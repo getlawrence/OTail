@@ -1,0 +1,95 @@
+.policy-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.policy-card-header {
+  padding: 16px;
+  border-bottom: 1px solid #e5e5ea;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.policy-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.policy-name-input {
+  font-size: 16px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.policy-name-input:hover {
+  border-color: #d1d1d6;
+}
+
+.policy-name-input:focus {
+  border-color: #0071e3;
+  outline: none;
+  background: white;
+}
+
+.policy-type-badge {
+  background: #f2f2f7;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.policy-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.enable-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.enable-toggle input[type="checkbox"] {
+  margin: 0;
+}
+
+.remove-policy-button {
+  padding: 8px 16px;
+  background: #ff3b30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+.remove-policy-button:hover {
+  opacity: 0.9;
+}
+
+.policy-card-content {
+  padding: 16px;
+}
+
+.policy-card-content > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Nested policy cards (for composite policies) */
+.policy-card .policy-card {
+  margin: 16px 0;
+  border: 1px solid #e5e5ea;
+  box-shadow: none;
+} 
