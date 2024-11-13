@@ -11,18 +11,18 @@ export const AddPolicyButton: React.FC<AddPolicyButtonProps> = ({ onSelectPolicy
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const policyTypes: { type: PolicyType; label: string }[] = [
-    { type: 'numeric_tag', label: 'Numeric Attribute' },
+    { type: 'numeric_attribute', label: 'Numeric Attribute' },
     { type: 'probabilistic', label: 'Probabilistic' },
     { type: 'rate_limiting', label: 'Rate Limiting' },
     { type: 'status_code', label: 'Status Code' },
     { type: 'string_attribute', label: 'String Attribute' },
     { type: 'latency', label: 'Latency' },
     { type: 'always_sample', label: 'Always Sample' },
-    { type: 'boolean_tag', label: 'Boolean Tag' },
+    { type: 'boolean_attribute', label: 'Boolean Tag' },
     { type: 'composite', label: 'Composite' },
-    { type: 'ottl', label: 'OTTL' },
+    { type: 'ottl_condition', label: 'ottl_condition' },
     { type: 'span_count', label: 'Span Count' },
-    { type: 'string_tag', label: 'String Tag' },
+    { type: 'string_attribute', label: 'String Tag' },
     { type: 'trace_state', label: 'Trace State' }
   ];
 

@@ -18,14 +18,6 @@ export const BasePolicyEditor = <T extends BasePolicy>({
         onChange={(e) => onUpdate({ ...policy, name: e.target.value })}
         placeholder="Policy Name"
       />
-      <label>
-        <input
-          type="checkbox"
-          checked={policy.enabled}
-          onChange={(e) => onUpdate({ ...policy, enabled: e.target.checked })}
-        />
-        Enabled
-      </label>
     </div>
   );
 }; 

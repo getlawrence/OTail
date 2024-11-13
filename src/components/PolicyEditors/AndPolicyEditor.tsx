@@ -1,25 +1,17 @@
 import React from 'react';
-import { CompositePolicy, Policy, PolicyType } from '../../types/PolicyTypes';
+import { AndPolicy, Policy, PolicyType } from '../../types/PolicyTypes';
 import { PolicyCard } from '../PolicyCard/PolicyCard';
 import { createNewPolicy } from '../../utils/policyUtils';
-import './CompositePolicyEditor.css';
 
-interface CompositePolicyEditorProps {
-  policy: CompositePolicy;
-  onUpdate: (policy: CompositePolicy) => void;
+interface AndPolicyEditorProps {
+  policy: AndPolicy;
+  onUpdate: (policy: AndPolicy) => void;
 }
 
-export const CompositePolicyEditor: React.FC<CompositePolicyEditorProps> = ({
+export const AndPolicyEditor: React.FC<AndPolicyEditorProps> = ({
   policy,
   onUpdate,
 }) => {
-  const handleOperatorChange = (operator: 'and' | 'or') => {
-    onUpdate({
-      ...policy,
-      operator,
-    });
-  };
-
   const handleAddSubPolicy = (type: PolicyType) => {
     const newPolicy = createNewPolicy(type);
     onUpdate({
@@ -45,18 +37,7 @@ export const CompositePolicyEditor: React.FC<CompositePolicyEditorProps> = ({
   };
 
   return (
-    <div className="composite-policy-editor">
-      <div className="operator-selector">
-        <label className="form-label">Operator</label>
-        <select
-          value={policy.operator}
-          onChange={(e) => handleOperatorChange(e.target.value as 'and' | 'or')}
-          className="form-input"
-        >
-          <option value="and">AND</option>
-          <option value="or">OR</option>
-        </select>
-      </div>
+    <div className="and-policy-editor">
       <div className="sub-policies">
         <h4>Sub Policies</h4>
         {policy.subPolicies.map((subPolicy, index) => (
@@ -65,6 +46,7 @@ export const CompositePolicyEditor: React.FC<CompositePolicyEditorProps> = ({
             policy={subPolicy}
             onUpdate={(updatedPolicy) => handleUpdateSubPolicy(index, updatedPolicy)}
             onRemove={() => handleRemoveSubPolicy(index)}
+            nested={true}
           />
         ))}
         <select
@@ -74,8 +56,16 @@ export const CompositePolicyEditor: React.FC<CompositePolicyEditorProps> = ({
         >
           <option value="" disabled>Add Sub Policy</option>
           <option value="numeric_attribute">Numeric Attribute</option>
+          <option value="probabilistic">Probabilistic</option>
+          <option value="rate_limiting">Rate Limiting</option>
+          <option value="status_code">Status Code</option>
           <option value="string_attribute">String Attribute</option>
-          {/* Add other policy types */}
+          <option value="latency">Latency</option>
+          <option value="always_sample">Always Sample</option>
+          <option value="boolean_attribute">Boolean Attribute</option>
+          <option value="ottl_condition">OTTL Condition</option>
+          <option value="span_count">Span Count</option>
+          <option value="trace_state">Trace State</option>
         </select>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { Policy, PolicyType } from '../types/PolicyTypes';
 export const parseYamlConfig = (yaml: string): TailSamplingConfig => {
   try {
     const parsed = load(yaml) as any;
-    
+
     if (!parsed?.processors?.tail_sampling) {
       throw new Error('Invalid configuration: Missing tail_sampling processor');
     }
@@ -28,16 +28,15 @@ const parsePolicyConfig = (config: any): Policy => {
   const basePolicy = {
     name: config.name || 'Unnamed Policy',
     type,
-    enabled: config.enabled ?? true,
   };
 
   const policyConfig = config[type];
-  
+
   switch (type) {
-    case 'numeric_tag':
+    case 'numeric_attribute':
       return {
         ...basePolicy,
-        type: 'numeric_tag' as const,
+        type: 'numeric_attribute' as const,
         key: policyConfig.key || '',
         minValue: policyConfig.min_value || 0,
         maxValue: policyConfig.max_value || 100,
@@ -72,7 +71,51 @@ const parsePolicyConfig = (config: any): Policy => {
         ...basePolicy,
         type: 'composite' as const,
         operator: policyConfig.operator || 'and',
-        subPolicies: policyConfig.sub_policies?.map(parsePolicyConfig) || [],
+        subPolicies: policyConfig.composite_sub_policy?.map(parsePolicyConfig) || [],
+      };
+    case 'ottl_condition':
+      return {
+        ...basePolicy,
+        type: 'ottl_condition' as const,
+        expression: policyConfig.expression || '',
+      };
+    case 'latency':
+      return {
+        ...basePolicy,
+        type: 'latency' as const,
+        thresholdMs: policyConfig.threshold_ms || 100,
+      };
+    case 'always_sample':
+      return {
+        ...basePolicy,
+        type: 'always_sample' as const,
+      };
+    case 'boolean_attribute':
+      return {
+        ...basePolicy,
+        type: 'boolean_attribute' as const,
+        key: policyConfig.key || '',
+        value: policyConfig.value ?? true,
+      };
+    case 'span_count':
+      return {
+        ...basePolicy,
+        type: 'span_count' as const,
+        minSpans: policyConfig.min_spans || 0,
+        maxSpans: policyConfig.max_spans || 1000,
+      };
+    case 'trace_state':
+      return {
+        ...basePolicy,
+        type: 'trace_state' as const,
+        key: policyConfig.key || '',
+        values: policyConfig.values || [],
+      };
+    case 'and':
+      return {
+        ...basePolicy,
+        type: 'and' as const,
+        subPolicies: policyConfig.and_sub_policy?.map(parsePolicyConfig) || [],
       };
     default:
       throw new Error(`Unsupported policy type: ${type}`);
@@ -81,12 +124,11 @@ const parsePolicyConfig = (config: any): Policy => {
 
 const getPolicyType = (config: any): PolicyType => {
   const types: PolicyType[] = [
-    'numeric_tag', 'probabilistic', 'rate_limiting', 'status_code',
-    'string_attribute', 'latency', 'always_sample', 'boolean_tag',
-    'composite', 'ottl', 'span_count', 'string_tag', 'trace_state'
+    'numeric_attribute', 'probabilistic', 'rate_limiting', 'status_code',
+    'string_attribute', 'latency', 'always_sample', 'boolean_attribute',
+    'composite', 'ottl_condition', 'span_count', 'string_attribute', 'trace_state', 'and'
   ];
-
-  const foundType = types.find(type => config[type]);
+  const foundType = types.find(type => config.type == type);
   if (!foundType) {
     throw new Error('Invalid policy configuration: Missing policy type');
   }

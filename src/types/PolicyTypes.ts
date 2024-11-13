@@ -1,28 +1,27 @@
 export type PolicyType = 
-  | 'numeric_tag'
+  | 'numeric_attribute'
   | 'probabilistic'
   | 'rate_limiting'
   | 'status_code'
   | 'string_attribute'
   | 'latency'
   | 'always_sample'
-  | 'boolean_tag'
+  | 'boolean_attribute'
   | 'composite'
-  | 'numeric_tag'
-  | 'ottl'
+  | 'numeric_attribute'
+  | 'ottl_condition'
   | 'span_count'
-  | 'string_tag'
+  | 'string_attribute'
   | 'trace_state'
   | 'and';
 
 export interface BasePolicy {
   name: string;
   type: PolicyType;
-  enabled: boolean;
 }
 
 export interface NumericTagPolicy extends BasePolicy {
-  type: 'numeric_tag';
+  type: 'numeric_attribute';
   key: string;
   minValue: number;
   maxValue: number;
@@ -59,7 +58,7 @@ export interface AlwaysSamplePolicy extends BasePolicy {
 }
 
 export interface BooleanTagPolicy extends BasePolicy {
-  type: 'boolean_tag';
+  type: 'boolean_attribute';
   key: string;
   value: boolean;
 }
@@ -71,14 +70,14 @@ export interface CompositePolicy extends BasePolicy {
 }
 
 export interface NumericTagPolicy extends BasePolicy {
-  type: 'numeric_tag';
+  type: 'numeric_attribute';
   key: string;
   minValue: number;
   maxValue: number;
 }
 
 export interface OttlPolicy extends BasePolicy {
-  type: 'ottl';
+  type: 'ottl_condition';
   expression: string;
 }
 
@@ -89,7 +88,7 @@ export interface SpanCountPolicy extends BasePolicy {
 }
 
 export interface StringTagPolicy extends BasePolicy {
-  type: 'string_tag';
+  type: 'string_attribute';
   key: string;
   values: string[];
 }

@@ -5,15 +5,14 @@ import { Policy } from '../types/PolicyTypes';
 const generatePolicyConfig = (policy: Policy): Record<string, any> => {
   const basePolicy = {
     name: policy.name,
-    type: policy.type,
-    enabled: policy.enabled,
+    type: policy.type
   };
 
   switch (policy.type) {
-    case 'numeric_tag':
+    case 'numeric_attribute':
       return {
         ...basePolicy,
-        numeric_tag: {
+        numeric_attribute: {
           key: policy.key,
           min_value: policy.minValue,
           max_value: policy.maxValue,
@@ -56,14 +55,11 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
         },
       };
     case 'always_sample':
+      return basePolicy;
+    case 'boolean_attribute':
       return {
         ...basePolicy,
-        always_sample: {},
-      };
-    case 'boolean_tag':
-      return {
-        ...basePolicy,
-        boolean_tag: {
+        boolean_attribute: {
           key: policy.key,
           value: policy.value,
         },
@@ -73,15 +69,24 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
         ...basePolicy,
         composite: {
           operator: policy.operator,
-          sub_policies: policy.subPolicies.map(subPolicy => 
+          sub_policies: policy.subPolicies.map(subPolicy =>
             generatePolicyConfig(subPolicy)
           ),
         },
       };
-    case 'ottl':
+    case 'and':
       return {
         ...basePolicy,
-        ottl: {
+        and: {
+          sub_policies: policy.subPolicies.map(subPolicy =>
+            generatePolicyConfig(subPolicy)
+          ),
+        },
+      };
+    case 'ottl_condition':
+      return {
+        ...basePolicy,
+        ottl_condition: {
           expression: policy.expression,
         },
       };
@@ -93,14 +98,6 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
           max_spans: policy.maxSpans,
         },
       };
-    case 'string_tag':
-      return {
-        ...basePolicy,
-        string_tag: {
-          key: policy.key,
-          values: policy.values,
-        },
-      };
     case 'trace_state':
       return {
         ...basePolicy,
@@ -110,7 +107,6 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
         },
       };
     default:
-      console.warn(`Unsupported policy type: ${policy.type}`);
       return basePolicy;
   }
 };

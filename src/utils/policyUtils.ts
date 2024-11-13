@@ -4,14 +4,13 @@ export const createNewPolicy = (type: PolicyType): Policy => {
   const basePolicy = {
     name: `New ${type} Policy`,
     type,
-    enabled: true,
   };
 
   switch (type) {
-    case 'numeric_tag':
+    case 'numeric_attribute':
       return {
         ...basePolicy,
-        type: 'numeric_tag',
+        type: 'numeric_attribute',
         key: '',
         minValue: 0,
         maxValue: 100,
@@ -52,10 +51,10 @@ export const createNewPolicy = (type: PolicyType): Policy => {
         ...basePolicy,
         type: 'always_sample',
       };
-    case 'boolean_tag':
+    case 'boolean_attribute':
       return {
         ...basePolicy,
-        type: 'boolean_tag',
+        type: 'boolean_attribute',
         key: '',
         value: false,
       };
@@ -66,18 +65,18 @@ export const createNewPolicy = (type: PolicyType): Policy => {
         subPolicies: [],
         operator: 'and',
       };
-    case 'numeric_tag':
+    case 'numeric_attribute':
       return {
         ...basePolicy,
-        type: 'numeric_tag',
+        type: 'numeric_attribute',
         key: '',
         minValue: 0,
         maxValue: 100,
       };
-    case 'ottl':
+    case 'ottl_condition':
       return {
         ...basePolicy,
-        type: 'ottl',
+        type: 'ottl_condition',
         expression: '',
       };
     case 'span_count':
@@ -87,10 +86,10 @@ export const createNewPolicy = (type: PolicyType): Policy => {
         minSpans: 0,
         maxSpans: 100,
       };
-    case 'string_tag':
+    case 'string_attribute':
       return {
         ...basePolicy,
-        type: 'string_tag',
+        type: 'string_attribute',
         key: '',
         values: [],
       };

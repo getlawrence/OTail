@@ -18,10 +18,11 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({ config, onConfigChan
     
     try {
       const parsedConfig = parseYamlConfig(value);
-      onConfigChange(parsedConfig);
+      if (parsedConfig.policies && Array.isArray(parsedConfig.policies)) {
+        onConfigChange(parsedConfig);
+      }
     } catch (error) {
       console.error('Failed to parse YAML:', error);
-      // Optionally show error to user
     }
   };
 

@@ -1,0 +1,22 @@
+processors:
+  tail_sampling:
+    decision_wait: 5
+    num_traces: 5000
+    expected_new_traces_per_sec: 50000
+    policies:
+      - name: new-policy-1
+        type: and
+        and:
+          and_sub_policy:
+          - name: prometheus-user-agent
+            type: string_attribute
+            string_attribute:
+              key: user_agent
+              values:
+                - (?i)^Prometheus
+          - name: always_sample
+            type: always_sample
+          - type: probabilistic
+            name: probabilistic-rate-limiting
+            probabilistic:
+              sampling_percentage: 0

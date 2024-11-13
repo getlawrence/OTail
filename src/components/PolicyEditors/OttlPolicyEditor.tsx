@@ -13,8 +13,8 @@ export const OttlPolicyEditor: React.FC<OttlPolicyEditorProps> = ({
 }) => {
   return (
     <div className="policy-editor">
-      <label className="form-label">OTTL Expression</label>
-      <div className="ottl-editor">
+      <label className="form-label">ottl_condition Expression</label>
+      <div className="ottl_condition-editor">
         <Editor
           height="200px"
           defaultLanguage="plaintext"

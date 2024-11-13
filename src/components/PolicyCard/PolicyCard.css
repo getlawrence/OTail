@@ -3,6 +3,7 @@
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
+  transition: all 0.3s ease;
 }
 
 .policy-card-header {
@@ -11,12 +12,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: pointer;
+}
+
+.policy-card-header:hover {
+  background-color: #f8f8f8;
 }
 
 .policy-card-title {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
 }
 
 .policy-name-input {
@@ -26,16 +33,7 @@
   padding: 4px 8px;
   border-radius: 4px;
   background: transparent;
-}
-
-.policy-name-input:hover {
-  border-color: #d1d1d6;
-}
-
-.policy-name-input:focus {
-  border-color: #0071e3;
-  outline: none;
-  background: white;
+  width: 200px;
 }
 
 .policy-type-badge {
@@ -60,8 +58,46 @@
   cursor: pointer;
 }
 
-.enable-toggle input[type="checkbox"] {
-  margin: 0;
+.collapse-icon {
+  margin-right: 8px;
+  transition: transform 0.3s ease;
+}
+
+.collapse-icon.expanded {
+  transform: rotate(90deg);
+}
+
+.policy-card-content {
+  padding: 16px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.policy-card-content.collapsed {
+  max-height: 0;
+  padding: 0 16px;
+}
+
+.nested-policy {
+  margin-left: 24px;
+  border-left: 2px solid #e5e5ea;
+  padding-left: 16px;
+}
+
+.policy-description {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.validation-warning {
+  background: #fff3dc;
+  border-left: 4px solid #ffa940;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #873800;
 }
 
 .remove-policy-button {
@@ -77,14 +113,6 @@
 
 .remove-policy-button:hover {
   opacity: 0.9;
-}
-
-.policy-card-content {
-  padding: 16px;
-}
-
-.policy-card-content > *:last-child {
-  margin-bottom: 0;
 }
 
 /* Nested policy cards (for composite policies) */
