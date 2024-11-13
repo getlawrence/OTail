@@ -4,6 +4,7 @@ import { TailSamplingConfig } from '../../types/ConfigTypes';
 import { PolicyList } from '../PolicyList/PolicyList';
 import { ConfigViewer } from '../ConfigViewer/ConfigViewer';
 import { createNewPolicy } from '../../utils/policyUtils';
+import { AddPolicyButton } from '../common/AddPolicyButton';
 import './ConfigEditor.css';
 
 export const ConfigEditor: React.FC = () => {
@@ -78,32 +79,7 @@ export const ConfigEditor: React.FC = () => {
         <div className="policies-section">
           <div className="policies-header">
             <h2>Sampling Policies</h2>
-            <select
-              className="add-policy-select"
-              onChange={(e) => {
-                if (e.target.value) {
-                  handleAddPolicy(e.target.value as PolicyType);
-                  e.target.value = ''; // Reset select after adding
-                }
-              }}
-              value=""
-            >
-              <option value="">Add Policy</option>
-              <option value="numeric_tag">Numeric Attribute</option>
-              <option value="probabilistic">Probabilistic</option>
-              <option value="rate_limiting">Rate Limiting</option>
-              <option value="status_code">Status Code</option>
-              <option value="string_attribute">String Attribute</option>
-              <option value="latency">Latency</option>
-              <option value="allow_all">Always Sample</option>
-              <option value="boolean_tag">Boolean Tag</option>
-              <option value="composite">Composite</option>
-              <option value="numeric_tag">Numeric Tag</option>
-              <option value="ottl">OTTL</option>
-              <option value="span_count">Span Count</option>
-              <option value="string_tag">String Tag</option>
-              <option value="trace_state">Trace State</option>
-            </select>
+            <AddPolicyButton onSelectPolicy={handleAddPolicy} />
           </div>
 
           <PolicyList
@@ -115,7 +91,7 @@ export const ConfigEditor: React.FC = () => {
       </div>
 
       <div className="config-editor-right">
-        <ConfigViewer config={config} />
+        <ConfigViewer config={config} onConfigChange={setConfig} />
       </div>
     </div>
   );
