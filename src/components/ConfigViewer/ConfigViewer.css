@@ -1,0 +1,17 @@
+.config-viewer {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  height: calc(100vh - 140px);
+}
+
+.config-viewer-header {
+  margin-bottom: 16px;
+}
+
+.config-viewer-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1d1d1f;
+} 

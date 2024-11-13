@@ -1,0 +1,46 @@
+.composite-policy-editor {
+  padding: 16px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  margin-top: 16px;
+}
+
+.operator-selector {
+  margin-bottom: 16px;
+}
+
+.sub-policies {
+  padding-left: 16px;
+  border-left: 2px solid #d1d1d6;
+}
+
+.sub-policies h4 {
+  margin: 0 0 16px 0;
+  color: #1d1d1f;
+}
+
+.value-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.remove-button {
+  padding: 8px 12px;
+  background: #ff3b30;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.add-button {
+  padding: 8px 12px;
+  background: #007aff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 8px;
+} 
