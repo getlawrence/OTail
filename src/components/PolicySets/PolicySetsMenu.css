@@ -1,0 +1,164 @@
+.policy-sets-menu {
+  position: fixed;
+  left: 0;
+  top: 80px;
+  bottom: 0;
+  background: white;
+  box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, 
+              rgba(15, 15, 15, 0.1) 0px 3px 6px;
+  z-index: 100;
+  width: 240px;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+}
+
+.policy-sets-menu.expanded {
+  transform: translateX(0);
+}
+
+.toggle-button {
+  position: absolute;
+  right: -24px;
+  top: 20px;
+  width: 24px;
+  height: 32px;
+  background: white;
+  border: none;
+  border-radius: 0 3px 3px 0;
+  box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, 
+              rgba(15, 15, 15, 0.1) 0px 3px 6px;
+  cursor: pointer;
+  color: rgb(55, 53, 47);
+  font-size: 14px;
+}
+
+.toggle-button .arrow {
+  transition: transform 0.3s ease-in-out;
+}
+
+.policy-sets-menu.expanded .toggle-button .arrow {
+  transform: rotate(180deg);
+}
+
+.menu-content {
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.policy-sets-menu.expanded .menu-content {
+  opacity: 1;
+  transition-delay: 0.1s;
+}
+
+/* Adjust main content padding when menu is expanded */
+.config-editor {
+  padding-left: 0;
+  transition: padding-left 0.3s ease-in-out;
+}
+
+.config-editor.menu-expanded {
+  padding-left: 300px;
+}
+
+.policy-set-item {
+  padding: 8px 12px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+  border: 1px solid rgba(55, 53, 47, 0.16);
+  transition: background 20ms ease-in 0s;
+}
+
+.policy-set-item:hover {
+  background: rgba(55, 53, 47, 0.03);
+}
+
+.policy-set-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.policy-set-info h4 {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgb(55, 53, 47);
+  margin: 0;
+}
+
+.policy-count {
+  font-size: 12px;
+  color: #666;
+  background: #f2f2f7;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.policy-set-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.import-button {
+    padding: 4px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.set-remove-button {
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.import-button:hover,
+.remove-button:hover {
+  opacity: 0.9;
+}
+
+.toggle-button.hidden {
+  display: none;
+}
+
+.menu-header {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em;
+  padding: 4px 8px;
+  color: rgba(55, 53, 47, 0.45);
+  transition: color 0.2s ease;
+}
+
+.close-button:hover {
+  color: rgba(55, 53, 47, 0.7);
+}

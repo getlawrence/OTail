@@ -1,6 +1,6 @@
 import { dump } from 'js-yaml';
 import { TailSamplingConfig } from '../types/ConfigTypes';
-import { Policy } from '../types/PolicyTypes';
+import { CompositePolicy, Policy, StringAttributePolicy } from '../types/PolicyTypes';
 
 const generatePolicyConfig = (policy: Policy): Record<string, any> => {
   const basePolicy = {
@@ -40,18 +40,13 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
         },
       };
     case 'string_attribute':
-      return {
-        ...basePolicy,
-        string_attribute: {
-          key: policy.key,
-          values: policy.values,
-        },
-      };
+      return generateStringAttributePolicyConfig(policy);
     case 'latency':
       return {
         ...basePolicy,
         latency: {
           threshold_ms: policy.thresholdMs,
+          upper_threshold_ms: policy.upperThresholdMs,
         },
       };
     case 'always_sample':
@@ -65,20 +60,12 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
         },
       };
     case 'composite':
-      return {
-        ...basePolicy,
-        composite: {
-          operator: policy.operator,
-          sub_policies: policy.subPolicies.map(subPolicy =>
-            generatePolicyConfig(subPolicy)
-          ),
-        },
-      };
+      return generateCompositeConfig(policy);
     case 'and':
       return {
         ...basePolicy,
         and: {
-          sub_policies: policy.subPolicies.map(subPolicy =>
+          and_sub_policy: policy.subPolicies.map(subPolicy =>
             generatePolicyConfig(subPolicy)
           ),
         },
@@ -87,7 +74,9 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
       return {
         ...basePolicy,
         ottl_condition: {
-          expression: policy.expression,
+          span_conditions: policy.spanConditions,
+          span_event_conditions: policy.spanEventConditions,
+          error_mode: policy.errorMode,
         },
       };
     case 'span_count':
@@ -109,6 +98,54 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
     default:
       return basePolicy;
   }
+};
+
+const generateStringAttributePolicyConfig = (policy: StringAttributePolicy) => {
+  const config: any = {
+    key: policy.key,
+    values: policy.values,
+  };
+  
+  if (policy.enabledRegexMatching) {
+    config.enabled_regex_matching = true;
+    if (policy.cacheMaxSize !== undefined) {
+      config.cache_max_size = policy.cacheMaxSize;
+    }
+  }
+  
+  if (policy.invertMatch) {
+    config.invert_match = true;
+  }
+  
+  return config;
+};
+
+const generateCompositeConfig = (policy: CompositePolicy): any => {
+  const config: any = {
+    name: policy.name,
+    type: policy.type,
+    composite: {
+      ...(policy.maxTotalSpansPerSecond && {
+        max_total_spans_per_second: policy.maxTotalSpansPerSecond,
+      }),
+      composite_sub_policy: policy.subPolicies.map(generatePolicyConfig),
+    },
+  };
+
+  // Add policy order if defined
+  if (policy.policyOrder?.length) {
+    config.composite.policy_order = policy.policyOrder;
+  }
+
+  // Add rate allocation if defined
+  if (policy.rateAllocation?.length) {
+    config.composite.rate_allocation = policy.rateAllocation.map(allocation => ({
+      policy: allocation.policy,
+      percent: allocation.percent,
+    }));
+  }
+
+  return config;
 };
 
 export const generateYamlConfig = (config: TailSamplingConfig): string => {

@@ -1,0 +1,17 @@
+.policy-name-text {
+  font-size: 16px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: text;
+  color: #1d1d1f;
+}
+
+.policy-name-text:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.policy-name-text:empty::before {
+  content: attr(placeholder);
+  color: #8e8e93;
+} 

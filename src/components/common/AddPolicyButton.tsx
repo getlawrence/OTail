@@ -23,7 +23,8 @@ export const AddPolicyButton: React.FC<AddPolicyButtonProps> = ({ onSelectPolicy
     { type: 'ottl_condition', label: 'ottl_condition' },
     { type: 'span_count', label: 'Span Count' },
     { type: 'string_attribute', label: 'String Tag' },
-    { type: 'trace_state', label: 'Trace State' }
+    { type: 'trace_state', label: 'Trace State' },
+    { type: 'and', label: 'And' }
   ];
 
   useEffect(() => {

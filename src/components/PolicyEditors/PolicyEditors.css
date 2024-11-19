@@ -16,6 +16,12 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
 }
 
 .ottl_condition-editor {
@@ -25,28 +31,31 @@
 }
 
 .form-field {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .form-label {
   display: block;
   margin-bottom: 8px;
+  font-size: 13px;
   font-weight: 500;
-  color: #1d1d1f;
+  color: #57606a;
 }
 
 .form-input {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d1d1d6;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border: 1px solid #eaecef;
+  border-radius: 8px;
   font-size: 14px;
+  transition: all 0.2s ease;
+  background: #ffffff;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #0071e3;
-  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
 }
 
 .tag-values,
@@ -62,40 +71,39 @@
   margin-bottom: 8px;
 }
 
-.remove-button {
-  padding: 8px;
-  background: #ff3b30;
-  color: white;
-  border: none;
-  border-radius: 6px;
+.set-remove-button {
+  padding: 6px 12px;
+  background: transparent;
+  color: #57606a;
+  border: 1px solid #eaecef;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  min-width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 13px;
+}
+
+.remove-button:hover {
+  background: #f8f9fa;
+  color: #cf222e;
 }
 
 .add-button {
   padding: 8px 16px;
-  background: #007aff;
+  background: #0969da;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  margin-top: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.add-button:hover,
-.remove-button:hover {
-  opacity: 0.9;
+.add-button:hover {
+  background: #0860c7;
+  transform: translateY(-1px);
 }
 
-.add-button:active,
-.remove-button:active {
+.add-button:active {
   opacity: 0.8;
 }
 
@@ -113,4 +121,86 @@
   color: #ff3b30;
   font-size: 12px;
   margin-top: 4px;
-} 
+}
+
+.condition-item {
+  margin-bottom: 16px;
+  border: 1px solid #eaecef;
+  border-radius: 6px;
+  padding: 12px;
+  background: #f6f8fa;
+}
+
+.condition-item .monaco-editor {
+  margin-bottom: 8px;
+  border: 1px solid #eaecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.condition-item .remove-button {
+  padding: 6px 12px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.condition-item .remove-button:hover {
+  background: #c82333;
+}
+
+.add-button {
+  padding: 8px 16px;
+  background: #0366d6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.add-button:hover {
+  background: #0256b4;
+}
+
+.form-field select.form-input {
+  height: 38px;
+  padding: 6px 12px;
+  background-image: url("data:image/svg+xml,...");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 10px;
+  padding-right: 30px;
+}
+
+.help-text {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  margin-left: 24px;
+}
+
+.cache-size-input {
+  margin-top: 8px;
+}
+
+.attribute-values {
+  margin-top: 16px;
+}
+
+.value-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.value-item .form-field {
+  flex: 1;
+  margin-bottom: 0;
+}
+  

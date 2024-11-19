@@ -4,19 +4,16 @@
 }
 
 .App-header {
-  background-color: #ffffff;
-  padding: 1rem 0;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: rgb(251, 251, 250);
+  padding: 1rem 96px;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.16);
 }
 
 .App-header h1 {
   margin: 0;
-  font-size: 1.5rem;
-  color: #1d1d1f;
-  max-width: 1800px;
-  margin: 0 auto;
-  padding: 0 20px;
+  font-size: 1.25rem;
+  color: rgb(55, 53, 47);
+  font-weight: 500;
 }
 
 main {
