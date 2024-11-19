@@ -3,9 +3,9 @@
   left: 0;
   top: 80px;
   bottom: 0;
-  background: white;
-  box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, 
-              rgba(15, 15, 15, 0.1) 0px 3px 6px;
+  background: var(--bg-secondary);
+  box-shadow: 0 0 0 1px var(--border-color),
+              0 3px 6px var(--shadow-color);
   z-index: 100;
   width: 240px;
   transform: translateX(-100%);
@@ -23,13 +23,13 @@
   top: 20px;
   width: 24px;
   height: 32px;
-  background: white;
+  background: var(--bg-secondary);
   border: none;
   border-radius: 0 3px 3px 0;
-  box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, 
-              rgba(15, 15, 15, 0.1) 0px 3px 6px;
+  box-shadow: 0 0 0 1px var(--border-color),
+              0 3px 6px var(--shadow-color);
   cursor: pointer;
-  color: rgb(55, 53, 47);
+  color: var(--text-primary);
   font-size: 14px;
 }
 
@@ -66,14 +66,14 @@
 
 .policy-set-item {
   padding: 8px 12px;
-  border-radius: 3px;
-  margin-bottom: 4px;
+  margin: 4px 0;
+  border-radius: 6px;
   border: 1px solid rgba(55, 53, 47, 0.16);
   transition: background 20ms ease-in 0s;
 }
 
 .policy-set-item:hover {
-  background: rgba(55, 53, 47, 0.03);
+  background-color: var(--hover-bg);
 }
 
 .policy-set-info {

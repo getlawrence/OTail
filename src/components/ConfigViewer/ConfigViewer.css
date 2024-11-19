@@ -1,8 +1,8 @@
 .config-viewer {
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px var(--shadow-color);
   height: calc(100vh - 140px);
 }
 
@@ -13,5 +13,12 @@
 .config-viewer-header h2 {
   margin: 0;
   font-size: 1.25rem;
-  color: #1d1d1f;
+  color: var(--text-primary);
+}
+
+/* Monaco Editor container override */
+.config-viewer .monaco-editor {
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--bg-secondary) !important;
 } 

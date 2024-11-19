@@ -2,19 +2,24 @@ import React from 'react';
 import './App.css';
 import { ConfigEditor } from './components/ConfigEditor/ConfigEditor';
 import { PolicySetsProvider } from './context/PolicySetsContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { ThemeToggle } from './components/common/ThemeToggle';
 
 function App() {
   return (
-    <div className="App">
+    <ThemeProvider>
       <PolicySetsProvider>
-        <header className="App-header">
-          <h1>OpenTelemetry Tail Sampling Configuration Generator</h1>
-        </header>
-        <main>
-          <ConfigEditor />
-        </main>
+        <div className="App">
+          <header className="App-header">
+            <h1>OpenTelemetry Tail Sampling Configuration Generator</h1>
+            <ThemeToggle />
+          </header>
+          <main>
+            <ConfigEditor />
+          </main>
+        </div>
       </PolicySetsProvider>
-    </div>
+    </ThemeProvider>
   );
 }
 
