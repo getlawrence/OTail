@@ -5,6 +5,9 @@ import { PolicyList } from '../PolicyList/PolicyList';
 import { ConfigViewer } from '../ConfigViewer/ConfigViewer';
 import { createNewPolicy } from '../../utils/policyUtils';
 import { AddPolicyButton } from '../common/AddPolicyButton';
+import { PolicySetsMenu } from '../PolicySets/PolicySetsMenu';
+import { usePolicySets } from '../../context/PolicySetsContext';
+import { EditableTitle } from '../common/EditableTitle';
 import './ConfigEditor.css';
 
 export const ConfigEditor: React.FC = () => {
@@ -13,6 +16,22 @@ export const ConfigEditor: React.FC = () => {
     decisionWait: 10,
     numTraces: 100,
   });
+  const [policySetName, setPolicySetName] = useState('');
+  const { addPolicySet } = usePolicySets();
+
+  const handleSavePolicySet = () => {
+    if (policySetName.trim()) {
+      addPolicySet(policySetName, config.policies);
+      setPolicySetName(''); // Clear the input after saving
+    }
+  };
+
+  const handleImportPolicies = (policies: Policy[]) => {
+    setConfig(prev => ({
+      ...prev,
+      policies: [...prev.policies, ...policies],
+    }));
+  };
 
   const handleAddPolicy = (type: PolicyType) => {
     setConfig(prev => ({
@@ -49,29 +68,49 @@ export const ConfigEditor: React.FC = () => {
 
   return (
     <div className="config-editor">
+      <PolicySetsMenu onImportPolicies={handleImportPolicies} />
       <div className="config-editor-left">
         <div className="config-settings">
-          <h2>General Settings</h2>
-          <div className="settings-grid">
-            <div className="form-field">
-              <label htmlFor="decisionWait">Decision Wait (seconds)</label>
-              <input
-                id="decisionWait"
-                type="number"
-                min="1"
-                value={config.decisionWait}
-                onChange={(e) => handleConfigSettingsChange('decisionWait', Number(e.target.value))}
+          <div className="settings-header">
+            <div className="header-content">
+              <EditableTitle
+                value={policySetName}
+                onChange={setPolicySetName}
+                placeholder="Enter policy set name"
               />
+              <button 
+                className="add-policy-button"
+                onClick={handleSavePolicySet}
+                disabled={!policySetName.trim()}
+              >
+                Save
+              </button>
             </div>
-            <div className="form-field">
-              <label htmlFor="numTraces">Number of Traces</label>
-              <input
-                id="numTraces"
-                type="number"
-                min="1"
-                value={config.numTraces}
-                onChange={(e) => handleConfigSettingsChange('numTraces', Number(e.target.value))}
-              />
+          </div>
+
+          <div className="settings-section">
+            <h2>General Settings</h2>
+            <div className="settings-grid">
+              <div className="form-field">
+                <label htmlFor="decisionWait">Decision Wait (seconds)</label>
+                <input
+                  id="decisionWait"
+                  type="number"
+                  min="1"
+                  value={config.decisionWait}
+                  onChange={(e) => handleConfigSettingsChange('decisionWait', Number(e.target.value))}
+                />
+              </div>
+              <div className="form-field">
+                <label htmlFor="numTraces">Number of Traces</label>
+                <input
+                  id="numTraces"
+                  type="number"
+                  min="1"
+                  value={config.numTraces}
+                  onChange={(e) => handleConfigSettingsChange('numTraces', Number(e.target.value))}
+                />
+              </div>
             </div>
           </div>
         </div>

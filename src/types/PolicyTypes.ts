@@ -25,11 +25,13 @@ export interface NumericTagPolicy extends BasePolicy {
   key: string;
   minValue: number;
   maxValue: number;
+  invertMatch?: boolean;
 }
 
 export interface ProbabilisticPolicy extends BasePolicy {
   type: 'probabilistic';
   samplingPercentage: number;
+  hashSalt?: string;
 }
 
 export interface RateLimitingPolicy extends BasePolicy {
@@ -46,11 +48,15 @@ export interface StringAttributePolicy extends BasePolicy {
   type: 'string_attribute';
   key: string;
   values: string[];
+  enabledRegexMatching?: boolean;
+  cacheMaxSize?: number;
+  invertMatch?: boolean;
 }
 
 export interface LatencyPolicy extends BasePolicy {
   type: 'latency';
   thresholdMs: number;
+  upperThresholdMs?: number;
 }
 
 export interface AlwaysSamplePolicy extends BasePolicy {
@@ -61,24 +67,26 @@ export interface BooleanTagPolicy extends BasePolicy {
   type: 'boolean_attribute';
   key: string;
   value: boolean;
+  invertMatch?: boolean;
 }
 
 export interface CompositePolicy extends BasePolicy {
   type: 'composite';
+  maxTotalSpansPerSecond?: number;
+  policyOrder?: string[];
+  rateAllocation?: Array<{
+    policy: string;
+    percent: number;
+  }>;
   subPolicies: Policy[];
   operator: 'and' | 'or';
 }
 
-export interface NumericTagPolicy extends BasePolicy {
-  type: 'numeric_attribute';
-  key: string;
-  minValue: number;
-  maxValue: number;
-}
-
 export interface OttlPolicy extends BasePolicy {
   type: 'ottl_condition';
-  expression: string;
+  errorMode?: string;
+  spanConditions?: string[];
+  spanEventConditions?: string[];
 }
 
 export interface SpanCountPolicy extends BasePolicy {
@@ -120,3 +128,10 @@ export type Policy =
   | StringTagPolicy
   | TraceStatePolicy
   | AndPolicy;
+
+export interface PolicySet {
+  id: string;
+  name: string;
+  policies: Policy[];
+  createdAt: string;
+}

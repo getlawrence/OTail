@@ -4,6 +4,7 @@ import classNames from 'classnames';
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  helpText?: string;
 }
 
 export const Input: React.FC<InputProps> = ({ label, error, className, ...props }) => {

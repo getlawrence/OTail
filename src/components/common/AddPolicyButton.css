@@ -3,20 +3,21 @@
 }
 
 .add-policy-button {
-  padding: 8px 16px;
-  background: #007aff;
-  color: white;
-  border: none;
-  border-radius: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  color: rgb(55, 53, 47);
+  border: 1px solid rgba(55, 53, 47, 0.16);
+  border-radius: 3px;
   cursor: pointer;
   font-size: 14px;
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: background 20ms ease-in 0s;
 }
 
 .add-policy-button:hover {
-  background: #0066cc;
+  background: rgba(55, 53, 47, 0.08);
 }
 
 .policy-dropdown {
@@ -25,25 +26,27 @@
   right: 0;
   margin-top: 4px;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+  box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, 
+              rgba(15, 15, 15, 0.1) 0px 3px 6px, 
+              rgba(15, 15, 15, 0.2) 0px 9px 24px;
   z-index: 1000;
   min-width: 200px;
-  max-height: 400px;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .policy-dropdown-item {
   width: 100%;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border: none;
   background: none;
   text-align: left;
   cursor: pointer;
   font-size: 14px;
-  color: #1d1d1f;
+  color: rgb(55, 53, 47);
+  transition: background 20ms ease-in 0s;
 }
 
 .policy-dropdown-item:hover {
-  background: #f5f5f7;
+  background: rgba(55, 53, 47, 0.08);
 } 

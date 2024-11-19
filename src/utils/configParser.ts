@@ -1,6 +1,6 @@
 import { load } from 'js-yaml';
 import { TailSamplingConfig } from '../types/ConfigTypes';
-import { Policy, PolicyType } from '../types/PolicyTypes';
+import { Policy, PolicyType, StringAttributePolicy, CompositePolicy } from '../types/PolicyTypes';
 
 export const parseYamlConfig = (yaml: string): TailSamplingConfig => {
   try {
@@ -60,30 +60,23 @@ const parsePolicyConfig = (config: any): Policy => {
         statusCodes: policyConfig.status_codes || [],
       };
     case 'string_attribute':
-      return {
-        ...basePolicy,
-        type: 'string_attribute' as const,
-        key: policyConfig.key || '',
-        values: policyConfig.values || [],
-      };
+      return parseStringAttributeConfig(policyConfig);
     case 'composite':
-      return {
-        ...basePolicy,
-        type: 'composite' as const,
-        operator: policyConfig.operator || 'and',
-        subPolicies: policyConfig.composite_sub_policy?.map(parsePolicyConfig) || [],
-      };
+      return parseCompositeConfig(policyConfig, basePolicy);
     case 'ottl_condition':
       return {
         ...basePolicy,
         type: 'ottl_condition' as const,
-        expression: policyConfig.expression || '',
+        spanConditions: policyConfig.span_conditions || [],
+        spanEventConditions: policyConfig.span_event_conditions || [],
+        errorMode: policyConfig.error_mode || 'ignore',
       };
     case 'latency':
       return {
         ...basePolicy,
         type: 'latency' as const,
         thresholdMs: policyConfig.threshold_ms || 100,
+        upperThresholdMs: policyConfig.upper_threshold_ms,
       };
     case 'always_sample':
       return {
@@ -122,6 +115,18 @@ const parsePolicyConfig = (config: any): Policy => {
   }
 };
 
+const parseStringAttributeConfig = (config: any): StringAttributePolicy => {
+  return {
+    type: 'string_attribute',
+    name: config.name || 'String Attribute Policy',
+    key: config.key || '',
+    values: config.values || [],
+    enabledRegexMatching: config.enabled_regex_matching || false,
+    cacheMaxSize: config.cache_max_size,
+    invertMatch: config.invert_match || false,
+  };
+};
+
 const getPolicyType = (config: any): PolicyType => {
   const types: PolicyType[] = [
     'numeric_attribute', 'probabilistic', 'rate_limiting', 'status_code',
@@ -134,4 +139,29 @@ const getPolicyType = (config: any): PolicyType => {
   }
 
   return foundType;
-}; 
+};
+
+const parseCompositeConfig = (
+  config: any, 
+  basePolicy: Pick<Policy, 'name' | 'type'>
+): CompositePolicy => {
+  const composite = config.composite;
+  
+  const policy: CompositePolicy = {
+    ...basePolicy,
+    type: 'composite',
+    operator: composite.operator || 'and',
+    subPolicies: composite.composite_sub_policy.map(parsePolicyConfig),
+    maxTotalSpansPerSecond: composite.max_total_spans_per_second,
+    policyOrder: composite.policy_order,
+  };
+
+  if (composite.rate_allocation) {
+    policy.rateAllocation = composite.rate_allocation.map((allocation: { policy: any; percent: any; }) => ({
+      policy: allocation.policy,
+      percent: allocation.percent,
+    }));
+  }
+
+  return policy;
+};

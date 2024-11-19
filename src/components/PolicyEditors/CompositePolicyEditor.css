@@ -1,46 +1,118 @@
 .composite-policy-editor {
-  padding: 16px;
-  background: #f8f8f8;
-  border-radius: 6px;
-  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.operator-selector {
+.config-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.config-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.policy-order-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 16px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.info-icon {
+  font-style: normal;
 }
 
 .sub-policies {
-  padding-left: 16px;
-  border-left: 2px solid #d1d1d6;
-}
-
-.sub-policies h4 {
-  margin: 0 0 16px 0;
-  color: #1d1d1f;
-}
-
-.value-item {
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.policy-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.policy-order-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 8px;
-  align-items: flex-start;
-  margin-bottom: 8px;
 }
 
-.remove-button {
-  padding: 8px 12px;
-  background: #ff3b30;
-  color: white;
-  border: none;
+.policy-order-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #e5e7eb;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.order-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-button {
+  padding: 4px 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #4b5563;
+  transition: all 0.2s ease;
+}
+
+.order-button:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.order-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.policy-content {
+  flex: 1;
+}
+
+.add-policy-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
+  background: #fff;
+  color: #1a1a1a;
   cursor: pointer;
 }
 
-.add-button {
-  padding: 8px 12px;
-  background: #007aff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 8px;
+.add-policy-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 } 

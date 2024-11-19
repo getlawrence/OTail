@@ -39,12 +39,15 @@ export const createNewPolicy = (type: PolicyType): Policy => {
         type: 'string_attribute',
         key: '',
         values: [],
+        enabledRegexMatching: false,
+        cacheMaxSize: undefined,
+        invertMatch: false,
       };
     case 'latency':
       return {
         ...basePolicy,
         type: 'latency',
-        thresholdMs: 1000,
+        thresholdMs: 1000
       };
     case 'always_sample':
       return {
@@ -77,7 +80,9 @@ export const createNewPolicy = (type: PolicyType): Policy => {
       return {
         ...basePolicy,
         type: 'ottl_condition',
-        expression: '',
+        spanConditions: [],
+        spanEventConditions: [],
+        errorMode: 'ignore',
       };
     case 'span_count':
       return {
@@ -92,6 +97,9 @@ export const createNewPolicy = (type: PolicyType): Policy => {
         type: 'string_attribute',
         key: '',
         values: [],
+        enabledRegexMatching: false,
+        cacheMaxSize: undefined,
+        invertMatch: false,
       };
     case 'trace_state':
       return {
