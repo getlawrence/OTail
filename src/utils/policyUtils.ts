@@ -68,14 +68,6 @@ export const createNewPolicy = (type: PolicyType): Policy => {
         subPolicies: [],
         operator: 'and',
       };
-    case 'numeric_attribute':
-      return {
-        ...basePolicy,
-        type: 'numeric_attribute',
-        key: '',
-        minValue: 0,
-        maxValue: 100,
-      };
     case 'ottl_condition':
       return {
         ...basePolicy,
@@ -90,16 +82,6 @@ export const createNewPolicy = (type: PolicyType): Policy => {
         type: 'span_count',
         minSpans: 0,
         maxSpans: 100,
-      };
-    case 'string_attribute':
-      return {
-        ...basePolicy,
-        type: 'string_attribute',
-        key: '',
-        values: [],
-        enabledRegexMatching: false,
-        cacheMaxSize: undefined,
-        invertMatch: false,
       };
     case 'trace_state':
       return {

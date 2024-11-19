@@ -9,7 +9,6 @@ import { PolicySetsMenu } from '../PolicySets/PolicySetsMenu';
 import { usePolicySets } from '../../context/PolicySetsContext';
 import { EditableTitle } from '../common/EditableTitle';
 import { Input } from '../common/Input';
-import { useTheme } from '../../context/ThemeContext';
 import './ConfigEditor.css';
 
 export const ConfigEditor: React.FC = () => {
@@ -20,7 +19,6 @@ export const ConfigEditor: React.FC = () => {
   });
   const [policySetName, setPolicySetName] = useState('');
   const { addPolicySet } = usePolicySets();
-  const { theme } = useTheme();
 
   const handleSavePolicySet = () => {
     if (policySetName.trim()) {
