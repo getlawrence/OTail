@@ -5,7 +5,7 @@
   bottom: 0;
   background: var(--bg-secondary);
   box-shadow: 0 0 0 1px var(--border-color),
-              0 3px 6px var(--shadow-color);
+    0 3px 6px var(--shadow-color);
   z-index: 100;
   width: 240px;
   transform: translateX(-100%);
@@ -27,7 +27,7 @@
   border: none;
   border-radius: 0 3px 3px 0;
   box-shadow: 0 0 0 1px var(--border-color),
-              0 3px 6px var(--shadow-color);
+    0 3px 6px var(--shadow-color);
   cursor: pointer;
   color: var(--text-primary);
   font-size: 14px;
@@ -65,56 +65,44 @@
 }
 
 .policy-set-item {
-  padding: 8px 12px;
-  margin: 4px 0;
-  border-radius: 6px;
-  border: 1px solid rgba(55, 53, 47, 0.16);
-  transition: background 20ms ease-in 0s;
-}
-
-.policy-set-item:hover {
-  background-color: var(--hover-bg);
-}
-
-.policy-set-info {
   display: flex;
   align-items: center;
+  padding: 8px;
   gap: 12px;
-  flex: 1;
 }
 
-.policy-set-info h4 {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgb(55, 53, 47);
+.policy-set-name {
   margin: 0;
+  flex: 1;
 }
 
 .policy-count {
   font-size: 12px;
-  color: #666;
-  background: #f2f2f7;
+  color: var(--text-secondary);
+  background: var(--hover-bg);
   padding: 2px 8px;
   border-radius: 12px;
 }
 
 .policy-set-actions {
   display: flex;
-  align-items: center;
   gap: 8px;
 }
 
 .import-button {
-    padding: 4px;
-    width: 24px;
-    height: 24px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hover-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .set-remove-button {
@@ -128,6 +116,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--hover-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .import-button:hover,
@@ -160,5 +151,5 @@
 }
 
 .close-button:hover {
-  color: rgba(55, 53, 47, 0.7);
+  color: var(--hover-bg);
 }

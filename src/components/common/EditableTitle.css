@@ -4,7 +4,7 @@
   padding: 4px 8px;
   border-radius: 4px;
   cursor: text;
-  color: #1d1d1f;
+  color: var(--text-secondary);
 }
 
 .policy-name-text:hover {

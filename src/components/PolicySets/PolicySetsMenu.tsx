@@ -37,12 +37,10 @@ export const PolicySetsMenu: React.FC<PolicySetsMenuProps> = ({ onImportPolicies
         <div className="policy-sets-list">
           {policySets.map((set) => (
             <div key={set.id} className="policy-set-item">
-              <div className="policy-set-info">
-                <h4>{set.name}</h4>
-                <span className="policy-count">
-                  {set.policies.length} {set.policies.length === 1 ? 'policy' : 'policies'}
-                </span>
-              </div>
+              <h4 className="policy-set-name">{set.name}</h4>
+              <span className="policy-count">
+                {set.policies.length} {set.policies.length === 1 ? 'policy' : 'policies'}
+              </span>
               <div className="policy-set-actions">
                 <button
                   className="import-button"

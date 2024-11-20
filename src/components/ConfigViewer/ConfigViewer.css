@@ -22,3 +22,16 @@
   border-radius: 6px;
   background: var(--bg-secondary) !important;
 } 
+
+@media (max-width: 1200px) {
+  .config-viewer {
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .config-viewer {
+    padding: 12px;
+    height: 300px;
+  }
+}

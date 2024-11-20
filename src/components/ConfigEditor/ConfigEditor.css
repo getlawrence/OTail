@@ -112,15 +112,59 @@ h2 {
   background: #a1a1a1;
 }
 
-/* Responsive adjustments */
+/* Updated responsive adjustments */
 @media (max-width: 1200px) {
   .config-editor {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .config-settings {
+    max-height: none;
+    margin-bottom: 16px;
   }
 
   .config-editor-right {
     height: 400px;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .config-editor {
+    padding: 12px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .header-content .add-policy-button {
+    width: 100%;
+  }
+
+  .save-policy-form {
+    flex-direction: column;
+  }
+
+  .save-policy-form button {
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  .policies-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .add-policy-select {
+    width: 100%;
+    min-width: unset;
   }
 }
 
@@ -203,6 +247,7 @@ h2 {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+  color: var(--text-primary);
 }
 
 .header-content .policy-name-text,
