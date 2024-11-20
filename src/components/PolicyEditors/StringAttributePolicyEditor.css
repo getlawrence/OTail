@@ -1,20 +1,21 @@
 .string-attribute-editor {
+  background: var(--bg-secondary);
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.config-section {
-  background: #fff;
+.string-config-section {
+  background: var(--bg-secondary);
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.config-section h3 {
+.string-config-section h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 16px 0;
   display: flex;
   justify-content: space-between;
@@ -45,7 +46,8 @@
   width: 40px;
   height: 20px;
   appearance: none;
-  background: #e4e4e7;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 20px;
   position: relative;
   cursor: pointer;
@@ -64,7 +66,7 @@
   border-radius: 50%;
   top: 2px;
   left: 2px;
-  background: white;
+  background: var(--text-primary);
   transition: all 0.3s ease;
 }
 
@@ -74,7 +76,7 @@
 
 .option-description {
   font-size: 13px;
-  color: #666;
+  color: var(--text-primary);
 }
 
 .cache-config {
@@ -98,23 +100,22 @@
 .add-value-button {
   padding: 4px 12px;
   font-size: 13px;
-  color: #3b82f6;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  color: var(--text-primary);
+  background: var(--button-bg);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .add-value-button:hover {
-  background: #dbeafe;
-  border-color: #93c5fd;
+  background: var(--button-hover);
 }
 
 .remove-value-button {
   padding: 4px 8px;
   font-size: 18px;
-  color: #666;
+  color: var(--text-primary);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -128,10 +129,10 @@
 .empty-state {
   text-align: center;
   padding: 24px;
-  color: #666;
-  background: #f9fafb;
+  color: var(--text-primary);
+  background: var(--bg-primary);
   border-radius: 6px;
-  border: 1px dashed #e5e7eb;
+  border: 1px dashed var(--border-color);
 }
 
 /* Update Input component styles */
@@ -142,10 +143,12 @@
 .input-container input {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   font-size: 14px;
   transition: all 0.2s ease;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .input-container input:focus {
@@ -155,6 +158,6 @@
 
 .help-text {
   font-size: 13px;
-  color: #666;
+  color: var(--text-primary);
   margin-top: 4px;
 } 

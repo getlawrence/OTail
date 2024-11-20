@@ -113,9 +113,9 @@ export const ConfigEditor: React.FC = () => {
           </div>
         </div>
 
-        <div className="settings-section">
-        <div className="policies-header">
-          <h2>Sampling Policies</h2>
+        <div className="settings-section policies-section">
+          <div className="policies-header">
+            <h2>Sampling Policies</h2>
             <AddPolicyButton onSelectPolicy={handleAddPolicy} />
           </div>
           <p className="settings-description">
