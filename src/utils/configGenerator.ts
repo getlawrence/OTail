@@ -102,21 +102,25 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
 
 const generateStringAttributePolicyConfig = (policy: StringAttributePolicy) => {
   const config: any = {
-    key: policy.key,
-    values: policy.values,
+    name: policy.name,
+    type: policy.type,
+    string_attribute: {
+      key: policy.key,
+      values: policy.values,
+    }
   };
-  
+
   if (policy.enabledRegexMatching) {
-    config.enabled_regex_matching = true;
+    config.string_attribute.enabled_regex_matching = true;
     if (policy.cacheMaxSize !== undefined) {
-      config.cache_max_size = policy.cacheMaxSize;
+      config.string_attribute.cache_max_size = policy.cacheMaxSize;
     }
   }
-  
+
   if (policy.invertMatch) {
-    config.invert_match = true;
+    config.string_attribute.invert_match = true;
   }
-  
+
   return config;
 };
 
