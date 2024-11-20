@@ -22,8 +22,7 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
 
   return (
     <div className="policy-editor string-attribute-editor">
-      {/* Main Configuration Section */}
-      <div className="config-section">
+      <div className="string-config-section">
         <h3>Basic Configuration</h3>
         <Input
           label="Attribute Key"
@@ -33,9 +32,7 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
           helpText="The attribute key to match against"
         />
       </div>
-
-      {/* Matching Options Section */}
-      <div className="config-section">
+      <div className="string-config-section">
         <h3>Matching Options</h3>
         <div className="matching-options">
           <label className="toggle-option">
@@ -86,9 +83,7 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
           </div>
         )}
       </div>
-
-      {/* Values Section */}
-      <div className="config-section">
+      <div className="string-config-section">
         <h3>
           {policy.enabledRegexMatching ? 'Regex Patterns' : 'Match Values'}
           <button

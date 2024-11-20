@@ -1,7 +1,6 @@
 import React from 'react';
 import { OttlPolicy } from '../../types/PolicyTypes';
 import { Editor } from '@monaco-editor/react';
-import { Input } from '../common/Input';
 
 interface OttlPolicyEditorProps {
   policy: OttlPolicy;

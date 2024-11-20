@@ -1,8 +1,8 @@
 .policy-editor {
   padding: 16px;
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px var(--shadow-color);
 }
 
 .checkbox-group {
@@ -17,15 +17,17 @@
   gap: 8px;
   cursor: pointer;
   user-select: none;
+  color: var(--text-primary);
 }
 
 .checkbox-label input[type="checkbox"] {
   width: 16px;
   height: 16px;
+  accent-color: var(--text-primary);
 }
 
 .ottl_condition-editor {
-  border: 1px solid #d1d1d6;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -39,23 +41,39 @@
   margin-bottom: 8px;
   font-size: 13px;
   font-weight: 500;
-  color: #57606a;
+  color: var(--text-secondary);
 }
 
 .form-input {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #eaecef;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.2s ease;
-  background: #ffffff;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .form-input:focus {
   outline: none;
   border-color: #0969da;
   box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+}
+
+.validation-warning {
+  color: #f59e0b;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.policy-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 8px 0;
+  font-style: italic;
 }
 
 .tag-values,

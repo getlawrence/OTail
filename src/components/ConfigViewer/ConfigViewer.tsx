@@ -3,6 +3,7 @@ import { Editor } from '@monaco-editor/react';
 import { TailSamplingConfig } from '../../types/ConfigTypes';
 import { generateYamlConfig } from '../../utils/configGenerator';
 import { parseYamlConfig } from '../../utils/configParser';
+import { useTheme } from '../../context/ThemeContext';
 import './ConfigViewer.css';
 
 interface ConfigViewerProps {
@@ -11,6 +12,7 @@ interface ConfigViewerProps {
 }
 
 export const ConfigViewer: React.FC<ConfigViewerProps> = ({ config, onConfigChange }) => {
+  const { theme } = useTheme();
   const yamlConfig = generateYamlConfig(config);
 
   const handleEditorChange = (value: string | undefined) => {
@@ -36,11 +38,12 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({ config, onConfigChan
         defaultLanguage="yaml"
         value={yamlConfig}
         onChange={handleEditorChange}
+        theme={theme === 'dark' ? 'vs-dark' : 'vs-light'}
         options={{
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           wordWrap: 'on',
-          theme: 'vs-light',
+          padding: { top: 16, bottom: 16 },
         }}
       />
     </div>

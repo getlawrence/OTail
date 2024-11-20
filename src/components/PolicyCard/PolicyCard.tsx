@@ -12,7 +12,6 @@ import { CompositePolicyEditor } from '../PolicyEditors/CompositePolicyEditor';
 import { NumericTagPolicyEditor } from '../PolicyEditors/NumericAttributePolicyEditor';
 import { OttlPolicyEditor } from '../PolicyEditors/OttlPolicyEditor';
 import { SpanCountPolicyEditor } from '../PolicyEditors/SpanCountPolicyEditor';
-import { StringTagPolicyEditor } from '../PolicyEditors/StringTagPolicyEditor';
 import { TraceStatePolicyEditor } from '../PolicyEditors/TraceStatePolicyEditor';
 import './PolicyCard.css';
 import { AndPolicyEditor } from '../PolicyEditors/AndPolicyEditor';
@@ -86,8 +85,6 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
         return <OttlPolicyEditor policy={policy} onUpdate={onUpdate} />;
       case 'span_count':
         return <SpanCountPolicyEditor policy={policy} onUpdate={onUpdate} />;
-      case 'string_attribute':
-        return <StringTagPolicyEditor policy={policy} onUpdate={onUpdate} />;
       case 'trace_state':
         return <TraceStatePolicyEditor policy={policy} onUpdate={onUpdate} />;
       case 'and':

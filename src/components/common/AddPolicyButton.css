@@ -4,9 +4,9 @@
 
 .add-policy-button {
   padding: 6px 12px;
-  background: transparent;
-  color: rgb(55, 53, 47);
-  border: 1px solid rgba(55, 53, 47, 0.16);
+  background: var(--button-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 3px;
   cursor: pointer;
   font-size: 14px;
@@ -17,7 +17,7 @@
 }
 
 .add-policy-button:hover {
-  background: rgba(55, 53, 47, 0.08);
+  background: var(--hover-bg);
 }
 
 .policy-dropdown {
@@ -25,11 +25,11 @@
   top: 100%;
   right: 0;
   margin-top: 4px;
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 3px;
-  box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, 
-              rgba(15, 15, 15, 0.1) 0px 3px 6px, 
-              rgba(15, 15, 15, 0.2) 0px 9px 24px;
+  box-shadow: 0 0 0 1px var(--border-color),
+              0 3px 6px var(--shadow-color),
+              0 9px 24px var(--shadow-color);
   z-index: 1000;
   min-width: 200px;
   overflow: hidden;
@@ -43,10 +43,10 @@
   text-align: left;
   cursor: pointer;
   font-size: 14px;
-  color: rgb(55, 53, 47);
+  color: var(--text-primary);
   transition: background 20ms ease-in 0s;
 }
 
 .policy-dropdown-item:hover {
-  background: rgba(55, 53, 47, 0.08);
+  background: var(--hover-bg);
 } 

@@ -1,0 +1,23 @@
+.policy-list {
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-right: -8px;  /* Compensate for padding to align with other elements */
+}
+
+/* Add a subtle fade effect when scrolling */
+.policy-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.policy-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.policy-list::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+}
+
+.policy-list::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+} 

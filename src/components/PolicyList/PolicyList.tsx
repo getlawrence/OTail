@@ -1,6 +1,7 @@
 import React from 'react';
 import { Policy } from '../../types/PolicyTypes';
 import { PolicyCard } from '../PolicyCard/PolicyCard';
+import './PolicyList.css';
 
 interface PolicyListProps {
   policies: Policy[];

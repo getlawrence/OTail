@@ -1,10 +1,40 @@
+:root {
+  /* Light theme variables */
+  --bg-primary: #fafafa;
+  --bg-secondary: #ffffff;
+  --text-primary: #2c3338;
+  --text-secondary: #57606a;
+  --border-color: #eaecef;
+  --hover-bg: rgba(55, 53, 47, 0.08);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --header-bg: rgb(251, 251, 250);
+  --input-border: #d1d1d6;
+  --button-bg: transparent;
+  --button-hover: rgba(55, 53, 47, 0.08);
+}
+
+[data-theme='dark'] {
+  /* Dark theme variables */
+  --bg-primary: #1a1b1e;
+  --bg-secondary: #2c2e33;
+  --text-primary: #e4e5e7;
+  --text-secondary: #a1a2a5;
+  --border-color: #383a3f;
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --header-bg: #2c2e33;
+  --input-border: #383a3f;
+  --button-bg: transparent;
+  --button-hover: rgba(255, 255, 255, 0.1);
+}
+
 body {
   margin: 0;
   font-family: inter, -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #fafafa;
-  color: #2c3338;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 * {

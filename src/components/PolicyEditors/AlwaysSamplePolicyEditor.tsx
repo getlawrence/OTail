@@ -1,6 +1,5 @@
 import React from 'react';
 import { AlwaysSamplePolicy } from '../../types/PolicyTypes';
-import { BasePolicyEditor } from '../common/BasePolicyEditor';
 
 interface AlwaysSamplePolicyEditorProps {
   policy: AlwaysSamplePolicy;

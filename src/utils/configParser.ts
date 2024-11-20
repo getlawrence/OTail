@@ -133,7 +133,7 @@ const getPolicyType = (config: any): PolicyType => {
     'string_attribute', 'latency', 'always_sample', 'boolean_attribute',
     'composite', 'ottl_condition', 'span_count', 'string_attribute', 'trace_state', 'and'
   ];
-  const foundType = types.find(type => config.type == type);
+  const foundType = types.find(type => config.type === type);
   if (!foundType) {
     throw new Error('Invalid policy configuration: Missing policy type');
   }

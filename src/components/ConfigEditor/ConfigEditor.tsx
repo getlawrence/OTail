@@ -8,6 +8,7 @@ import { AddPolicyButton } from '../common/AddPolicyButton';
 import { PolicySetsMenu } from '../PolicySets/PolicySetsMenu';
 import { usePolicySets } from '../../context/PolicySetsContext';
 import { EditableTitle } from '../common/EditableTitle';
+import { Input } from '../common/Input';
 import './ConfigEditor.css';
 
 export const ConfigEditor: React.FC = () => {
@@ -69,58 +70,57 @@ export const ConfigEditor: React.FC = () => {
   return (
     <div className="config-editor">
       <PolicySetsMenu onImportPolicies={handleImportPolicies} />
-      <div className="config-editor-left">
-        <div className="config-settings">
-          <div className="settings-header">
-            <div className="header-content">
-              <EditableTitle
-                value={policySetName}
-                onChange={setPolicySetName}
-                placeholder="Enter policy set name"
-              />
-              <button 
-                className="add-policy-button"
-                onClick={handleSavePolicySet}
-                disabled={!policySetName.trim()}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-
-          <div className="settings-section">
-            <h2>General Settings</h2>
-            <div className="settings-grid">
-              <div className="form-field">
-                <label htmlFor="decisionWait">Decision Wait (seconds)</label>
-                <input
-                  id="decisionWait"
-                  type="number"
-                  min="1"
-                  value={config.decisionWait}
-                  onChange={(e) => handleConfigSettingsChange('decisionWait', Number(e.target.value))}
-                />
-              </div>
-              <div className="form-field">
-                <label htmlFor="numTraces">Number of Traces</label>
-                <input
-                  id="numTraces"
-                  type="number"
-                  min="1"
-                  value={config.numTraces}
-                  onChange={(e) => handleConfigSettingsChange('numTraces', Number(e.target.value))}
-                />
-              </div>
-            </div>
+      <div className="config-settings">
+        <div className="settings-header">
+          <div className="header-content">
+            <EditableTitle
+              value={policySetName}
+              onChange={setPolicySetName}
+              placeholder="Enter policy set name"
+            />
+            <button 
+              className="save-policy-button"
+              onClick={handleSavePolicySet}
+              disabled={!policySetName.trim()}
+            >
+              Save Policy Set
+            </button>
           </div>
         </div>
 
-        <div className="policies-section">
+        <div className="settings-section">
+          <h2>General Settings</h2>
+          <p className="settings-description">
+            Configure the general sampling settings that apply to all policies.
+          </p>
+          <div className="settings-grid">
+            <Input
+              label="Decision Wait"
+              type="number"
+              min="1"
+              value={config.decisionWait}
+              onChange={(e) => handleConfigSettingsChange('decisionWait', Number(e.target.value))}
+              helpText="Time to wait for a trace to be completed (in seconds)"
+            />
+            <Input
+              label="Number of Traces"
+              type="number"
+              min="1"
+              value={config.numTraces}
+              onChange={(e) => handleConfigSettingsChange('numTraces', Number(e.target.value))}
+              helpText="Number of traces kept in memory"
+            />
+          </div>
+        </div>
+
+        <div className="settings-section policies-section">
           <div className="policies-header">
             <h2>Sampling Policies</h2>
             <AddPolicyButton onSelectPolicy={handleAddPolicy} />
           </div>
-
+          <p className="settings-description">
+            Add and configure sampling policies to determine which traces to sample.
+          </p>
           <PolicyList
             policies={config.policies}
             onUpdatePolicy={handleUpdatePolicy}
@@ -129,9 +129,7 @@ export const ConfigEditor: React.FC = () => {
         </div>
       </div>
 
-      <div className="config-editor-right">
-        <ConfigViewer config={config} onConfigChange={setConfig} />
-      </div>
+      <ConfigViewer config={config} onConfigChange={setConfig} />
     </div>
   );
 }; 
