@@ -95,12 +95,6 @@ export interface SpanCountPolicy extends BasePolicy {
   maxSpans: number;
 }
 
-export interface StringTagPolicy extends BasePolicy {
-  type: 'string_attribute';
-  key: string;
-  values: string[];
-}
-
 export interface TraceStatePolicy extends BasePolicy {
   type: 'trace_state';
   key: string;
@@ -125,7 +119,6 @@ export type Policy =
   | NumericTagPolicy
   | OttlPolicy
   | SpanCountPolicy
-  | StringTagPolicy
   | TraceStatePolicy
   | AndPolicy;
 

@@ -10,6 +10,7 @@ import { usePolicySets } from '../../context/PolicySetsContext';
 import { EditableTitle } from '../common/EditableTitle';
 import { Input } from '../common/Input';
 import './ConfigEditor.css';
+import { EvaluationResult } from '../../types/TraceTypes';
 
 export const ConfigEditor: React.FC = () => {
   const [config, setConfig] = useState<TailSamplingConfig>({
@@ -18,6 +19,7 @@ export const ConfigEditor: React.FC = () => {
     numTraces: 100,
   });
   const [policySetName, setPolicySetName] = useState('');
+  const [evaluationResults, setEvaluationResults] = useState<Record<string, EvaluationResult>>();
   const { addPolicySet } = usePolicySets();
 
   const handleSavePolicySet = () => {
@@ -125,11 +127,16 @@ export const ConfigEditor: React.FC = () => {
             policies={config.policies}
             onUpdatePolicy={handleUpdatePolicy}
             onRemovePolicy={handleRemovePolicy}
+            evaluationResult={evaluationResults}
           />
         </div>
       </div>
 
-      <ConfigViewer config={config} onConfigChange={setConfig} />
+      <ConfigViewer 
+        config={config} 
+        onConfigChange={setConfig}
+        onEvaluationResults={setEvaluationResults}
+      />
     </div>
   );
 }; 

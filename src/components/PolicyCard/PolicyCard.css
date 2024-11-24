@@ -7,6 +7,14 @@
   box-shadow: 0 1px 2px var(--shadow-color);
 }
 
+.policy-card.sampled {
+  border: 2px solid #22c55e;
+}
+
+.policy-card.not-sampled {
+  border: 2px solid #ef4444;
+}
+
 .policy-card:hover {
   box-shadow: 0 3px 12px var(--shadow-color);
   transform: translateY(-1px);

@@ -65,7 +65,7 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
       return {
         ...basePolicy,
         and: {
-          and_sub_policy: policy.subPolicies.map(subPolicy =>
+          and_sub_policy: policy.subPolicies.map((subPolicy: Policy) =>
             generatePolicyConfig(subPolicy)
           ),
         },
