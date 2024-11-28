@@ -1,20 +1,19 @@
-import { BasePolicyEvaluator } from './BaseEvaluator';
+import { PolicyEvaluator } from './BaseEvaluator';
 import { StringAttributePolicy } from '../types/PolicyTypes';
-import { Trace, EvaluationResult } from '../types/TraceTypes';
+import { Trace, Decision } from '../types/TraceTypes';
 
-export class StringAttributeEvaluator extends BasePolicyEvaluator {
+export class StringAttributeEvaluator implements PolicyEvaluator {
     protected policy: StringAttributePolicy;
     private regexCache: Map<string, RegExp>;
 
     constructor(policy: StringAttributePolicy) {
-        super(policy);
         this.policy = policy;
         this.regexCache = new Map();
     }
 
-    evaluate(trace: Trace): EvaluationResult {
-        for (const span of trace.spans) {
-            const value = span.attributes[this.policy.key];
+    evaluate(trace: Trace): Decision {
+        for (const span of trace.resourceSpans) {
+            const value = span.resource.attributes[this.policy.key];
             if (value === undefined) {
                 continue;
             }
@@ -25,17 +24,10 @@ export class StringAttributeEvaluator extends BasePolicyEvaluator {
             const decision = this.policy.invertMatch ? !matches : matches;
 
             if (decision) {
-                return {
-                    sampled: true,
-                    reason: `Matched ${this.policy.key}=${value}`
-                };
+                return Decision.Sampled
             }
         }
-
-        return {
-            sampled: false,
-            reason: `No matching attribute ${this.policy.key} found`
-        };
+        return Decision.NotSampled;
     }
 
     private matchesRegex(value: string): boolean {

@@ -1,16 +1,6 @@
 import { Policy } from '../types/PolicyTypes';
-import { Trace, EvaluationResult } from '../types/TraceTypes';
+import { Trace, Decision } from '../types/TraceTypes';
 
 export interface PolicyEvaluator {
-  evaluate(trace: Trace): EvaluationResult;
+  evaluate(trace: Trace): Decision;
 }
-
-export abstract class BasePolicyEvaluator implements PolicyEvaluator {
-  protected policy: Policy;
-
-  constructor(policy: Policy) {
-    this.policy = policy;
-  }
-
-  abstract evaluate(trace: Trace): EvaluationResult;
-} 

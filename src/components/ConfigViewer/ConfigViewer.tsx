@@ -5,13 +5,13 @@ import { generateYamlConfig } from '../../utils/configGenerator';
 import { parseYamlConfig } from '../../utils/configParser';
 import { useTheme } from '../../context/ThemeContext';
 import { evaluatePolicy } from '../../utils/policyEvaluator';
-import { EvaluationResult } from '../../types/TraceTypes';
+import { Decision } from '../../types/TraceTypes';
 import './ConfigViewer.css';
 
 interface ConfigViewerProps {
   config: TailSamplingConfig;
   onConfigChange: (config: TailSamplingConfig) => void;
-  onEvaluationResults?: (results: Record<string, EvaluationResult>) => void;
+  onEvaluationResults?: (results: Record<string, Decision>) => void;
 }
 
 export const ConfigViewer: React.FC<ConfigViewerProps> = ({ 
@@ -45,7 +45,7 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({
   const runSimulation = () => {
     try {
       const parsedData = JSON.parse(simulationData);
-      const results: Record<string, EvaluationResult> = {};
+      const results: Record<string, Decision> = {};
       
       config.policies.forEach(policy => {
         results[policy.name] = evaluatePolicy(policy, parsedData);

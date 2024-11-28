@@ -2,13 +2,13 @@ import React from 'react';
 import { Policy } from '../../types/PolicyTypes';
 import { PolicyCard } from '../PolicyCard/PolicyCard';
 import './PolicyList.css';
-import { EvaluationResult } from '../../types/TraceTypes';
+import { Decision } from '../../types/TraceTypes';
 
 interface PolicyListProps {
   policies: Policy[];
   onUpdatePolicy: (index: number, policy: Policy) => void;
   onRemovePolicy: (index: number) => void;
-  evaluationResult?: Record<string, EvaluationResult>;
+  evaluationResult?: Record<string, Decision>;
 }
 
 export const PolicyList: React.FC<PolicyListProps> = ({

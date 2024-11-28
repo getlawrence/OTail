@@ -20,10 +20,25 @@ export interface Span {
 
 export interface Trace {
   traceId: string;
+  resourceSpans: ResourceSpan[]
+}
+
+export interface Resource {
+  attributes: Record<string, any>;
+}
+
+export interface ResourceSpan {
+  resource: Resource;
+  scopeSpans: ScopeSpan[]
+}
+
+export interface ScopeSpan {
   spans: Span[];
 }
 
-export interface EvaluationResult {
-  sampled: boolean;
-  reason?: string;
-} 
+export enum Decision {
+  Sampled,
+  NotSampled,
+  InvertNotSampled,
+  InvertSampled
+}

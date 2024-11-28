@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Policy } from '../../types/PolicyTypes';
-import { EvaluationResult } from '../../types/TraceTypes';
+import { Decision } from '../../types/TraceTypes';
 import classNames from 'classnames';
 import { ProbabilisticPolicyEditor } from '../PolicyEditors/ProbabilisticPolicyEditor';
 import { RateLimitingPolicyEditor } from '../PolicyEditors/RateLimitingPolicyEditor';
@@ -22,7 +22,7 @@ interface PolicyCardProps {
   onUpdate: (policy: Policy) => void;
   onRemove: () => void;
   nested?: boolean;
-  evaluationResult?: EvaluationResult;
+  evaluationResult?: Decision;
 }
 
 export const PolicyCard: React.FC<PolicyCardProps> = ({
@@ -98,10 +98,10 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
   };
 
   return (
-    <div className={classNames('policy-card', { 
+    <div className={classNames('policy-card', {
       'nested-policy': nested,
-      'sampled': evaluationResult?.sampled,
-      'not-sampled': evaluationResult !== undefined && !evaluationResult.sampled
+      'sampled': evaluationResult == Decision.Sampled,
+      'not-sampled': evaluationResult !== undefined && evaluationResult != Decision.Sampled
     })}>
       <div className="policy-card-header" onClick={handleHeaderClick}>
         <div className="policy-card-title">
@@ -119,7 +119,7 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
           <div className="policy-type-badge">{policy.type}</div>
         </div>
         <div className="policy-card-actions">
-          <button 
+          <button
             className="remove-policy-button"
             onClick={(e) => {
               e.stopPropagation();
