@@ -2,6 +2,10 @@
 
 OTail is a user-friendly web interface for creating and managing OpenTelemetry tail sampling processor configurations. It provides a visual way to configure complex sampling policies without having to write YAML directly.
 
+## UI
+<img width="1467" alt="Screenshot 2024-12-01 at 13 57 34" src="https://github.com/user-attachments/assets/c21b8795-190e-4bd3-a3df-7a6940236d35">
+
+
 ## Features
 
 - **Visual Policy Configuration**: Easily create and manage sampling policies through an intuitive UI
