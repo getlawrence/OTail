@@ -4,6 +4,7 @@ import { ConfigEditor } from './components/ConfigEditor/ConfigEditor';
 import { PolicySetsProvider } from './context/PolicySetsContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ThemeToggle } from './components/common/ThemeToggle';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <main>
             <ConfigEditor />
           </main>
+          <Analytics />
         </div>
       </PolicySetsProvider>
     </ThemeProvider>
