@@ -14,9 +14,7 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<TailSamplingConfig>({
-    policies: [],
-    decisionWait: 10,
-    numTraces: 100,
+    policies: []
   });
 
   const updateConfig = (newConfig: TailSamplingConfig) => setConfig(newConfig);

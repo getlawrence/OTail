@@ -1,0 +1,12 @@
+{
+    "resourceSpans": [{
+      "resource": {
+         "attributes": {"service.name": "services"}
+      },
+      "scopeSpans": [{
+        "spans": [{
+          "attributes": {"app.force_sample": true}
+        }]
+      }]
+    }]
+  }

@@ -65,7 +65,7 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
       return {
         ...basePolicy,
         and: {
-          and_sub_policy: policy.subPolicies.map(subPolicy =>
+          and_sub_policy: policy.subPolicies.map((subPolicy: Policy) =>
             generatePolicyConfig(subPolicy)
           ),
         },
@@ -154,12 +154,8 @@ const generateCompositeConfig = (policy: CompositePolicy): any => {
 
 export const generateYamlConfig = (config: TailSamplingConfig): string => {
   const processorConfig = {
-    processors: {
-      tail_sampling: {
-        decision_wait: config.decisionWait || 10,
-        num_traces: config.numTraces || 100,
-        policies: config.policies.map(generatePolicyConfig).filter(Boolean),
-      },
+    tail_sampling: {
+      policies: config.policies.map(generatePolicyConfig).filter(Boolean),
     },
   };
 

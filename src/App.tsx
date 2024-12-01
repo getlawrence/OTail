@@ -11,7 +11,7 @@ function App() {
       <PolicySetsProvider>
         <div className="App">
           <header className="App-header">
-            <h1>OpenTelemetry Tail Sampling Configuration Generator</h1>
+            <h1>Tail Sampling Config Generator</h1>
             <ThemeToggle />
           </header>
           <main>
