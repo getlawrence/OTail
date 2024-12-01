@@ -74,8 +74,8 @@
   padding: 8px 16px;
   border-radius: 6px;
   background: var(--primary-color);
-  color: white;
-  border: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s ease;
@@ -87,4 +87,13 @@
 
 .editor-container {
   margin-bottom: 16px;
+}
+
+
+.not-sampled {
+  color: #ef4444;
+}
+
+.sampled {
+  color: #22c55e;
 }

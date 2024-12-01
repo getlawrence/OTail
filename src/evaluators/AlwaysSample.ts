@@ -1,7 +1,7 @@
 import { Trace, Decision } from "../types/TraceTypes";
-import { PolicyEvaluator } from "./BaseEvaluator";
+import { BasePolicyEvaluator } from "./BaseEvaluator";
 
-export class AlwaysSampleEvaluator implements PolicyEvaluator {
+export class AlwaysSampleEvaluator extends BasePolicyEvaluator {
     evaluate(trace: Trace): Decision {
         return Decision.Sampled;
     }

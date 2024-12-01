@@ -1,21 +1,44 @@
-import { AlwaysSampleEvaluator } from '../evaluators/AlwaysSample';
-import { BooleanAttributeFilterEvaluator } from '../evaluators/BooleanAttributeFilter';
-import { LatemcyEvaluator } from '../evaluators/Latency';
-import { StringAttributeEvaluator } from '../evaluators/StringAttribute';
-import { Policy } from '../types/PolicyTypes';
-import { Trace, Decision } from '../types/TraceTypes';
+import { PolicyEvaluator } from '../evaluators/BaseEvaluator';
+import { Trace, Decision, DecisionResult } from '../types/TraceTypes';
 
-export const evaluatePolicy = (policy: Policy, traceData: Trace): Decision => {
-    switch (policy.type) {
-        case 'always_sample':
-            return new AlwaysSampleEvaluator().evaluate(traceData);
-        case 'string_attribute':
-            return new StringAttributeEvaluator(policy).evaluate(traceData);
-        case 'boolean_attribute':
-            return new BooleanAttributeFilterEvaluator(policy.key, policy.value, policy.invertMatch).evaluate(traceData)
-        case 'latency':
-            return new LatemcyEvaluator(policy.thresholdMs, policy.upperThresholdMs ?? 0).evaluate(traceData);
-        default:
-            throw new Error(`Unsupported policy type: ${policy.type}`);
+
+export const makeDecision = (trace: Trace, policies: PolicyEvaluator[]): DecisionResult => {
+    let finalDecision: Decision = Decision.NotSampled;
+
+    const samplingDecision: Record<Decision, boolean> = {
+        [Decision.Error]: false,
+        [Decision.Sampled]: false,
+        [Decision.NotSampled]: false,
+        [Decision.InvertSampled]: false,
+        [Decision.InvertNotSampled]: false
+    };
+    const policyDecisions: Record<string, Decision> = {}
+
+    for (const policy of policies) {
+        try {
+            const decision = policy.evaluate(trace);
+            samplingDecision[decision] = true;
+            policyDecisions[policy.policyName] = decision;
+
+        } catch (error) {
+            samplingDecision[Decision.Error] = true;
+            console.error('Sampling policy error', error);
+        }
     }
-};
+
+    if (samplingDecision[Decision.InvertNotSampled]) {
+        finalDecision = Decision.NotSampled;
+    }
+
+    if (samplingDecision[Decision.Sampled]) {
+        finalDecision = Decision.Sampled;
+    }
+
+    if (samplingDecision[Decision.InvertSampled] && !samplingDecision[Decision.NotSampled]) {
+        finalDecision = Decision.Sampled;
+    }
+    return {
+        finalDecision,
+        policyDecisions
+    };
+}

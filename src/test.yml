@@ -1,22 +1,117 @@
-processors:
-  tail_sampling:
-    decision_wait: 5
-    num_traces: 5000
-    expected_new_traces_per_sec: 50000
-    policies:
-      - name: new-policy-1
-        type: and
-        and:
-          and_sub_policy:
-          - name: prometheus-user-agent
+tail_sampling:
+  decision_wait: 10s
+  num_traces: 100
+  policies:
+    - name: backwards-compatibility-policy
+      type: and
+      and:
+        and_sub_policy:
+          - name: String Attribute Policy
             type: string_attribute
             string_attribute:
-              key: user_agent
+              key: service.name
               values:
-                - (?i)^Prometheus
-          - name: always_sample
+                - list
+                - of
+                - services
+                - using
+                - tail_sampling
+              invert_match: true
+          - name: sample-all-policy
             type: always_sample
-          - type: probabilistic
-            name: probabilistic-rate-limiting
+    - name: team_a-probe
+      type: and
+      and:
+        and_sub_policy:
+          - name: String Attribute Policy
+            type: string_attribute
+            string_attribute:
+              key: service.name
+              values:
+                - service-1
+                - service-2
+                - service-3
+          - name: String Attribute Policy
+            type: string_attribute
+            string_attribute:
+              key: http.route
+              values:
+                - /live
+                - /ready
+              enabled_regex_matching: true
+          - name: probabilistic-policy
+            type: probabilistic
             probabilistic:
-              sampling_percentage: 0
+              sampling_percentage: 0.1
+    - name: team_a-noisy-endpoint-1
+      type: and
+      and:
+        and_sub_policy:
+          - name: String Attribute Policy
+            type: string_attribute
+            string_attribute:
+              key: service.name
+              values:
+                - service-1
+          - name: String Attribute Policy
+            type: string_attribute
+            string_attribute:
+              key: http.route
+              values:
+                - /v1/name/.+
+              enabled_regex_matching: true
+          - name: probabilistic-policy
+            type: probabilistic
+            probabilistic:
+              sampling_percentage: 1
+    - name: team_a-service-1
+      type: and
+      and:
+        and_sub_policy:
+          - name: String Attribute Policy
+            type: string_attribute
+            string_attribute:
+              key: service.name
+              values:
+                - service-1
+          - name: String Attribute Policy
+            type: string_attribute
+            string_attribute:
+              key: http.route
+              values:
+                - /v1/name/.+
+              enabled_regex_matching: true
+              invert_match: true
+          - name: probabilistic-policy
+            type: probabilistic
+            probabilistic:
+              sampling_percentage: 100
+    - name: team_a-status-policy
+      type: and
+      and:
+        and_sub_policy:
+          - name: String Attribute Policy
+            type: string_attribute
+            string_attribute:
+              key: service.name
+              values:
+                - list
+                - of
+                - services
+                - using
+                - tail_sampling
+          - name: trace-status-policy
+            type: status_code
+            status_code:
+              status_codes:
+                - ERROR
+    - name: team_a-force-sample
+      type: boolean_attribute
+      boolean_attribute:
+        key: app.force_sample
+        value: true
+    - name: team_a-do-not-sample
+      type: boolean_attribute
+      boolean_attribute:
+        key: app.do_not_sample
+        value: true

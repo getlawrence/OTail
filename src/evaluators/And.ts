@@ -1,11 +1,11 @@
-import { AndPolicy, Policy } from "../types/PolicyTypes";
 import { Trace, Decision } from "../types/TraceTypes";
-import { PolicyEvaluator } from "./BaseEvaluator";
+import { BasePolicyEvaluator, PolicyEvaluator } from "./BaseEvaluator";
 
-export class AndEvaluator implements PolicyEvaluator {
+export class AndEvaluator extends BasePolicyEvaluator {
     private subPolicies: PolicyEvaluator[];
 
-    constructor(subPolicies: PolicyEvaluator[]) {
+    constructor(name: string, subPolicies: PolicyEvaluator[]) {
+        super(name);
         this.subPolicies = subPolicies;
     }
 

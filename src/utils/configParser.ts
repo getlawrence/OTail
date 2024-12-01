@@ -6,15 +6,13 @@ export const parseYamlConfig = (yaml: string): TailSamplingConfig => {
   try {
     const parsed = load(yaml) as any;
 
-    if (!parsed?.processors?.tail_sampling) {
+    if (!parsed?.tail_sampling) {
       throw new Error('Invalid configuration: Missing tail_sampling processor');
     }
 
-    const tailSampling = parsed.processors.tail_sampling;
+    const tailSampling = parsed.tail_sampling;
 
     return {
-      decisionWait: tailSampling.decision_wait || 10,
-      numTraces: tailSampling.num_traces || 100,
       policies: tailSampling.policies?.map(parsePolicyConfig) || [],
     };
   } catch (error) {

@@ -100,8 +100,8 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
   return (
     <div className={classNames('policy-card', {
       'nested-policy': nested,
-      'sampled': evaluationResult == Decision.Sampled,
-      'not-sampled': evaluationResult !== undefined && evaluationResult != Decision.Sampled
+      'sampled': evaluationResult === Decision.Sampled,
+      'not-sampled': evaluationResult !== undefined && evaluationResult !== Decision.Sampled
     })}>
       <div className="policy-card-header" onClick={handleHeaderClick}>
         <div className="policy-card-title">

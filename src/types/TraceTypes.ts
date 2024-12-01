@@ -40,5 +40,11 @@ export enum Decision {
   Sampled,
   NotSampled,
   InvertNotSampled,
-  InvertSampled
+  InvertSampled,
+  Error
+}
+
+export interface DecisionResult {
+  finalDecision: Decision;
+  policyDecisions: Record<string, Decision>;
 }

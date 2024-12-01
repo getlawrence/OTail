@@ -1,12 +1,13 @@
-import { PolicyEvaluator } from './BaseEvaluator';
+import { BasePolicyEvaluator } from './BaseEvaluator';
 import { StringAttributePolicy } from '../types/PolicyTypes';
 import { Trace, Decision } from '../types/TraceTypes';
 
-export class StringAttributeEvaluator implements PolicyEvaluator {
+export class StringAttributeEvaluator extends BasePolicyEvaluator {
     protected policy: StringAttributePolicy;
     private regexCache: Map<string, RegExp>;
 
     constructor(policy: StringAttributePolicy) {
+        super(policy.name);
         this.policy = policy;
         this.regexCache = new Map();
     }

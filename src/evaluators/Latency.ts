@@ -1,9 +1,11 @@
 import { Trace, Decision, Span } from "../types/TraceTypes";
-import { PolicyEvaluator } from "./BaseEvaluator";
+import { BasePolicyEvaluator } from "./BaseEvaluator";
 import { hasSpanWithCondition } from "./util";
 
-export class LatemcyEvaluator implements PolicyEvaluator {
-    constructor(private thresholdMs: number, private upperThresholdMs: number) { }
+export class LatencyEvaluator extends BasePolicyEvaluator {
+    constructor(name: string, private thresholdMs: number, private upperThresholdMs: number) {
+        super(name);
+    }
     evaluate(trace: Trace): Decision {
         let minTime: number = Infinity;
         let maxTime: number = -Infinity;

@@ -4,9 +4,10 @@ import { TailSamplingConfig } from '../../types/ConfigTypes';
 import { generateYamlConfig } from '../../utils/configGenerator';
 import { parseYamlConfig } from '../../utils/configParser';
 import { useTheme } from '../../context/ThemeContext';
-import { evaluatePolicy } from '../../utils/policyEvaluator';
+import { makeDecision } from '../../utils/policyEvaluator';
 import { Decision } from '../../types/TraceTypes';
 import './ConfigViewer.css';
+import { buildPolicy } from '../../utils/PolicyBuilder';
 
 interface ConfigViewerProps {
   config: TailSamplingConfig;
@@ -14,19 +15,20 @@ interface ConfigViewerProps {
   onEvaluationResults?: (results: Record<string, Decision>) => void;
 }
 
-export const ConfigViewer: React.FC<ConfigViewerProps> = ({ 
-  config, 
+export const ConfigViewer: React.FC<ConfigViewerProps> = ({
+  config,
   onConfigChange,
-  onEvaluationResults 
+  onEvaluationResults
 }) => {
   const { theme } = useTheme();
   const [isSimulationMode, setIsSimulationMode] = useState(false);
   const [simulationData, setSimulationData] = useState('{\n  \n}');
+  const [finalDecision, SetfinalDecision] = useState<Decision>(Decision.NotSampled);
   const yamlConfig = generateYamlConfig(config);
 
   const handleEditorChange = (value: string | undefined) => {
     if (!value) return;
-    
+
     try {
       const parsedConfig = parseYamlConfig(value);
       if (parsedConfig.policies && Array.isArray(parsedConfig.policies)) {
@@ -45,13 +47,9 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({
   const runSimulation = () => {
     try {
       const parsedData = JSON.parse(simulationData);
-      const results: Record<string, Decision> = {};
-      
-      config.policies.forEach(policy => {
-        results[policy.name] = evaluatePolicy(policy, parsedData);
-      });
-      
-      onEvaluationResults?.(results);
+      const decision = makeDecision(parsedData, config.policies.map(buildPolicy));
+      onEvaluationResults?.(decision.policyDecisions);
+      SetfinalDecision(decision.finalDecision);
     } catch (error) {
       console.error('Invalid trace data:', error);
     }
@@ -61,17 +59,27 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({
     <div className="config-viewer">
       <div className="config-viewer-header">
         <div className="header-content">
-          <h2>{isSimulationMode ? 'Test Configuration' : 'Configuration'}</h2>
+          <h2>
+            {isSimulationMode ? (
+              <>
+                Decision: <span className={finalDecision === Decision.Sampled ? 'sampled' : 'not-sampled'}>
+                  {Decision[finalDecision]}
+                </span>
+              </>
+            ) : (
+              'Configuration'
+            )}
+          </h2>
           <div className="header-actions">
             {isSimulationMode && (
-              <button 
+              <button
                 className="simulate-button"
                 onClick={runSimulation}
               >
                 Run Simulation
               </button>
             )}
-            <button 
+            <button
               className={`mode-toggle ${isSimulationMode ? 'active' : ''}`}
               onClick={() => setIsSimulationMode(!isSimulationMode)}
             >
@@ -80,7 +88,7 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({
           </div>
         </div>
       </div>
-      
+
       <div className="editor-container">
         <Editor
           height="calc(100vh - 200px)"
