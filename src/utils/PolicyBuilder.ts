@@ -11,7 +11,7 @@ const getSharedPolicyEvaluator = (policy: Policy): PolicyEvaluator => {
         case 'always_sample':
             return new AlwaysSampleEvaluator(policy.name);
         case 'string_attribute':
-            return new StringAttributeEvaluator(policy);
+            return new StringAttributeEvaluator(policy.name, policy.key, policy.values, policy.enabledRegexMatching, policy.cacheMaxSize, policy.invertMatch);
         case 'boolean_attribute':
             return new BooleanAttributeFilterEvaluator(policy.name, policy.key, policy.value, policy.invertMatch)
         case 'latency':

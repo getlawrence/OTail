@@ -48,7 +48,7 @@ export interface StringAttributePolicy extends BasePolicy {
   type: 'string_attribute';
   key: string;
   values: string[];
-  enabledRegexMatching?: boolean;
+  enabledRegexMatching: boolean;
   cacheMaxSize?: number;
   invertMatch?: boolean;
 }
