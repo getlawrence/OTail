@@ -3,6 +3,7 @@ import { CompositePolicy, Policy, PolicyType } from '../../types/PolicyTypes';
 import { PolicyCard } from '../PolicyCard/PolicyCard';
 import { Input } from '../common/Input';
 import { createNewPolicy } from '../../utils/policyUtils';
+import { SubPolicySelect } from '../common/SubPolicySelect';
 
 export const CompositePolicyEditor: React.FC<{
   policy: CompositePolicy;
@@ -111,27 +112,7 @@ export const CompositePolicyEditor: React.FC<{
             </div>
           ))}
         </div>
-
-        <select
-          onChange={(e) => {
-            if (e.target.value) {
-              handleAddSubPolicy(e.target.value as PolicyType);
-              e.target.value = '';
-            }
-          }}
-          value=""
-          className="form-input"
-        >
-          <option value="">Add Sub Policy...</option>
-          <option value="numeric_attribute">Numeric Attribute</option>
-          <option value="probabilistic">Probabilistic</option>
-          <option value="rate_limiting">Rate Limiting</option>
-          <option value="status_code">Status Code</option>
-          <option value="string_attribute">String Attribute</option>
-          <option value="latency">Latency</option>
-          <option value="always_sample">Always Sample</option>
-          <option value="boolean_attribute">Boolean Attribute</option>
-        </select>
+        <SubPolicySelect onSelect={handleAddSubPolicy} />
       </div>
     </div>
   );

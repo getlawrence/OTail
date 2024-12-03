@@ -48,7 +48,7 @@ const getNewCompositePolicy = (policy: CompositePolicy) => {
         const policyEval = getCompositeSubPolicyEvaluator(subPolicy)
         const evalParams = {
             evaluator: policyEval,
-            maxSpansPerSecond: rateAllocationsMap[policy.name],
+            maxSpansPerSecond: rateAllocationsMap[subPolicy.name],
         }
         subPolicyEvalParams.push(evalParams);
     }
