@@ -8,7 +8,7 @@ import { useMode } from '../../context/ModeContext';
 import { makeDecision } from '../../utils/policyEvaluator';
 import { Decision } from '../../types/TraceTypes';
 import './ConfigViewer.css';
-import { buildPolicy } from '../../utils/new-policyBuilder';
+import { buildPolicy } from '../../utils/policyBuilder';
 
 interface ConfigViewerProps {
   config: TailSamplingConfig;
