@@ -1,5 +1,6 @@
 import React from 'react';
 import { StatusCodePolicy } from '../../types/PolicyTypes';
+import { StatusCode } from '../../types/TraceTypes';
 
 interface StatusCodePolicyEditorProps {
   policy: StatusCodePolicy;
@@ -10,7 +11,7 @@ export const StatusCodePolicyEditor: React.FC<StatusCodePolicyEditorProps> = ({
   policy,
   onUpdate,
 }) => {
-  const statusCodes = ['ERROR', 'OK', 'UNSET'];
+  let statusCodes: StatusCode[] = ['OK', 'ERROR', 'UNSET'];
 
   return (
     <div className="policy-editor">

@@ -1,3 +1,4 @@
+export type StatusCode = 'OK' | 'ERROR' | 'UNSET';
 export interface Span {
   traceId: string;
   spanId: string;
@@ -8,7 +9,7 @@ export interface Span {
   endTime: number;
   attributes: Record<string, any>;
   status: {
-    code: 'OK' | 'ERROR' | 'UNSET';
+    code: StatusCode;
     message?: string;
   };
   events: Array<{

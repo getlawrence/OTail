@@ -78,3 +78,8 @@ export const invertHasInstrumentationLibrarySpanWithCondition = (ilss: ScopeSpan
     }
     return true
 }
+
+
+export const getSpanCount = (trace: Trace) => {
+    return trace.resourceSpans.length;
+}

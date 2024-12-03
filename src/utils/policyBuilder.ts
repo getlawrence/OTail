@@ -2,7 +2,11 @@ import { AlwaysSampleEvaluator } from "../evaluators/AlwaysSample";
 import { AndEvaluator } from "../evaluators/And";
 import { PolicyEvaluator } from "../evaluators/BaseEvaluator";
 import { BooleanAttributeFilterEvaluator } from "../evaluators/BooleanAttributeFilter";
+import { CompositeEvaluator } from "../evaluators/Composite";
 import { LatencyEvaluator } from "../evaluators/Latency";
+import { NumericAttributeFilterEvaluator } from "../evaluators/NumericAttributeFilter";
+import { SpanCountEvaluator } from "../evaluators/SpanCount";
+import { StatusCodeFilterEvaluator } from "../evaluators/StatusCodeFilter";
 import { StringAttributeEvaluator } from "../evaluators/StringAttribute";
 import { AndPolicy, CompositePolicy, Policy } from "../types/PolicyTypes";
 
@@ -13,11 +17,19 @@ const getSharedPolicyEvaluator = (policy: Policy): PolicyEvaluator => {
         case 'string_attribute':
             return new StringAttributeEvaluator(policy.name, policy.key, policy.values, policy.enabledRegexMatching, policy.cacheMaxSize, policy.invertMatch);
         case 'boolean_attribute':
-            return new BooleanAttributeFilterEvaluator(policy.name, policy.key, policy.value, policy.invertMatch)
+            return new BooleanAttributeFilterEvaluator(policy.name, policy.key, policy.value, policy.invertMatch);
+        case 'numeric_attribute':
+            return new NumericAttributeFilterEvaluator(policy.name, policy.key, policy.minValue, policy.maxValue, policy.invertMatch);
+        case 'span_count':
+            return new SpanCountEvaluator(policy.name, policy.minSpans, policy.maxSpans);
+        case 'status_code':
+            return new StatusCodeFilterEvaluator(policy.name, policy.statusCodes);
         case 'latency':
             return new LatencyEvaluator(policy.name, policy.thresholdMs, policy.upperThresholdMs ?? 0);
         case 'and':
             return getNewAndPolicy(policy);
+        case 'composite':
+            return getNewCompositePolicy(policy);
         default:
             console.error(`Unsupported policy type: ${policy.type}`);
             return new AlwaysSampleEvaluator(policy.name);
@@ -31,16 +43,16 @@ export const getNewAndPolicy = (policy: AndPolicy) => {
 
 const getNewCompositePolicy = (policy: CompositePolicy) => {
     const rateAllocationsMap = getRateAllocationMap(policy)
-    const subPolicyEvalParams: Record<string, { evaluator: PolicyEvaluator, maxSpansPerSecond: number }> = {}
+    const subPolicyEvalParams: { evaluator: PolicyEvaluator, maxSpansPerSecond: number }[] = []
     for (const subPolicy of policy.subPolicies) {
         const policyEval = getCompositeSubPolicyEvaluator(subPolicy)
         const evalParams = {
             evaluator: policyEval,
             maxSpansPerSecond: rateAllocationsMap[policy.name],
         }
-        subPolicyEvalParams[policy.name] = evalParams
-
+        subPolicyEvalParams.push(evalParams);
     }
+    return new CompositeEvaluator(policy.name, subPolicyEvalParams)
 }
 
 const getRateAllocationMap = (policy: CompositePolicy) => {
