@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { usePolicySets } from '../../context/PolicySetsContext';
-import './PolicySetsMenu.css';
+import { useRecipes } from '../../context/RecipesContext';
+import './RecipesMenu.css';
 import { Policy } from '../../types/PolicyTypes';
 
-interface PolicySetsMenuProps {
+interface RecipesMenuProps {
   onImportPolicies: (policies: Policy[]) => void;
 }
 
-export const PolicySetsMenu: React.FC<PolicySetsMenuProps> = ({ onImportPolicies }) => {
+export const RecipesMenu: React.FC<RecipesMenuProps> = ({ onImportPolicies }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { policySets, removePolicySet } = usePolicySets();
+  const { recipes, removeRecipe } = useRecipes();
 
   return (
     <div className={`policy-sets-menu ${isExpanded ? 'expanded' : ''}`}>
@@ -32,26 +32,26 @@ export const PolicySetsMenu: React.FC<PolicySetsMenuProps> = ({ onImportPolicies
           </button>
         )}
         <div className="menu-header">
-          <h3>Saved Policy Sets</h3>
+          <h3>Saved Recipes</h3>
         </div>
         <div className="policy-sets-list">
-          {policySets.map((set) => (
-            <div key={set.id} className="policy-set-item">
-              <h4 className="policy-set-name">{set.name}</h4>
+          {recipes.map((recipe) => (
+            <div key={recipe.id} className="policy-set-item">
+              <h4 className="policy-set-name">{recipe.name}</h4>
               <span className="policy-count">
-                {set.policies.length} {set.policies.length === 1 ? 'policy' : 'policies'}
+                {recipe.policies.length} {recipe.policies.length === 1 ? 'policy' : 'policies'}
               </span>
               <div className="policy-set-actions">
                 <button
                   className="import-button"
-                  onClick={() => onImportPolicies(set.policies)}
+                  onClick={() => onImportPolicies(recipe.policies)}
                 >
                   +
                 </button>
                 <button
                   className="set-remove-button"
-                  onClick={() => removePolicySet(set.id)}
-                  aria-label="Remove policy set"
+                  onClick={() => removeRecipe(recipe.id)}
+                  aria-label="Remove recipe"
                 >
                   ✕
                 </button>

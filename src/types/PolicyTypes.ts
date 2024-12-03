@@ -124,7 +124,7 @@ export type Policy =
   | TraceStatePolicy
   | AndPolicy;
 
-export interface PolicySet {
+export interface Recipe {
   id: string;
   name: string;
   policies: Policy[];

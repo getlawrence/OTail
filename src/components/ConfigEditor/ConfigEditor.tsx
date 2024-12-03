@@ -5,8 +5,8 @@ import { PolicyList } from '../PolicyList/PolicyList';
 import { ConfigViewer } from '../ConfigViewer/ConfigViewer';
 import { createNewPolicy } from '../../utils/policyUtils';
 import { AddPolicyButton } from '../common/AddPolicyButton';
-import { PolicySetsMenu } from '../PolicySets/PolicySetsMenu';
-import { usePolicySets } from '../../context/PolicySetsContext';
+import { RecipesMenu } from '../Recipes/RecipesMenu';
+import { useRecipes } from '../../context/RecipesContext';
 import { EditableTitle } from '../common/EditableTitle';
 import './ConfigEditor.css';
 import { Decision } from '../../types/TraceTypes';
@@ -15,14 +15,14 @@ export const ConfigEditor: React.FC = () => {
   const [config, setConfig] = useState<TailSamplingConfig>({
     policies: [],
   });
-  const [policySetName, setPolicySetName] = useState('');
+  const [recipeName, setRecipeName] = useState('');
   const [evaluationResults, setEvaluationResults] = useState<Record<string, Decision>>();
-  const { addPolicySet } = usePolicySets();
+  const { addRecipe } = useRecipes();
 
-  const handleSavePolicySet = () => {
-    if (policySetName.trim()) {
-      addPolicySet(policySetName, config.policies);
-      setPolicySetName(''); // Clear the input after saving
+  const handleSaveRecipe = () => {
+    if (recipeName.trim()) {
+      addRecipe(recipeName, config.policies);
+      setRecipeName(''); // Clear the input after saving
     }
   };
 
@@ -59,21 +59,21 @@ export const ConfigEditor: React.FC = () => {
 
   return (
     <div className="config-editor">
-      <PolicySetsMenu onImportPolicies={handleImportPolicies} />
+      <RecipesMenu onImportPolicies={handleImportPolicies} />
       <div className="config-settings">
         <div className="settings-header">
           <div className="header-content">
             <EditableTitle
-              value={policySetName}
-              onChange={setPolicySetName}
-              placeholder="Enter policy set name"
+              value={recipeName}
+              onChange={setRecipeName}
+              placeholder="Enter recipe name"
             />
             <button 
               className="save-policy-button"
-              onClick={handleSavePolicySet}
-              disabled={!policySetName.trim()}
+              onClick={handleSaveRecipe}
+              disabled={!recipeName.trim()}
             >
-              Save Policy Set
+              Save Recipe
             </button>
           </div>
         </div>
