@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import { ConfigEditor } from './components/ConfigEditor/ConfigEditor';
-import { PolicySetsProvider } from './context/PolicySetsContext';
+import { RecipesProvider } from './context/RecipesContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Analytics } from '@vercel/analytics/react';
 import { ModeProvider } from './context/ModeContext';
@@ -11,7 +11,7 @@ function App() {
   return (
     <ThemeProvider>
       <ModeProvider>
-        <PolicySetsProvider>
+        <RecipesProvider>
           <div className="App">
             <header className="App-header">
               <Nav />
@@ -21,7 +21,7 @@ function App() {
             </main>
             <Analytics />
           </div>
-        </PolicySetsProvider>
+        </RecipesProvider>
       </ModeProvider>
     </ThemeProvider>
   );
