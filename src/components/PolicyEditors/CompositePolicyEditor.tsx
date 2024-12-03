@@ -3,7 +3,6 @@ import { CompositePolicy, Policy, PolicyType } from '../../types/PolicyTypes';
 import { PolicyCard } from '../PolicyCard/PolicyCard';
 import { Input } from '../common/Input';
 import { createNewPolicy } from '../../utils/policyUtils';
-import './CompositePolicyEditor.css';
 
 export const CompositePolicyEditor: React.FC<{
   policy: CompositePolicy;
@@ -40,7 +39,7 @@ export const CompositePolicyEditor: React.FC<{
     onUpdate({
       ...policy,
       subPolicies: newPolicies,
-      policyOrder: (policy.policyOrder || []).map(name => 
+      policyOrder: (policy.policyOrder || []).map(name =>
         name === oldName ? updatedPolicy.name : name
       )
     });
@@ -75,7 +74,6 @@ export const CompositePolicyEditor: React.FC<{
       <div className="config-section">
         <h3>Sub Policies</h3>
         <div className="policy-order-info">
-          <i className="info-icon">ℹ️</i>
           <span>Use the arrows to change policy execution order</span>
         </div>
 
@@ -122,7 +120,7 @@ export const CompositePolicyEditor: React.FC<{
             }
           }}
           value=""
-          className="form-input add-policy-select"
+          className="form-input"
         >
           <option value="">Add Sub Policy...</option>
           <option value="numeric_attribute">Numeric Attribute</option>

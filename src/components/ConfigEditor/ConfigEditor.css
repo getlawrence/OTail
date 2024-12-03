@@ -52,15 +52,6 @@
   margin-bottom: 16px;
 }
 
-.add-policy-select {
-  padding: 8px 12px;
-  border: 1px solid #d1d1d6;
-  border-radius: 6px;
-  background: white;
-  font-size: 14px;
-  min-width: 200px;
-}
-
 .form-field {
   display: flex;
   flex-direction: column;
