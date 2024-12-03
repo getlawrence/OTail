@@ -4,10 +4,11 @@ import { TailSamplingConfig } from '../../types/ConfigTypes';
 import { generateYamlConfig } from '../../utils/configGenerator';
 import { parseYamlConfig } from '../../utils/configParser';
 import { useTheme } from '../../context/ThemeContext';
+import { useMode } from '../../context/ModeContext';
 import { makeDecision } from '../../utils/policyEvaluator';
 import { Decision } from '../../types/TraceTypes';
 import './ConfigViewer.css';
-import { buildPolicy } from '../../utils/PolicyBuilder';
+import { buildPolicy } from '../../utils/policyBuilder';
 
 interface ConfigViewerProps {
   config: TailSamplingConfig;
@@ -21,7 +22,7 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({
   onEvaluationResults
 }) => {
   const { theme } = useTheme();
-  const [isSimulationMode, setIsSimulationMode] = useState(false);
+  const { mode } = useMode();
   const [simulationData, setSimulationData] = useState('{\n  \n}');
   const [finalDecision, SetfinalDecision] = useState<Decision>(Decision.NotSampled);
   const yamlConfig = generateYamlConfig(config);
@@ -60,7 +61,7 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({
       <div className="config-viewer-header">
         <div className="header-content">
           <h2>
-            {isSimulationMode ? (
+            {mode === 'Test' ? (
               <>
                 Decision: <span className={finalDecision === Decision.Sampled ? 'sampled' : 'not-sampled'}>
                   {Decision[finalDecision]}
@@ -71,7 +72,7 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({
             )}
           </h2>
           <div className="header-actions">
-            {isSimulationMode && (
+            {mode === 'Test' && (
               <button
                 className="simulate-button"
                 onClick={runSimulation}
@@ -79,12 +80,6 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({
                 Run Simulation
               </button>
             )}
-            <button
-              className={`mode-toggle ${isSimulationMode ? 'active' : ''}`}
-              onClick={() => setIsSimulationMode(!isSimulationMode)}
-            >
-              {isSimulationMode ? 'View Config' : 'Test Config'}
-            </button>
           </div>
         </div>
       </div>
@@ -92,9 +87,9 @@ export const ConfigViewer: React.FC<ConfigViewerProps> = ({
       <div className="editor-container">
         <Editor
           height="calc(100vh - 200px)"
-          defaultLanguage={isSimulationMode ? 'json' : 'yaml'}
-          value={isSimulationMode ? simulationData : yamlConfig}
-          onChange={isSimulationMode ? handleSimulationDataChange : handleEditorChange}
+          defaultLanguage={mode === 'Test' ? 'json' : 'yaml'}
+          value={mode === 'Test' ? simulationData : yamlConfig}
+          onChange={mode === 'Test' ? handleSimulationDataChange : handleEditorChange}
           theme={theme === 'dark' ? 'vs-dark' : 'vs-light'}
           options={{
             minimap: { enabled: false },

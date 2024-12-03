@@ -20,10 +20,6 @@ export const LatencyPolicyEditor: React.FC<LatencyPolicyEditorProps> = ({
 
   return (
     <div className="policy-editor">
-      <p className="policy-description">
-        Sample traces based on their latency. Traces with latency between the lower and upper thresholds will be sampled.
-      </p>
-      
       <Input
         label="Lower Threshold (ms)"
         type="number"

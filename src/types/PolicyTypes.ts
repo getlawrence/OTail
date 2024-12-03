@@ -1,3 +1,5 @@
+import { StatusCode } from "./TraceTypes";
+
 export type PolicyType = 
   | 'numeric_attribute'
   | 'probabilistic'
@@ -41,7 +43,7 @@ export interface RateLimitingPolicy extends BasePolicy {
 
 export interface StatusCodePolicy extends BasePolicy {
   type: 'status_code';
-  statusCodes: string[];
+  statusCodes: StatusCode[];
 }
 
 export interface StringAttributePolicy extends BasePolicy {

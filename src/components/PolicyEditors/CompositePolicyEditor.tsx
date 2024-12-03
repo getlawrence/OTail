@@ -3,7 +3,7 @@ import { CompositePolicy, Policy, PolicyType } from '../../types/PolicyTypes';
 import { PolicyCard } from '../PolicyCard/PolicyCard';
 import { Input } from '../common/Input';
 import { createNewPolicy } from '../../utils/policyUtils';
-import './CompositePolicyEditor.css';
+import { SubPolicySelect } from '../common/SubPolicySelect';
 
 export const CompositePolicyEditor: React.FC<{
   policy: CompositePolicy;
@@ -40,7 +40,7 @@ export const CompositePolicyEditor: React.FC<{
     onUpdate({
       ...policy,
       subPolicies: newPolicies,
-      policyOrder: (policy.policyOrder || []).map(name => 
+      policyOrder: (policy.policyOrder || []).map(name =>
         name === oldName ? updatedPolicy.name : name
       )
     });
@@ -75,7 +75,6 @@ export const CompositePolicyEditor: React.FC<{
       <div className="config-section">
         <h3>Sub Policies</h3>
         <div className="policy-order-info">
-          <i className="info-icon">ℹ️</i>
           <span>Use the arrows to change policy execution order</span>
         </div>
 
@@ -113,27 +112,7 @@ export const CompositePolicyEditor: React.FC<{
             </div>
           ))}
         </div>
-
-        <select
-          onChange={(e) => {
-            if (e.target.value) {
-              handleAddSubPolicy(e.target.value as PolicyType);
-              e.target.value = '';
-            }
-          }}
-          value=""
-          className="form-input add-policy-select"
-        >
-          <option value="">Add Sub Policy...</option>
-          <option value="numeric_attribute">Numeric Attribute</option>
-          <option value="probabilistic">Probabilistic</option>
-          <option value="rate_limiting">Rate Limiting</option>
-          <option value="status_code">Status Code</option>
-          <option value="string_attribute">String Attribute</option>
-          <option value="latency">Latency</option>
-          <option value="always_sample">Always Sample</option>
-          <option value="boolean_attribute">Boolean Attribute</option>
-        </select>
+        <SubPolicySelect onSelect={handleAddSubPolicy} />
       </div>
     </div>
   );
