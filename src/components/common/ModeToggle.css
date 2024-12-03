@@ -1,0 +1,55 @@
+.mode-toggle-container {
+    display: inline-flex;
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+}
+
+.mode-toggle-switch {
+    position: relative;
+    display: flex;
+    width: 8rem;
+    height: 2rem;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.mode-toggle-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background-color: #3b82f6;
+    transition: transform 0.3s ease-in-out;
+}
+
+.mode-toggle-background.test-mode {
+    transform: translateX(100%);
+}
+
+.mode-toggle-label {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.mode-toggle-label.edit-label {
+    left: 0;
+}
+
+.mode-toggle-label.test-label {
+    right: 0;
+}
+
+.mode-toggle-label.active {
+    color: var(--text-primary);
+}
+
+.mode-toggle-label.inactive {
+    color: var(--text-secondary);
+}

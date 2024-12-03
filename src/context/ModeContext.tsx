@@ -9,16 +9,7 @@ interface ModeContextType {
 const ModeContext = createContext<ModeContextType | undefined>(undefined);
 
 export const ModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [mode, setMode] = useState<Mode>(() => {
-        const savedMode = localStorage.getItem('mode');
-        return (savedMode as Mode) || 'edit';
-    });
-
-    useEffect(() => {
-        document.documentElement.setAttribute('data-mode', mode);
-        localStorage.setItem('mode', mode);
-    }, [mode]);
-
+    const [mode, setMode] = useState<Mode>('Edit');
     const toggleMode = () => {
         setMode(prev => prev === 'Edit' ? 'Test' : 'Edit');
     };
