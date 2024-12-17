@@ -1,30 +1,25 @@
-import React from 'react';
-import './App.css';
-import { ConfigEditor } from './components/ConfigEditor/ConfigEditor';
-import { RecipesProvider } from './context/RecipesContext';
-import { ThemeProvider } from './context/ThemeContext';
-import { Analytics } from '@vercel/analytics/react';
-import { ModeProvider } from './context/ModeContext';
-import { Nav } from './components/common/Nav';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import Layout from './layout'
+import Sampling from './smapling/page'
+import OtelConfig from './config/page'
+import Agents from './agents/page'
+import { ThemeProvider } from "@/hooks/use-theme"
 
 function App() {
   return (
-    <ThemeProvider>
-      <ModeProvider>
-        <RecipesProvider>
-          <div className="App">
-            <header className="App-header">
-              <Nav />
-            </header>
-            <main>
-              <ConfigEditor />
-            </main>
-            <Analytics />
-          </div>
-        </RecipesProvider>
-      </ModeProvider>
+    <ThemeProvider defaultTheme="system">
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/sampling" element={<Sampling />} />
+            <Route path="/otel-config" element={<OtelConfig />} />
+            <Route path="/agents" element={<Agents />} />
+            <Route path="/" element={<Navigate to="/sampling" replace />} />
+          </Routes>
+        </Layout>
+      </Router>
     </ThemeProvider>
-  );
+  )
 }
 
-export default App;
+export default App
