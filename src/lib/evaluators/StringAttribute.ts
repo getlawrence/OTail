@@ -19,7 +19,7 @@ export class StringAttributeEvaluator extends BasePolicyEvaluator {
         key: string,
         values: string[],
         regexMatchEnabled: boolean,
-        evictSize: number = DEFAULT_CACHE_SIZE,
+        _evictSize: number = DEFAULT_CACHE_SIZE,
         invertMatch: boolean = false
     ) {
         super(name)
