@@ -61,7 +61,7 @@ func (s *Server) Start() error {
 				},
 			},
 		},
-		ListenEndpoint: "127.0.0.1:4320",
+		ListenEndpoint: ":4320",
 		HTTPMiddleware: otelhttp.NewMiddleware("/v1/opamp"),
 	}
 

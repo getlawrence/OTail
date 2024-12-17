@@ -1,0 +1,17 @@
+server:
+  endpoint: ws://backend:4320/v1/opamp  # Changed from wss to ws since we're in development
+  tls:
+    insecure: true
+
+capabilities:
+  reports_effective_config: true
+  reports_own_metrics: true
+  reports_health: true
+  accepts_remote_config: true
+  reports_remote_config: true
+
+agent:
+  executable: /otelcol-contrib
+
+storage:
+  directory: /var/lib/opamp

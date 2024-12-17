@@ -3,7 +3,8 @@ import { Agent, columns } from "./columns"
 import { DataTable } from "./data-table"
 
 async function getData(): Promise<Agent[]> {
-    const response = await fetch('http://localhost:8080/api/v1/agents');
+    const baseUrl = process.env.VITE_API_BASE_URL;
+    const response = await fetch(`${baseUrl}/api/v1/agents`);
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }

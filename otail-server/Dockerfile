@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.21-alpine AS builder
+FROM golang:1.22.0-alpine AS builder
 
 WORKDIR /app
 
@@ -23,8 +23,12 @@ WORKDIR /app
 # Copy binary from builder
 COPY --from=builder /app/main .
 
+# Create source directory for development mounting
+RUN mkdir -p /src
+
 # Expose port
 EXPOSE 8080
+EXPOSE 4320
 
 # Run the application
 CMD ["./main"]

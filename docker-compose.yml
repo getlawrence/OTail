@@ -1,36 +1,48 @@
 version: '3.8'
 
 services:
+  frontend:
+    build:
+      context: ./otail
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - otail-network
   backend:
     build:
       context: ./otail-server
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+      - "4320:4320"  # OpAMP WebSocket endpoint
     environment:
       - GO_ENV=development
     volumes:
-      - ./otail-server:/app
+      - ./otail-server:/src  # Mount source code to /src instead of /app
     networks:
       - otail-network
 
-  frontend:
+  opampsupervisor:
     build:
-      context: ./frontend
+      context: ./opampsupervisor
       dockerfile: Dockerfile
-    ports:
-      - "5173:5173"
     environment:
-      - NODE_ENV=development
-      - VITE_API_URL=http://backend:8080
+      - OPAMP_SERVER_URL=http://backend:4320
+    ports:
+      - "4317:4317"  # OTLP gRPC
+      - "4318:4318"  # OTLP HTTP
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    depends_on:
-      - backend
+      - ./opampsupervisor/data:/var/lib/opamp
+      - opamp-storage:/var/lib/opamp
     networks:
       - otail-network
+    depends_on:
+      - backend
 
 networks:
   otail-network:
     driver: bridge
+
+volumes:
+  opamp-storage:
