@@ -21,8 +21,9 @@ import { useState } from "react"
 import OtelConfig from "@/config/page"
 
 export type Agent = {
-    id: string
-    status: "pending" | "processing" | "success" | "failed"
+    id: string;
+    status: "pending" | "processing" | "success" | "failed";
+    EffectiveConfig: string;
 }
 
 export type Agents = {

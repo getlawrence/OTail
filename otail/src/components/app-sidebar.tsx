@@ -28,6 +28,11 @@ const items = [
     url: "/otel-config",
     icon: Settings,
   },
+  {
+    title: "config2",
+    url: "/otel-config2",
+    icon: Settings,
+  },
 ]
 
 export function AppSidebar() {
