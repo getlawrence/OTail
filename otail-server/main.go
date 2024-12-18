@@ -14,6 +14,25 @@ import (
 	"go.uber.org/zap"
 )
 
+// Add this middleware function
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
@@ -39,10 +58,13 @@ func main() {
 	apiHandler := api.NewHandler(logger, samplingService)
 	apiHandler.SetupRoutes(router)
 
-	// Create HTTP server
+	// Apply CORS middleware
+	corsRouter := corsMiddleware(router)
+
+	// Create HTTP server with CORS middleware
 	httpServer := &http.Server{
 		Addr:    ":8080",
-		Handler: router,
+		Handler: corsRouter,
 	}
 
 	// Start the OPAmp server

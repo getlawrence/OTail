@@ -1,21 +1,28 @@
-import { useEffect, useState } from "react"
-import { Agent, columns } from "./columns"
+import React, { useEffect, useState } from "react"
+import { Agents, Agent, columns } from "./columns"
 import { DataTable } from "./data-table"
 
-async function getData(): Promise<Agent[]> {
-    const baseUrl = process.env.VITE_API_BASE_URL;
-    const response = await fetch(`${baseUrl}/api/v1/agents`);
+async function getData(): Promise<Agents> {
+    const baseUrl = 'http://localhost:8080'
+    const response = await fetch(`${baseUrl}/api/v1/agents`, {
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
     if (!response.ok) {
         throw new Error('Network response was not ok');
     }
     return response.json();
 }
 
-const Agents = () => {
+const AgentsPage = () => {
     const [data, setData] = useState<Agent[]>([])
 
     useEffect(() => {
-        getData().then(setData)
+        getData().then(data => {
+            setData(Object.values(data))
+        })
     }, [])
 
     return (
@@ -25,4 +32,4 @@ const Agents = () => {
     )
 }
 
-export default Agents
+export default AgentsPage

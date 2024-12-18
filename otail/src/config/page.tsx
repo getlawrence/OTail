@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FC} from 'react';
 import Editor from '@monaco-editor/react';
 import OtelConfigVisualizer from '../components/OtelConfigVisualizer';
 
@@ -28,8 +28,8 @@ service:
       processors: [batch]
       exporters: [otlp]`;
 
-const OtelConfig = () => {
-  const [yamlConfig, setYamlConfig] = useState(defaultConfig);
+const OtelConfig: FC<{config?: string}> = ({config}) => {
+  const [yamlConfig, setYamlConfig] = useState(config ?? defaultConfig);
 
   return (
     <div className="flex flex-col h-full gap-4 p-4">

@@ -7,6 +7,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    volumes:
+      - ./otail:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
     networks:
       - otail-network
   backend:
