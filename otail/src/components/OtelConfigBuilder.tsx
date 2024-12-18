@@ -444,9 +444,6 @@ const OtelConfigBuilder = ({ onChange }: OtelConfigBuilderProps) => {
               top: 0,
               background: 'rgba(52, 152, 219, 0.05)', // Light blue tint
             }}>
-            <div style={sectionStyles.sectionTitle}>
-              Traces Pipeline
-            </div>
           </div>
 
           {/* Metrics Section */}
@@ -456,9 +453,6 @@ const OtelConfigBuilder = ({ onChange }: OtelConfigBuilderProps) => {
               top: `${LAYOUT_CONFIG.SECTION_HEIGHT / 3}px`,
               background: 'rgba(46, 204, 113, 0.05)', // Light green tint
             }}>
-            <div style={sectionStyles.sectionTitle}>
-              Metrics Pipeline
-            </div>
           </div>
 
           {/* Logs Section */}
@@ -468,9 +462,6 @@ const OtelConfigBuilder = ({ onChange }: OtelConfigBuilderProps) => {
               top: `${LAYOUT_CONFIG.SECTION_HEIGHT * 2 / 3}px`,
               background: 'rgba(155, 89, 182, 0.05)', // Light purple tint
             }}>
-            <div style={sectionStyles.sectionTitle}>
-              Logs Pipeline
-            </div>
           </div>
 
           {/* Section Labels */}
