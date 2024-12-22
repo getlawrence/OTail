@@ -1,4 +1,4 @@
-import { Home, Settings, PersonStanding } from "lucide-react"
+import { Home, Settings, Telescope } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import {
   Sidebar,
@@ -21,7 +21,7 @@ const items = [
   {
     title: "Agents",
     url: "/agents",
-    icon: PersonStanding,
+    icon: Telescope,
   },
   {
     title: "config",
