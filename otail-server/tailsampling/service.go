@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/mottibec/otail-server/opamp"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 )
 
 // Service handles tail sampling specific operations
@@ -24,25 +25,32 @@ func NewService(logger *zap.Logger, opampServer *opamp.Server) *Service {
 }
 
 // GetConfig retrieves the tail sampling configuration for a specific agent
-func (s *Service) GetConfig(agentID uuid.UUID) (map[string]interface{}, error) {
+func (s *Service) GetConfig(agentID uuid.UUID) (string, error) {
 	config, err := s.opampServer.GetEffectiveConfig(agentID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get tail sampling config: %w", err)
+		return "", fmt.Errorf("failed to get tail sampling config: %w", err)
 	}
-
-	// Parse the config string into a map
 	var configMap map[string]interface{}
-	if err := json.Unmarshal([]byte(config), &configMap); err != nil {
-		return nil, fmt.Errorf("failed to parse tail sampling config: %w", err)
+	if err := yaml.Unmarshal([]byte(config), &configMap); err != nil {
+		return "", fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
-	// Extract only the tail sampling related configuration
-	// You might want to modify this based on your specific config structure
-	if samplingConfig, ok := configMap["service"].(map[string]interface{})["sampling"]; ok {
-		return map[string]interface{}{"sampling": samplingConfig}, nil
+	processors, ok := configMap["processors"].(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("processors is not a map[string]interface{}")
 	}
 
-	return make(map[string]interface{}), nil
+	tailSampling, ok := processors["tail_sampling"].(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("tail_sampling is not a map[string]interface{}")
+	}
+
+	tailSamplingConfig, err := json.Marshal(tailSampling)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal tail sampling config: %w", err)
+	}
+
+	return string(tailSamplingConfig), nil
 }
 
 // UpdateConfig updates the tail sampling configuration for a specific agent
@@ -68,9 +76,28 @@ func (s *Service) UpdateConfig(agentID uuid.UUID, config map[string]interface{})
 		fullConfig["service"] = make(map[string]interface{})
 	}
 
-	// Update only the sampling section
+	// Ensure processors section exists
 	serviceConfig := fullConfig["service"].(map[string]interface{})
-	serviceConfig["sampling"] = config["sampling"]
+	if _, ok := serviceConfig["processors"]; !ok {
+		serviceConfig["processors"] = make(map[string]interface{})
+	}
+
+	// Ensure traces section exists
+	if _, ok := serviceConfig["pipelines"]; !ok {
+		serviceConfig["pipelines"] = make(map[string]interface{})
+	}
+
+	// Update the tail_sampling processor
+	tracesConfig := serviceConfig["pipelines"].(map[string]interface{})
+	tracesConfig["traces"] = map[string]interface{}{
+		"processors": []interface{}{
+			"tail_sampling",
+		},
+	}
+
+	// Update the tail_sampling processor
+	processorsConfig := serviceConfig["processors"].(map[string]interface{})
+	processorsConfig["tail_sampling"] = config["tail_sampling"]
 
 	// Update the config through OpAMP server
 	if err := s.opampServer.UpdateConfig(agentID, fullConfig); err != nil {

@@ -2,24 +2,24 @@ import { Node } from 'reactflow';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useState } from 'react';
 import { Input } from './ui/input';
-import {Button} from './ui/button';
+import { Button } from './ui/button';
 
 interface ComponentConfigDialogProps {
   node: Node;
   onClose: () => void;
-  onUpdate: (config: any) => void;
+  onConfigUpdate: (nodeId: string, config: any) => void;
 }
 
 export const ComponentConfigDialog = ({
   node,
   onClose,
-  onUpdate
+  onConfigUpdate
 }: ComponentConfigDialogProps) => {
   const [config, setConfig] = useState(node.data.config);
   const [pipelineName, setPipelineName] = useState(node.data.pipelineName || 'default');
 
   const handleSave = () => {
-    onUpdate({ ...config, pipelineName });
+    onConfigUpdate(node.id, { ...config, pipelineName });
     onClose();
   };
 

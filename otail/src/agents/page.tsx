@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Agents, Agent, columns } from "./columns"
 import { DataTable } from "./data-table"
 

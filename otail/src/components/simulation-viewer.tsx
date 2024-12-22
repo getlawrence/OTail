@@ -23,7 +23,9 @@ export const SimulationViewer: FC<SimulationViewerProps> = ({
   return (
     <div className="flex flex-col h-full">
       <div className="rounded-lg p-5 shadow-custom h-[calc(100vh-240px)] lg:h-[300px] md:h-[250px] md:p-3 w-full max-w-5xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">Decision: {Decision[finalDecision]} </h2>
+        <h2 className="text-2xl font-bold mb-4">Decision:  <span className={finalDecision == Decision.Sampled ? 'text-green-500' : 'text-destructive'}>
+          {Decision[finalDecision]}
+        </span></h2>
         <Editor
           className='p-2 rounded-md bg-bg-secondary'
           height="100%"

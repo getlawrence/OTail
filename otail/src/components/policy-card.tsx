@@ -66,7 +66,7 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemo
   const samplingDecisionClass = samplingDecision === undefined 
     ? ''
     : samplingDecision === Decision.Sampled 
-      ? 'border-success' 
+      ? 'border-green-500	' 
       : 'border-destructive';
 
   return (

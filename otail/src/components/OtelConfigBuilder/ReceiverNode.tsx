@@ -1,12 +1,12 @@
 import { Handle, Position } from 'reactflow';
-import { Card, CardContent } from './ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
-interface ExporterNodeProps {
-  data: { label: string; config: any };
-  handleStyle: React.CSSProperties;
+interface ReceiverNodeProps {
+  data: any;
+  handleStyle?: React.CSSProperties;
 }
 
-const ExporterNode = ({ data, handleStyle }: ExporterNodeProps) => {
+const ReceiverNode = ({ data, handleStyle }: ReceiverNodeProps) => {
   return (
     <Card className="min-w-40">
       <CardContent className="p-3">
@@ -18,15 +18,15 @@ const ExporterNode = ({ data, handleStyle }: ExporterNodeProps) => {
         )}
       </CardContent>
       <Handle
-        type="target"
-        position={Position.Left}
+        type="source"
+        position={Position.Right}
         style={{
           ...handleStyle,
-          left: '-6px',
+          right: '-6px',
         }}
       />
     </Card>
   );
 };
 
-export default ExporterNode;
+export default ReceiverNode;

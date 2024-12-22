@@ -22,4 +22,5 @@ require (
 	go.opentelemetry.io/otel/metric v1.32.0 // indirect
 	go.opentelemetry.io/otel/trace v1.32.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
