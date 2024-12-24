@@ -10,19 +10,17 @@ OTail is a user-friendly web interface for creating and managing OpenTelemetry t
 
 - **Visual Policy Configuration**: Easily create and manage sampling policies through an intuitive UI
 - **Real-time YAML Preview**: See the generated YAML configuration update in real-time
-- **Multiple Policy Types Support**:
-  - Probabilistic Sampling
-  - Rate Limiting
-  - Status Code Based
-  - String Attribute
-  - Numeric Attribute
-  - Latency Based
-  - Always Sample
-  - Boolean Attribute
-  - Composite (AND/OR)
-  - OTTL Condition
-  - Span Count
-  - Trace State
+- **View Agent Effective Config**: View the effective configuration of the agent, including the generated YAML configuration
+- **Send Updated Config To Agent**: Send the updated YAML configuration to the agent
+- **Dark Mode Toggle**: Switch between light and dark themes
+- **Configuration Validation**: Validate sampling policy configurations before applying
+- **Export Configuration**: Export current configuration as a downloadable YAML file
+
+## Local Setup
+
+1. Clone the repository: `git clone https://github.com/your-username/otail.git`
+2. Start docker compose: `docker compose up`
+3. Open your browser and navigate to http://localhost:3000
 
 ## Contributing
 
