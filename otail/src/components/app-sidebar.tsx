@@ -12,23 +12,32 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const items = [
-  {
-    title: "Home",
-    url: "/sampling",
-    icon: Home,
-  },
-  {
-    title: "Agents",
-    url: "/agents",
-    icon: Telescope,
-  },
-  {
-    title: "config",
-    url: "/otel-config",
-    icon: Settings,
-  }
-]
+//hide items if VITE_SHOW_SIDEBAR=false in .env 
+const items = import.meta.env.VITE_SHOW_SIDEBAR === 'true'
+  ? [
+    {
+      title: "Home",
+      url: "/sampling",
+      icon: Home,
+    },
+    {
+      title: "Agents",
+      url: "/agents",
+      icon: Telescope,
+    },
+    {
+      title: "config",
+      url: "/otel-config",
+      icon: Settings,
+    },
+  ]
+  : [
+    {
+      title: "Home",
+      url: "/sampling",
+      icon: Home,
+    },
+  ];
 
 export function AppSidebar() {
   return (

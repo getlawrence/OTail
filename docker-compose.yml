@@ -12,6 +12,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - VITE_SHOW_SIDEBAR=true
     networks:
       - otail-network
   backend:
