@@ -132,4 +132,4 @@ dist
 effective.yaml
 agent.log
 *.dat
-
+.DS_Store
