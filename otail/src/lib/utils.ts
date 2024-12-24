@@ -5,10 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Type for debounced function that includes cancel method
+type DebouncedFunction<T extends (...args: any[]) => any> = {
+  (...args: Parameters<T>): void;
+  cancel: () => void;
+};
+
 export function createDebounce<T extends (...args: any[]) => any>(
   fn: T, 
   waitMs: number
-): (...args: Parameters<T>) => void {
+): DebouncedFunction<T> {
   let timeoutId: NodeJS.Timeout | null = null;
   let lastArgs: Parameters<T> | null = null;
 

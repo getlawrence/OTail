@@ -207,7 +207,7 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
     setNodes(nds => nds.concat(newNode));
   }, [nodes, setNodes, determineSection, generateUniquePipelineName]);
 
-  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+  const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
   }, []);
 

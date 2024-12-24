@@ -125,13 +125,15 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       pipelineNodes.forEach(node => {
         if (!node.type) return;
 
-        const componentType = `${node.type}s` as keyof OtelConfig;
+        const componentType = `${node.type}s` as 'receivers' | 'processors' | 'exporters';
         const pipelineArrayKey = nodeTypeToPipelineType(node.type);
         const pipelineArray = config.service.pipelines[fullPipelineKey][pipelineArrayKey];
 
         // Add component config if it doesn't exist
-        if (!config[componentType][node.data.label]) {
-          config[componentType][node.data.label] = node.data.config || {};
+        if (componentType in config) {
+          if (!config[componentType][node.data.label]) {
+            config[componentType][node.data.label] = node.data.config || {};
+          }
         }
 
         // Add component to pipeline if it's not already there

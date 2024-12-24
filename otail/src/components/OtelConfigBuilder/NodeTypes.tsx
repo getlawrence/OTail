@@ -1,4 +1,3 @@
-import React from 'react';
 import { styles } from './styles';
 import ReceiverNode from './ReceiverNode';
 import ProcessorNode from './ProcessorNode';
