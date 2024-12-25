@@ -4,6 +4,10 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card } from '../ui/card';
 import { Slider } from '../ui/slider';
+import { Combobox } from '../ui/combobox';
+import { getOtelAttributes } from '@/utils/otel-attributes';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
 
 interface NumericTagPolicyEditorProps {
   policy: NumericTagPolicy;
@@ -21,15 +25,29 @@ export const NumericTagPolicyEditor: React.FC<NumericTagPolicyEditorProps> = ({
     });
   };
 
+  const otelAttributes = React.useMemo(() => getOtelAttributes(), []);
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="key">Attribute Key</Label>
-        <Input
+        <div className="flex items-center gap-2">
+          <Label htmlFor="key">Attribute Key</Label>
+          <Tooltip>
+            <TooltipTrigger>
+              <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Select from standard OpenTelemetry attributes or enter a custom key</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <Combobox
           id="key"
           value={policy.key}
-          onChange={(e) => handleChange('key', e.target.value)}
-          placeholder="Enter attribute key"
+          onChange={(value) => handleChange('key', value)}
+          options={otelAttributes}
+          placeholder="Select or type an attribute key"
+          allowCustomValue
         />
       </div>
       
