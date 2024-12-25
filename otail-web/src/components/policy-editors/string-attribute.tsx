@@ -5,6 +5,8 @@ import { Label } from '../ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
 import { Switch } from '../ui/switch';
+import { Combobox } from '../ui/combobox';
+import { getOtelAttributes } from '@/utils/otel-attributes';
 
 interface StringAttributePolicyEditorProps {
   policy: StringAttributePolicy;
@@ -22,6 +24,8 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
     onUpdate({ ...policy, [field]: value });
   };
 
+  const otelAttributes = React.useMemo(() => getOtelAttributes(), []);
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -32,16 +36,17 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
               <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
             </TooltipTrigger>
             <TooltipContent>
-              <p>The key of the attribute to match against (e.g., http.method, user.id)</p>
+              <p>Select from standard OpenTelemetry attributes or enter a custom key</p>
             </TooltipContent>
           </Tooltip>
         </div>
-        <Input
+        <Combobox
           id="attributeKey"
           value={policy.key}
-          onChange={(e) => updateField('key', e.target.value)}
-          placeholder="e.g., http.method, user.id"
-          className="w-full"
+          onChange={(value) => updateField('key', value)}
+          options={otelAttributes}
+          placeholder="Select or type an attribute key"
+          allowCustomValue
         />
       </div>
 

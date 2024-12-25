@@ -1,8 +1,11 @@
 import React from 'react';
-import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Select,  SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { BooleanTagPolicy } from '@/types/policy';
+import { Combobox } from '../ui/combobox';
+import { getOtelAttributes } from '@/utils/otel-attributes';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
 
 interface BooleanTagPolicyEditorProps {
   policy: BooleanTagPolicy;
@@ -13,19 +16,33 @@ export const BooleanTagPolicyEditor: React.FC<BooleanTagPolicyEditorProps> = ({
   policy,
   onUpdate,
 }) => {
+  const otelAttributes = React.useMemo(() => getOtelAttributes(), []);
+
   return (
     <div className="policy-editor">
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="key">Attribute Key</Label>
-          <Input
+          <div className="flex items-center gap-2">
+            <Label htmlFor="key">Attribute Key</Label>
+            <Tooltip>
+              <TooltipTrigger>
+                <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Select from standard OpenTelemetry attributes or enter a custom key</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <Combobox
             id="key"
             value={policy.key}
-            onChange={(e) => onUpdate({
+            onChange={(value) => onUpdate({
               ...policy,
-              key: e.target.value
+              key: value
             })}
-            placeholder="Enter attribute key"
+            options={otelAttributes}
+            placeholder="Select or type an attribute key"
+            allowCustomValue
           />
         </div>
         <div className="space-y-2">
