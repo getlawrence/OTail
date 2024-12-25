@@ -2,6 +2,7 @@ package opamp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -100,23 +101,19 @@ func (s *Server) GetEffectiveConfig(agentId uuid.UUID) (string, error) {
 	return "", fmt.Errorf("agent %s not found", agentId)
 }
 
-func (s *Server) UpdateConfig(agentId uuid.UUID, config map[string]interface{}) error {
+func (s *Server) UpdateConfig(agentId uuid.UUID, config map[string]interface{}, notifyNextStatusUpdate chan<- struct{}) error {
+	configByte, err := json.Marshal(config)
+	if err != nil {
+		return err
+	}
+
 	configMap := &protobufs.AgentConfigMap{
-		ConfigMap: make(map[string]*protobufs.AgentConfigFile),
+		ConfigMap: map[string]*protobufs.AgentConfigFile{
+			"": {Body: configByte},
+		},
 	}
 
-	for key, value := range config {
-		strValue, ok := value.(string)
-		if !ok {
-			strValue = fmt.Sprintf("%v", value)
-		}
-
-		configMap.ConfigMap[key] = &protobufs.AgentConfigFile{
-			Body: []byte(strValue),
-		}
-	}
-
-	s.agents.SetCustomConfigForAgent(agentId, configMap, nil)
+	s.agents.SetCustomConfigForAgent(agentId, configMap, notifyNextStatusUpdate)
 	return nil
 }
 
