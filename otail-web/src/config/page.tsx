@@ -6,9 +6,10 @@ import { createDebounce } from '@/lib/utils'; // Import our custom debounce
 
 interface ConfigPageProps {
   config?: string;
+  onUpdate?: (value: string) => void
 }
 
-export default function ConfigPage({ config }: ConfigPageProps) {
+export default function ConfigPage({ config, onUpdate }: ConfigPageProps) {
   const [yaml, setYaml] = useState<string>(() => config || '');
   const [viewYaml, setViewYaml] = useState(true);
   const [editorValue, setEditorValue] = useState(yaml);
@@ -55,6 +56,7 @@ export default function ConfigPage({ config }: ConfigPageProps) {
         <Button onClick={() => setViewYaml(!viewYaml)} className="text-sm">
           Toggle YAML View
         </Button>
+        { config && <Button onClick={() => onUpdate?.(editorValue)}> Save </Button>}
       </div>
       <div className={`grid ${viewYaml ? 'grid-cols-1' : 'grid-cols-2'} gap-4 flex-grow`}>
         <OtelConfigBuilder

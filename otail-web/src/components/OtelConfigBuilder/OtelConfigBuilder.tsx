@@ -12,8 +12,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import { Sidebar } from './OtelConfigBuilderSidebar';
-import { ComponentConfigDialog } from '../ComponentConfigDialog';
+import { Sidebar } from './Sidebar';
+import { ComponentConfigDialog } from './ComponentConfigDialog';
 import { load } from 'js-yaml';
 import { nodeTypes } from './NodeTypes';
 import { FlowSection } from './FlowSection';
@@ -99,8 +99,6 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
           newEdges.push(...createEdges(receiverNodes, exporterNodes))
         }
       });
-      console.log('Nodes:', newNodes);
-      console.log('Edges:', newEdges);
       setNodes(newNodes);
       setEdges(newEdges);
     } catch (error) {

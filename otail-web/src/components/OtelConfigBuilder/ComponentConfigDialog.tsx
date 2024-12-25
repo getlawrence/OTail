@@ -1,8 +1,10 @@
 import { Node } from 'reactflow';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { useState } from 'react';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { PolicyBuilder } from '../policy-builder';
+import { useConfigState } from '@/hooks/use-config';
 
 interface ComponentConfigDialogProps {
   node: Node;
@@ -15,14 +17,23 @@ export const ComponentConfigDialog = ({
   onClose,
   onConfigUpdate
 }: ComponentConfigDialogProps) => {
+  const {
+    state,
+    handleAddPolicy,
+    handleUpdatePolicy,
+    handleRemovePolicy,
+  } = useConfigState(node.data.config.policies);
+
   const [config, setConfig] = useState(node.data.config);
   const [pipelineName, setPipelineName] = useState(node.data.pipelineName || 'default');
 
   const handleSave = () => {
-    onConfigUpdate(node.id, { ...config, pipelineName });
+    console.log('Saving config:', { ...config, pipelineName, policies: state.config.policies });
+    onConfigUpdate(node.id, { ...config, pipelineName, policies: state.config.policies });
     onClose();
   };
 
+  const processorType = node.data.label;
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent>
@@ -49,6 +60,11 @@ export const ComponentConfigDialog = ({
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
           </div>
+          {processorType === "tail_sampling" && <PolicyBuilder
+            policies={state.config.policies}
+            addPolicy={handleAddPolicy}
+            updatePolicy={handleUpdatePolicy}
+            removePolicy={handleRemovePolicy} />}
         </div>
         <div className="flex justify-end space-x-2">
           <Button variant="outline" onClick={onClose}>Cancel</Button>

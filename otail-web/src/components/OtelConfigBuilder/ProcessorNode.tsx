@@ -13,7 +13,7 @@ const ProcessorNode = ({ data, handleStyle }: ProcessorNodeProps) => {
         <div className="font-medium text-sm">{data.label}</div>
         {Object.entries(data.config || {}).map(([key, value]) => (
           <div key={key} className="text-xs text-muted-foreground mt-1">
-            {key}: {value as string}
+            {key}: {Array.isArray(value) ? value.length : value as string}
           </div>
         ))}
       </CardContent>

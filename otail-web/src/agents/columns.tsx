@@ -73,7 +73,7 @@ export const columns: ColumnDef<Agent>[] = [
                                 <DialogTitle>Agent Configuration</DialogTitle>
                             </DialogHeader>
                             <div className="h-[80vh] overflow-auto">
-                                <OtelConfig config={agent.EffectiveConfig} />
+                                <OtelConfig config={agent.EffectiveConfig} onUpdate={(_value: string) => setConfigOpen(false)} />
                             </div>
                         </DialogContent>
                     </Dialog>
