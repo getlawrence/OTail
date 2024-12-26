@@ -1,5 +1,5 @@
 export type Agent = {
-    id: string;
+    InstanceId: string;
     status: "pending" | "processing" | "success" | "failed";
     EffectiveConfig: string;
 }
