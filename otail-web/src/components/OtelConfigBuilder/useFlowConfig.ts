@@ -1,21 +1,7 @@
 import { useCallback } from 'react';
 import { Node, Edge } from 'reactflow';
 import { dump } from 'js-yaml';
-import { OtelConfig, PipelineConfig } from './types';
-
-// Helper to convert node type to pipeline config key
-const nodeTypeToPipelineType = (type: string | undefined): keyof PipelineConfig => {
-  switch (type) {
-    case 'exporter':
-      return 'exporters';
-    case 'processor':
-      return 'processors';
-    case 'receiver':
-      return 'receivers';
-    default:
-      throw new Error(`Invalid node type: ${type}`);
-  }
-};
+import { OtelConfig } from './types';
 
 // Helper to create a graph representation for finding connected components
 const createAdjacencyList = (nodes: Node[], edges: Edge[]) => {
@@ -42,6 +28,7 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       receivers: {},
       processors: {},
       exporters: {},
+      connectors: {},
       service: {
         pipelines: {}
       }
@@ -126,7 +113,7 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
         if (!node.type) return;
 
         const componentType = `${node.type}s` as 'receivers' | 'processors' | 'exporters';
-        const pipelineArrayKey = nodeTypeToPipelineType(node.type);
+        const pipelineArrayKey = componentType;
         const pipelineArray = config.service.pipelines[fullPipelineKey][pipelineArrayKey];
 
         // Add component config if it doesn't exist

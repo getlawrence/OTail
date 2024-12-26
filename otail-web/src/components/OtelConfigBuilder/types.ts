@@ -24,10 +24,15 @@ export interface ExporterConfig {
   [key: string]: any;
 }
 
+export interface ConnectorConfig {
+  [key: string]: any;
+}
+
 export interface OtelConfig {
   receivers: Record<string, ReceiverConfig>;
   processors: Record<string, ProcessorConfig>;
   exporters: Record<string, ExporterConfig>;
+  connectors: Record<string, ConnectorConfig>;
   service: ServiceConfig;
 }
 
