@@ -28,8 +28,11 @@ export const ComponentConfigDialog = ({
   const [pipelineName, setPipelineName] = useState(node.data.pipelineName || 'default');
 
   const handleSave = () => {
-    console.log('Saving config:', { ...config, pipelineName, policies: state.config.policies });
-    onConfigUpdate(node.id, { ...config, pipelineName, policies: state.config.policies });
+    const updatedConfig = { ...config };
+    if (processorType === 'tail_sampling') {
+      updatedConfig.policies = state.config.policies;
+    }
+    onConfigUpdate(node.id, updatedConfig);
     onClose();
   };
 

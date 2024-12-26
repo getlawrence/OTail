@@ -39,8 +39,7 @@ services:
       - "4317:4317"  # OTLP gRPC
       - "4318:4318"  # OTLP HTTP
     volumes:
-      - ./opampsupervisor/data:/var/lib/opamp
-      - opamp-storage:/var/lib/opamp
+      - ./opampsupervisor/storage:/var/lib/opamp
     networks:
       - otail-network
     depends_on:

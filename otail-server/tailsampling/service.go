@@ -56,49 +56,8 @@ func (s *Service) GetConfig(agentID uuid.UUID) (string, error) {
 
 // UpdateConfig updates the tail sampling configuration for a specific agent
 func (s *Service) UpdateConfig(agentID uuid.UUID, config map[string]interface{}) error {
-
-	// Get the current config to merge with
-	currentConfig, err := s.opampServer.GetEffectiveConfig(agentID)
-	if err != nil {
-		return fmt.Errorf("failed to get current config: %w", err)
-	}
-
-	var fullConfig map[string]interface{}
-	if err := json.Unmarshal([]byte(currentConfig), &fullConfig); err != nil {
-		fullConfig = make(map[string]interface{})
-	}
-
-	// Ensure service section exists
-	if _, ok := fullConfig["service"]; !ok {
-		fullConfig["service"] = make(map[string]interface{})
-	}
-
-	// Ensure processors section exists
-	serviceConfig := fullConfig["service"].(map[string]interface{})
-	if _, ok := serviceConfig["processors"]; !ok {
-		serviceConfig["processors"] = make(map[string]interface{})
-	}
-
-	// Ensure traces section exists
-	if _, ok := serviceConfig["pipelines"]; !ok {
-		serviceConfig["pipelines"] = make(map[string]interface{})
-	}
-
-	// Update the tail_sampling processor
-	tracesConfig := serviceConfig["pipelines"].(map[string]interface{})
-	tracesConfig["traces"] = map[string]interface{}{
-		"processors": []interface{}{
-			"tail_sampling",
-		},
-	}
-
-	// Update the tail_sampling processor
-	processorsConfig := serviceConfig["processors"].(map[string]interface{})
-	processorsConfig["tail_sampling"] = config["tail_sampling"]
-
-	// Update the config through OpAMP server
 	notifyNextStatusUpdate := make(chan struct{}, 1)
-	if err := s.opampServer.UpdateConfig(agentID, fullConfig, notifyNextStatusUpdate); err != nil {
+	if err := s.opampServer.UpdateConfig(agentID, config, notifyNextStatusUpdate); err != nil {
 		return fmt.Errorf("failed to update tail sampling config: %w", err)
 	}
 	timer := time.NewTicker(time.Second * 5)

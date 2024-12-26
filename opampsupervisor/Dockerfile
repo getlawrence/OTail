@@ -27,7 +27,6 @@ FROM alpine:latest
 # Copy from builder
 COPY --from=builder /build/opampsupervisor .
 COPY --from=builder /build/examples/supervisor_docker.yaml .
-COPY --from=builder /build/effective.yaml .
 
 # Copy from OpenTelemetry
 COPY --from=otel /otelcol-contrib /otelcol-contrib
