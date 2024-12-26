@@ -2,13 +2,15 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import OtelConfigBuilder from '@/components/OtelConfigBuilder/OtelConfigBuilder';
 import Editor, { OnChange } from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
-import { createDebounce } from '@/lib/utils'; // Import our custom debounce
+import { createDebounce } from '@/lib/utils'; 
+import { Eye, EyeOff, Save } from 'lucide-react'; 
 
 interface ConfigPageProps {
   config?: string;
+  onUpdate?: (value: string) => void
 }
 
-export default function ConfigPage({ config }: ConfigPageProps) {
+export default function ConfigPage({ config, onUpdate }: ConfigPageProps) {
   const [yaml, setYaml] = useState<string>(() => config || '');
   const [viewYaml, setViewYaml] = useState(true);
   const [editorValue, setEditorValue] = useState(yaml);
@@ -52,9 +54,24 @@ export default function ConfigPage({ config }: ConfigPageProps) {
     <div className="flex flex-col h-full gap-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Configuration Canvas</h1>
-        <Button onClick={() => setViewYaml(!viewYaml)} className="text-sm">
-          Toggle YAML View
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={() => setViewYaml(!viewYaml)} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            {viewYaml ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            {viewYaml ? 'Show YAML' : 'Hide YAML'}
+          </Button>
+          { config && (
+            <Button 
+              onClick={() => onUpdate?.(editorValue)} 
+              className="flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" /> Save
+            </Button>
+          )}
+        </div>
       </div>
       <div className={`grid ${viewYaml ? 'grid-cols-1' : 'grid-cols-2'} gap-4 flex-grow`}>
         <OtelConfigBuilder

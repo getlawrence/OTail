@@ -19,16 +19,11 @@ import {
 } from "@/components/ui/dialog"
 import { useState } from "react"
 import OtelConfig from "@/config/page"
+import { Agent } from "@/api/types"
+import { updateConfig } from "@/api/agent"
+import { load } from 'js-yaml';
 
-export type Agent = {
-    id: string;
-    status: "pending" | "processing" | "success" | "failed";
-    EffectiveConfig: string;
-}
 
-export type Agents = {
-    [key: string]: Agent
-}
 
 export const columns: ColumnDef<Agent>[] = [
     {
@@ -46,8 +41,12 @@ export const columns: ColumnDef<Agent>[] = [
     {
         id: "actions",
         cell: ({ row }) => {
-            const agent = row.original
-            const [configOpen, setConfigOpen] = useState(false)
+            const agent = row.original;
+            const [configOpen, setConfigOpen] = useState(false);
+            const onUpdate = (value: string) => {
+                updateConfig(agent.InstanceId, JSON.stringify(load(value)));
+                setConfigOpen(false);
+            }
 
             return (
                 <>
@@ -73,7 +72,7 @@ export const columns: ColumnDef<Agent>[] = [
                                 <DialogTitle>Agent Configuration</DialogTitle>
                             </DialogHeader>
                             <div className="h-[80vh] overflow-auto">
-                                <OtelConfig config={agent.EffectiveConfig} />
+                                <OtelConfig config={agent.EffectiveConfig} onUpdate={onUpdate} />
                             </div>
                         </DialogContent>
                     </Dialog>

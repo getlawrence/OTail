@@ -12,10 +12,27 @@ export interface ServiceConfig {
   };
 }
 
+export interface ReceiverConfig {
+  [key: string]: any;
+}
+
+export interface ProcessorConfig {
+  [key: string]: any;
+}
+
+export interface ExporterConfig {
+  [key: string]: any;
+}
+
+export interface ConnectorConfig {
+  [key: string]: any;
+}
+
 export interface OtelConfig {
-  receivers: Record<string, any>;
-  processors: Record<string, any>;
-  exporters: Record<string, any>;
+  receivers: Record<string, ReceiverConfig>;
+  processors: Record<string, ProcessorConfig>;
+  exporters: Record<string, ExporterConfig>;
+  connectors: Record<string, ConnectorConfig>;
   service: ServiceConfig;
 }
 
