@@ -9,6 +9,8 @@ import ReactFlow, {
   Connection,
   Node,
   Edge,
+  useReactFlow,
+  ReactFlowProvider
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -21,12 +23,13 @@ import { useFlowConfig } from './useFlowConfig';
 import { styles, LAYOUT_CONFIG, VALID_CONNECTIONS, PIPELINE_SECTIONS } from './constants';
 import type { OtelConfigBuilderProps, OtelConfig, PipelineType } from './types';
 
-const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initialYaml }) => {
+const OtelConfigBuilderInner: React.FC<OtelConfigBuilderProps> = ({ onChange, initialYaml }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const { generateConfig } = useFlowConfig(nodes, edges, onChange);
-  
+  const { project } = useReactFlow();
+
   const hasParsedYaml = useRef(false); // Keeps track of whether the YAML has been parsed.
 
   const parseInitialYaml = useCallback((yamlString: string) => {
@@ -40,8 +43,8 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
         const [pipelineType, pipelineName] = pipelineKey.split('/');
 
         const createNodes = (
-          components: string[], 
-          type: 'receiver' | 'processor' | 'exporter', 
+          components: string[],
+          type: 'receiver' | 'processor' | 'exporter',
           startX: number,
           y: number
         ) => {
@@ -68,7 +71,7 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
         };
 
         const baseY = Object.keys(PIPELINE_SECTIONS).indexOf(pipelineType) * (LAYOUT_CONFIG.SECTION_HEIGHT / 3) + 50;
-        
+
         // Create nodes for each component type
         const receiverNodes = createNodes(pipeline.receivers, 'receiver', 50, baseY);
         const processorNodes = createNodes(pipeline.processors, 'processor', 300, baseY);
@@ -78,7 +81,7 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
 
         // Create edges between nodes
         const createEdges = (sourceNodes: Node[], targetNodes: Node[]) => {
-          return sourceNodes.flatMap(source => 
+          return sourceNodes.flatMap(source =>
             targetNodes.map(target => ({
               id: `edge-${source.id}-${target.id}`,
               source: source.id,
@@ -95,7 +98,7 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
         if (processorNodes.length && exporterNodes.length) {
           newEdges.push(...createEdges(processorNodes, exporterNodes));
         }
-        if(receiverNodes.length && exporterNodes.length){
+        if (receiverNodes.length && exporterNodes.length) {
           newEdges.push(...createEdges(receiverNodes, exporterNodes))
         }
       });
@@ -132,8 +135,8 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
   }, [nodes, setEdges]);
 
   const generateUniquePipelineName = useCallback((
-    baseType: PipelineType, 
-    baseName: string, 
+    baseType: PipelineType,
+    baseName: string,
     existingPipelines: string[]
   ): string => {
     let counter = 1;
@@ -150,10 +153,9 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
   }, []);
 
   const determineSection = useCallback((y: number): PipelineType => {
-    const sectionHeight = LAYOUT_CONFIG.SECTION_HEIGHT / 3;
-    if (y < sectionHeight) return 'traces';
-    if (y < sectionHeight * 2) return 'metrics';
-    return 'logs';
+    const sectionTypes = Object.keys(PIPELINE_SECTIONS) as PipelineType[];
+    const index = Math.floor(y / (LAYOUT_CONFIG.SECTION_HEIGHT / sectionTypes.length));
+    return sectionTypes[Math.min(Math.max(0, index), sectionTypes.length - 1)];
   }, []);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -166,18 +168,14 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
 
     const type = event.dataTransfer.getData('application/reactflow');
     const name = event.dataTransfer.getData('component/name');
-    
+
     if (!type || !name) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
-    const position = {
-      x: event.clientX - rect.left - LAYOUT_CONFIG.NODE_WIDTH / 2,
-      y: event.clientY - rect.top - LAYOUT_CONFIG.NODE_HEIGHT / 2,
-    };
-
-    // Snap to grid
-    position.x = Math.round(position.x / 15) * 15;
-    position.y = Math.round(position.y / 15) * 15;
+    const position = project({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
+    });
 
     const section = determineSection(position.y);
     const existingPipelines = nodes
@@ -196,22 +194,18 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
       },
       sourcePosition: Position.Right,
       targetPosition: Position.Left,
-      style: {
-        width: LAYOUT_CONFIG.NODE_WIDTH,
-        height: LAYOUT_CONFIG.NODE_HEIGHT,
-      },
     };
 
-    setNodes(nds => nds.concat(newNode));
-  }, [nodes, setNodes, determineSection, generateUniquePipelineName]);
+    setNodes((nds) => nds.concat(newNode));
+  }, [nodes, generateUniquePipelineName, determineSection, setNodes, project]);
 
   const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
   }, []);
 
   const updateNodeConfig = useCallback((nodeId: string, config: any) => {
-    setNodes(nds => 
-      nds.map(node => 
+    setNodes(nds =>
+      nds.map(node =>
         node.id === nodeId
           ? { ...node, data: { ...node.data, config } }
           : node
@@ -220,9 +214,9 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
   }, [setNodes]);
 
   const onNodesDelete = useCallback((nodesToDelete: Node[]) => {
-    setEdges(eds => 
-      eds.filter(edge => 
-        !nodesToDelete.some(node => 
+    setEdges(eds =>
+      eds.filter(edge =>
+        !nodesToDelete.some(node =>
           node.id === edge.source || node.id === edge.target
         )
       )
@@ -230,8 +224,8 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
   }, [setEdges]);
 
   const onEdgesDelete = useCallback((edgesToDelete: Edge[]) => {
-    setEdges(eds => 
-      eds.filter(edge => 
+    setEdges(eds =>
+      eds.filter(edge =>
         !edgesToDelete.some(e => e.id === edge.id)
       )
     );
@@ -254,39 +248,51 @@ const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = ({ onChange, initial
   }, []);
 
   return (
-    <div className="flex h-full">
-      <Sidebar />
-      <div className="flex-grow relative" onDragOver={onDragOver} onDrop={onDrop}>
+    <div className="h-full relative">
+      <div className="absolute inset-0 ml-12" onDragOver={onDragOver} onDrop={onDrop}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          nodeTypes={nodeTypes}
           connectionMode={ConnectionMode.Loose}
+          nodeTypes={nodeTypes}
+          className="bg-background"
           onNodeClick={onNodeClick}
           onNodesDelete={onNodesDelete}
           onEdgesDelete={onEdgesDelete}
+          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+          minZoom={0.5}
+          maxZoom={1.5}
         >
-          <Background gap={15} size={1} />
+          <Background />
           {Object.keys(PIPELINE_SECTIONS).map((type, index) => (
-            <FlowSection 
-              key={type} 
-              type={type as PipelineType} 
-              index={index} 
+            <FlowSection
+              key={type}
+              type={type as PipelineType}
+              index={index}
             />
           ))}
         </ReactFlow>
-        {selectedNode && (
-          <ComponentConfigDialog
-            node={selectedNode}
-            onClose={() => setSelectedNode(null)}
-            onConfigUpdate={updateNodeConfig}
-          />
-        )}
       </div>
+      <Sidebar />
+      {selectedNode && (
+        <ComponentConfigDialog
+          node={selectedNode}
+          onClose={() => setSelectedNode(null)}
+          onConfigUpdate={updateNodeConfig}
+        />
+      )}
     </div>
+  );
+};
+
+const OtelConfigBuilder: React.FC<OtelConfigBuilderProps> = (props) => {
+  return (
+    <ReactFlowProvider>
+      <OtelConfigBuilderInner {...props} />
+    </ReactFlowProvider>
   );
 };
 

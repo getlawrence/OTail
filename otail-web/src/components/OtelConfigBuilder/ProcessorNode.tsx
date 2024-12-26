@@ -1,5 +1,6 @@
 import { Handle, Position } from 'reactflow';
 import { Card, CardContent } from '@/components/ui/card';
+import { Bolt } from 'lucide-react';
 
 interface ProcessorNodeProps {
   data: any;
@@ -10,12 +11,15 @@ const ProcessorNode = ({ data, handleStyle }: ProcessorNodeProps) => {
   return (
     <Card className="min-w-40">
       <CardContent className="p-3">
-        <div className="font-medium text-sm">{data.label}</div>
-        {Object.entries(data.config || {}).map(([key, value]) => (
-          <div key={key} className="text-xs text-muted-foreground mt-1">
-            {key}: {Array.isArray(value) ? value.length : typeof value === 'object' ? JSON.stringify(value) : value as string}
+        <div className="flex items-center gap-2">
+          <Bolt size={16} />
+          <div className="font-medium text-sm">{data.label}</div>
+        </div>
+        {data.config?.endpoint && (
+          <div className="text-xs text-muted-foreground mt-1">
+            {data.config.endpoint}
           </div>
-        ))}
+        )}
       </CardContent>
       <Handle
         type="target"
