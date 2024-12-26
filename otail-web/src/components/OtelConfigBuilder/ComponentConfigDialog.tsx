@@ -2,7 +2,7 @@ import { Node } from 'reactflow';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { PolicyBuilder } from '../policy-builder';
-import { useConfigState } from '@/hooks/use-config';
+import { usePolicyConfig } from '@/hooks/use-config';
 import { useState } from 'react';
 import { ReceiverConfig, ProcessorConfig } from './types';
 import { componentSchemas, ComponentType } from './componentSchemas';
@@ -24,7 +24,7 @@ export const ComponentConfigDialog = ({
     handleAddPolicy,
     handleUpdatePolicy,
     handleRemovePolicy,
-  } = useConfigState(node.data.config.policies);
+  } = usePolicyConfig(node.data.config.policies);
 
   const [config, setConfig] = useState<Record<string, any>>(node.data.config || {});
   const [pipelineName, setPipelineName] = useState(node.data.pipelineName || 'default');
@@ -61,7 +61,7 @@ export const ComponentConfigDialog = ({
     }
 
     const updatedConfig = { ...config };
-    
+
     if (node.data.label === 'tail_sampling') {
       updatedConfig.policies = state.config.policies;
     }
