@@ -143,6 +143,40 @@ export const CompositePolicyEditor: React.FC<{
                     </div>
                 </div>
 
+                <div className="p-6 rounded-lg border">
+                    <Label className="text-lg font-semibold">Rate Allocation</Label>
+                    <div className="mt-4 space-y-4">
+                        {policy.subPolicies.map((subPolicy, index) => (
+                            <div key={`rate-${subPolicy.name}`} className="flex items-center gap-4">
+                                <span className="min-w-[200px]">{subPolicy.name}</span>
+                                <div className="relative flex-grow max-w-sm">
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={policy.rateAllocation?.[index]?.percent ?? 0}
+                                        onChange={(e) => {
+                                            const newRateAllocation = [...(policy.rateAllocation || [])];
+                                            newRateAllocation[index] = {
+                                                policy: subPolicy.name,
+                                                percent: Number(e.target.value)
+                                            };
+                                            onUpdate({
+                                                ...policy,
+                                                rateAllocation: newRateAllocation
+                                            });
+                                        }}
+                                        className="pr-12 focus-visible:ring-2 focus-visible:ring-primary"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                                        %
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 <div className="space-y-4">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-semibold">Sub Policies</h3>

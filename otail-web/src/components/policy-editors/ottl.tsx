@@ -1,6 +1,8 @@
 import React from 'react';
-import { OttlPolicy } from '@/types/policy'
-import { Editor } from '@monaco-editor/react';
+import { OttlPolicy } from '@/types/policy';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 interface OttlPolicyEditorProps {
   policy: OttlPolicy;
@@ -12,137 +14,65 @@ export const OttlPolicyEditor: React.FC<OttlPolicyEditorProps> = ({
   onUpdate,
 }) => {
   // Helper function to update span conditions
-  const handleSpanConditionUpdate = (index: number, value: string) => {
-    const newConditions = [...(policy.spanConditions || [])];
-    newConditions[index] = value;
+  const handleSpanConditionUpdate = (value: string) => {
+    const conditions = value.split('\n').map(line => line.trim()).filter(line => line !== '');
     onUpdate({
       ...policy,
-      spanConditions: newConditions,
+      spanConditions: conditions,
     });
   };
 
   // Helper function to update span event conditions
-  const handleSpanEventConditionUpdate = (index: number, value: string) => {
-    const newConditions = [...(policy.spanEventConditions || [])];
-    newConditions[index] = value;
+  const handleSpanEventConditionUpdate = (value: string) => {
+    const conditions = value.split('\n').map(line => line.trim()).filter(line => line !== '');
     onUpdate({
       ...policy,
-      spanEventConditions: newConditions,
-    });
-  };
-
-  // Add new condition handlers
-  const handleAddSpanCondition = () => {
-    onUpdate({
-      ...policy,
-      spanConditions: [...(policy.spanConditions || []), ''],
-    });
-  };
-
-  const handleAddSpanEventCondition = () => {
-    onUpdate({
-      ...policy,
-      spanEventConditions: [...(policy.spanEventConditions || []), ''],
-    });
-  };
-
-  // Remove condition handlers
-  const handleRemoveSpanCondition = (index: number) => {
-    onUpdate({
-      ...policy,
-      spanConditions: (policy.spanConditions || []).filter((_, i) => i !== index),
-    });
-  };
-
-  const handleRemoveSpanEventCondition = (index: number) => {
-    onUpdate({
-      ...policy,
-      spanEventConditions: (policy.spanEventConditions || []).filter((_, i) => i !== index),
+      spanEventConditions: conditions,
     });
   };
 
   return (
-    <div className="policy-editor">
-      <div className="form-field">
-        <label className="form-label">Error Mode</label>
-        <select
-          className="form-input"
-          value={policy.errorMode || 'ignore'}
-          onChange={(e) => onUpdate({
-            ...policy,
-            errorMode: e.target.value,
-          })}
-        >
-          <option value="ignore">Ignore</option>
-          <option value="propagate">Propagate</option>
-        </select>
-      </div>
+    <div className='space-y-4'>
+      <div className="pt-6 space-y-4">
+        <div className="space-y-2">
+          <Label>Error Mode</Label>
+          <Select
+            value={policy.errorMode || 'ignore'}
+            onValueChange={(value) => onUpdate({
+              ...policy,
+              errorMode: value,
+            })}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ignore">Ignore</SelectItem>
+              <SelectItem value="propagate">Propagate</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div className="form-field">
-        <label className="form-label">Span Conditions</label>
-        {(policy.spanConditions || []).map((condition, index) => (
-          <div key={index} className="condition-item">
-            <Editor
-              height="100px"
-              defaultLanguage="plaintext"
-              value={condition}
-              onChange={(value) => handleSpanConditionUpdate(index, value || '')}
-              options={{
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                theme: 'vs-light',
-              }}
-            />
-            <button
-              className="remove-button"
-              onClick={() => handleRemoveSpanCondition(index)}
-              aria-label="Remove condition"
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-        <button
-          className="add-button"
-          onClick={handleAddSpanCondition}
-        >
-          Add Span Condition
-        </button>
-      </div>
+        <div className="space-y-2">
+          <Label>Span Conditions</Label>
+          <Textarea
+            value={(policy.spanConditions || []).join('\n')}
+            onChange={(e) => handleSpanConditionUpdate(e.target.value)}
+            placeholder="Enter conditions (one per line)"
+            className="min-h-[150px]"
+          />
+        </div>
 
-      <div className="form-field">
-        <label className="form-label">Span Event Conditions</label>
-        {(policy.spanEventConditions || []).map((condition, index) => (
-          <div key={index} className="condition-item">
-            <Editor
-              height="100px"
-              defaultLanguage="plaintext"
-              value={condition}
-              onChange={(value) => handleSpanEventConditionUpdate(index, value || '')}
-              options={{
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                theme: 'vs-light',
-              }}
-            />
-            <button
-              className="remove-button"
-              onClick={() => handleRemoveSpanEventCondition(index)}
-              aria-label="Remove condition"
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-        <button
-          className="add-button"
-          onClick={handleAddSpanEventCondition}
-        >
-          Add Span Event Condition
-        </button>
+        <div className="space-y-2">
+          <Label>Span Event Conditions</Label>
+          <Textarea
+            value={(policy.spanEventConditions || []).join('\n')}
+            onChange={(e) => handleSpanEventConditionUpdate(e.target.value)}
+            placeholder="Enter conditions (one per line)"
+            className="min-h-[150px]"
+          />
+        </div>
       </div>
     </div>
   );
-}; 
+};

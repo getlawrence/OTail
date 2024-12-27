@@ -12,7 +12,7 @@ interface AlwaysSamplePolicyEditorProps {
 export const AlwaysSamplePolicyEditor: React.FC<AlwaysSamplePolicyEditorProps> = ({
 }) => {
   return (
-    <div className="policy-editor p-4">
+    <div className="p-4">
       <div className="flex items-center gap-2">
         <Label>Always Sample Policy</Label>
         <Tooltip>
