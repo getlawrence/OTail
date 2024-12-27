@@ -1,11 +1,5 @@
-export interface SchemaField {
-  type: 'string' | 'number' | 'boolean' | 'object';
-  label: string;
-  required?: boolean;
-  default?: any;
-  placeholder?: string;
-  fields?: Record<string, SchemaField>;
-}
+
+import { SchemaField } from '../DynamicForm/types';
 
 export interface ComponentSchema {
   fields: Record<string, SchemaField>;

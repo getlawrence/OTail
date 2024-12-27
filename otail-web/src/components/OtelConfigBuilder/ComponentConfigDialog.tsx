@@ -6,7 +6,7 @@ import { usePolicyConfig } from '@/hooks/use-config';
 import { useState } from 'react';
 import { ReceiverConfig, ProcessorConfig } from './types';
 import { componentSchemas, ComponentType } from './componentSchemas';
-import { DynamicForm } from './DynamicForm';
+import { DynamicForm } from '../DynamicForm/DynamicForm';
 
 interface ComponentConfigDialogProps {
   node: Node;
@@ -142,7 +142,7 @@ export const ComponentConfigDialog = ({
 
           {schema && (
             <DynamicForm
-              schema={schema}
+              schema={{ ...schema.fields }}
               values={config}
               onChange={handleFieldChange}
               errors={errors}
