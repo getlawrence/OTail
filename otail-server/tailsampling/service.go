@@ -31,19 +31,32 @@ func (s *Service) GetConfig(agentID uuid.UUID) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get tail sampling config: %w", err)
 	}
-	var configMap map[string]interface{}
-	if err := yaml.Unmarshal([]byte(config), &configMap); err != nil {
+
+	var yamlConfig map[interface{}]interface{}
+	if err := yaml.Unmarshal([]byte(config), &yamlConfig); err != nil {
 		return "", fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
+	// Convert the YAML map to a string-keyed map
+	configMap := convertToStringMap(yamlConfig)
+	s.logger.Info("Parsed tail sampling config", zap.Any("configMap", configMap))
+
 	processors, ok := configMap["processors"].(map[string]interface{})
 	if !ok {
-		return "", fmt.Errorf("processors is not a map[string]interface{}")
+		// Return empty JSON object if processors doesn't exist or is not a map
+		return "{}", nil
 	}
 
-	tailSampling, ok := processors["tail_sampling"].(map[string]interface{})
+	// If tail_sampling doesn't exist in processors, return empty config
+	tailSampling, exists := processors["tail_sampling"]
+	if !exists {
+		return "{}", nil
+	}
+
+	// Check if tail_sampling is a map
+	_, ok = tailSampling.(map[string]interface{})
 	if !ok {
-		return "", fmt.Errorf("tail_sampling is not a map[string]interface{}")
+		return "{}", nil
 	}
 
 	tailSamplingConfig, err := json.Marshal(tailSampling)
@@ -72,4 +85,36 @@ func (s *Service) UpdateConfig(agentID uuid.UUID, config map[string]interface{})
 // ListAgents returns a list of all connected agents
 func (s *Service) ListAgents() map[uuid.UUID]*opamp.Agent {
 	return s.opampServer.ListAgents()
+}
+
+// convertToStringMap converts map[interface{}]interface{} to map[string]interface{}
+func convertToStringMap(m map[interface{}]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for k, v := range m {
+		switch val := v.(type) {
+		case map[interface{}]interface{}:
+			result[fmt.Sprint(k)] = convertToStringMap(val)
+		case []interface{}:
+			result[fmt.Sprint(k)] = convertToInterfaceSlice(val)
+		default:
+			result[fmt.Sprint(k)] = v
+		}
+	}
+	return result
+}
+
+// convertToInterfaceSlice handles conversion of slice elements
+func convertToInterfaceSlice(slice []interface{}) []interface{} {
+	result := make([]interface{}, len(slice))
+	for i, v := range slice {
+		switch val := v.(type) {
+		case map[interface{}]interface{}:
+			result[i] = convertToStringMap(val)
+		case []interface{}:
+			result[i] = convertToInterfaceSlice(val)
+		default:
+			result[i] = v
+		}
+	}
+	return result
 }

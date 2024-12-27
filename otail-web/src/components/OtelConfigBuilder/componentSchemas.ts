@@ -1,9 +1,10 @@
-interface SchemaField {
-  type: 'string' | 'number' | 'boolean';
+export interface SchemaField {
+  type: 'string' | 'number' | 'boolean' | 'object';
   label: string;
   required?: boolean;
   default?: any;
   placeholder?: string;
+  fields?: Record<string, SchemaField>;
 }
 
 export interface ComponentSchema {
@@ -13,22 +14,39 @@ export interface ComponentSchema {
 export const componentSchemas: Record<string, ComponentSchema> = {
   otlp: {
     fields: {
-      endpoint: {
-        type: 'string',
-        label: 'Endpoint',
+      protocols: {
+        type: 'object',
+        label: 'Protocols',
         required: true,
-        placeholder: 'Enter OTLP endpoint',
-      },
-      protocol: {
-        type: 'string',
-        label: 'Protocol',
-        required: true,
-        default: 'grpc',
-      },
-      tls: {
-        type: 'boolean',
-        label: 'Enable TLS',
-        default: false,
+        fields: {
+          grpc: {
+            type: 'object',
+            label: 'gRPC',
+            fields: {
+              endpoint: {
+                type: 'string',
+                label: 'Endpoint',
+                placeholder: 'Enter gRPC endpoint',
+              },
+              tls: {
+                type: 'boolean',
+                label: 'Enable TLS',
+                default: false,
+              },
+            },
+          },
+          http: {
+            type: 'object',
+            label: 'HTTP',
+            fields: {
+              endpoint: {
+                type: 'string',
+                label: 'Endpoint',
+                placeholder: 'Enter HTTP endpoint',
+              },
+            },
+          },
+        },
       },
     },
   },

@@ -28,64 +28,116 @@ export const ComponentConfigDialog = ({
 
   const [config, setConfig] = useState<Record<string, any>>(node.data.config || {});
   const [pipelineName, setPipelineName] = useState(node.data.pipelineName || 'default');
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const componentType = node.data.label.toLowerCase() as ComponentType;
   const schema = componentSchemas[componentType];
+  const isTailSampling = componentType === 'tail_sampling';
 
   const handleFieldChange = (field: string, value: any) => {
-    setConfig(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setConfig(prev => {
+      // Handle nested fields
+      const fieldPath = field.split('.');
+      const newConfig = { ...prev };
+
+      let current = newConfig;
+      for (let i = 0; i < fieldPath.length - 1; i++) {
+        const key = fieldPath[i];
+        if (!current[key] || typeof current[key] !== 'object') {
+          current[key] = {};
+        }
+        current = current[key];
+      }
+      current[fieldPath[fieldPath.length - 1]] = value;
+
+      return newConfig;
+    });
+
+    // Clear error when field is changed
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateField = (field: any, value: any, path: string[] = []): string | null => {
+    const fieldPath = path.join('.');
+
+    if (field.required && (value === undefined || value === null || value === '')) {
+      return `${field.label} is required`;
+    }
+
+    if (field.type === 'object' && field.fields) {
+      for (const [subFieldName, subField] of Object.entries(field.fields)) {
+        const subValue = value?.[subFieldName];
+        const error = validateField(subField, subValue, [...path, subFieldName]);
+        if (error) return error;
+      }
+    }
+
+    return null;
   };
 
   const validateConfig = () => {
+    const newErrors: Record<string, string> = {};
+    let isValid = true;
+
     if (!pipelineName.trim()) {
-      return false;
+      newErrors['pipelineName'] = 'Pipeline name is required';
+      isValid = false;
     }
 
     if (schema) {
       for (const [fieldName, field] of Object.entries(schema.fields)) {
-        if (field.required && !config[fieldName]) {
-          return false;
+        const error = validateField(field, config[fieldName], [fieldName]);
+        if (error) {
+          newErrors[fieldName] = error;
+          isValid = false;
         }
       }
     }
 
-    return true;
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleSave = () => {
-    if (!validateConfig()) {
-      return;
+    if (validateConfig()) {
+      const updatedConfig = {
+        ...config,
+      };
+
+      if (isTailSampling) {
+        updatedConfig.policies = state.config.policies;
+      }
+
+      onConfigUpdate(node.id, updatedConfig);
+      onClose();
     }
-
-    const updatedConfig = { ...config };
-
-    if (node.data.label === 'tail_sampling') {
-      updatedConfig.policies = state.config.policies;
-    }
-
-    onConfigUpdate(node.id, updatedConfig);
-    onClose();
   };
-
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Configure {node.data.label}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <div className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Pipeline Name</label>
+            <label className="text-sm font-medium">
+              Pipeline Name <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={pipelineName}
               onChange={(e) => setPipelineName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
-              placeholder="Enter pipeline name"
+              className={errors['pipelineName'] ? 'border-red-500' : ''}
             />
+            {errors['pipelineName'] && (
+              <p className="text-sm text-red-500">{errors['pipelineName']}</p>
+            )}
           </div>
 
           {schema && (
@@ -93,10 +145,11 @@ export const ComponentConfigDialog = ({
               schema={schema}
               values={config}
               onChange={handleFieldChange}
+              errors={errors}
             />
           )}
 
-          {node.data.label === "tail_sampling" && (
+          {isTailSampling && (
             <PolicyBuilder
               policies={state.config.policies}
               addPolicy={handleAddPolicy}
@@ -106,7 +159,7 @@ export const ComponentConfigDialog = ({
           )}
 
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={onClose} type="button">
+            <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
             <Button onClick={handleSave}>Save</Button>
