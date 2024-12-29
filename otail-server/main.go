@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/mottibec/otail-server/api"
+	"github.com/mottibec/otail-server/clickhouse"
 	"github.com/mottibec/otail-server/opamp"
 	"github.com/mottibec/otail-server/tailsampling"
 	"go.uber.org/zap"
@@ -24,7 +25,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		// Handle preflight requests
-		if r.Method == "OPTIONS" {
+		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -48,6 +49,13 @@ func main() {
 		logger.Fatal("Failed to create OpAMP server", zap.Error(err))
 	}
 
+	// Initialize ClickHouse client
+	clickhouseClient, err := clickhouse.NewClient(os.Getenv("CLICKHOUSE_DSN"), logger)
+	if err != nil {
+		logger.Fatal("Failed to create ClickHouse client", zap.Error(err))
+	}
+	defer clickhouseClient.Close()
+
 	// Create the tail sampling service
 	samplingService := tailsampling.NewService(logger, opampServer)
 
@@ -55,7 +63,7 @@ func main() {
 	router := mux.NewRouter()
 
 	// Create the HTTP API handler
-	apiHandler := api.NewHandler(logger, samplingService)
+	apiHandler := api.NewHandler(logger, samplingService, clickhouseClient)
 	apiHandler.SetupRoutes(router)
 
 	// Apply CORS middleware
