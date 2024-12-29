@@ -116,7 +116,6 @@ func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
 
 	logs, err := h.clickhouse.QueryLogs(r.Context(), agentID, startTime, endTime, limit)
 	if err != nil {
-		h.logger.Error("Failed to query logs", zap.Error(err))
 		h.writeError(w, http.StatusInternalServerError, "Failed to query logs")
 		return
 	}

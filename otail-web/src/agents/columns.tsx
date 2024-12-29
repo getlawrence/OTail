@@ -20,9 +20,8 @@ import {
 import { useState } from "react"
 import OtelConfig from "@/config/page"
 import { Agent } from "@/api/types"
-import { updateConfig } from "@/api/agent"
+import { fetchAgentLogs, updateConfig } from "@/api/agent"
 import { load } from 'js-yaml';
-
 
 
 export const columns: ColumnDef<Agent>[] = [
@@ -54,10 +53,28 @@ export const columns: ColumnDef<Agent>[] = [
         cell: ({ row }) => {
             const agent = row.original;
             const [configOpen, setConfigOpen] = useState(false);
+            const [logsOpen, setLogsOpen] = useState(false);
+            const [logs, setLogs] = useState<string>("");
+            const [loading, setLoading] = useState(false);
+
             const onUpdate = (value: string) => {
                 updateConfig(agent.InstanceId, JSON.stringify(load(value)));
                 setConfigOpen(false);
             }
+
+            const handleViewLogs = async () => {
+                setLoading(true);
+                setLogsOpen(true);
+                try {
+                    const logsData = await fetchAgentLogs(agent.InstanceId);
+                    setLogs(logsData);
+                } catch (error) {
+                    console.error('Failed to fetch logs:', error);
+                    setLogs('Failed to fetch logs');
+                } finally {
+                    setLoading(false);
+                }
+            };
 
             return (
                 <>
@@ -73,6 +90,9 @@ export const columns: ColumnDef<Agent>[] = [
                             <DropdownMenuItem onClick={() => setConfigOpen(true)}>
                                 View config
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleViewLogs}>
+                                View logs
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -84,6 +104,21 @@ export const columns: ColumnDef<Agent>[] = [
                             </DialogHeader>
                             <div className="h-[80vh] overflow-auto">
                                 <OtelConfig config={agent.EffectiveConfig} onUpdate={onUpdate} />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+
+                    <Dialog open={logsOpen} onOpenChange={setLogsOpen}>
+                        <DialogContent className="max-w-[90vw] max-h-[90vh]">
+                            <DialogHeader>
+                                <DialogTitle>Agent Logs</DialogTitle>
+                            </DialogHeader>
+                            <div className="h-[80vh] overflow-auto">
+                                {loading ? (
+                                    <div>Loading logs...</div>
+                                ) : (
+                                    <pre className="whitespace-pre-wrap break-words">{logs}</pre>
+                                )}
                             </div>
                         </DialogContent>
                     </Dialog>

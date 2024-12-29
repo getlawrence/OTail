@@ -15,9 +15,9 @@ type LogEntry struct {
 	Timestamp          time.Time         `json:"timestamp"`
 	TraceId            string            `json:"traceId"`
 	SpanId             string            `json:"spanId"`
-	TraceFlags         uint32            `json:"traceFlags"`
+	TraceFlags         uint8             `json:"traceFlags"`
 	SeverityText       string            `json:"severityText"`
-	SeverityNumber     int32             `json:"severityNumber"`
+	SeverityNumber     uint8             `json:"severityNumber"`
 	ServiceName        string            `json:"serviceName"`
 	Body               string            `json:"body"`
 	ResourceSchemaUrl  string            `json:"resourceSchemaUrl"`
@@ -73,7 +73,7 @@ func NewClient(dsn string, logger *zap.Logger) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) QueryLogs(ctx context.Context, serviceName string, startTime, endTime time.Time, limit int) ([]LogEntry, error) {
+func (c *Client) QueryLogs(ctx context.Context, serviceInstanceID string, startTime, endTime time.Time, limit int) ([]LogEntry, error) {
 	query := `
 		SELECT
 			Timestamp,
@@ -92,11 +92,11 @@ func (c *Client) QueryLogs(ctx context.Context, serviceName string, startTime, e
 			ScopeAttributes,
 			LogAttributes
 		FROM default.otel_logs
-		WHERE Timestamp BETWEEN ? AND ?
+		WHERE ResourceAttributes['service.instance.id'] = ?
 		ORDER BY Timestamp DESC
-		LIMIT ?`
+		LIMIT 1000`
 
-	rows, err := c.conn.Query(ctx, query, startTime, endTime, limit)
+	rows, err := c.conn.Query(ctx, query, serviceInstanceID, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query logs: %w", err)
 	}

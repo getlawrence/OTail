@@ -41,3 +41,11 @@ export async function updateConfig(agentId: string, config: string): Promise<voi
         throw new Error('Network response was not ok');
     }
 }
+
+export async function fetchAgentLogs(agentId: string): Promise<string> {
+    const response = await fetch(`${baseUrl}/api/v1/agents/${agentId}/logs`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch logs');
+    }
+    return response.text();
+};
