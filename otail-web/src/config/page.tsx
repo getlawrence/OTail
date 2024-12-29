@@ -3,7 +3,7 @@ import OtelConfigBuilder from '@/components/OtelConfigBuilder/OtelConfigBuilder'
 import Editor, { OnChange } from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { createDebounce } from '@/lib/utils'; 
-import { Eye, EyeOff, Save } from 'lucide-react'; 
+import { Eye, EyeOff, Send } from 'lucide-react'; 
 
 interface ConfigPageProps {
   config?: string;
@@ -68,7 +68,7 @@ export default function ConfigPage({ config, onUpdate }: ConfigPageProps) {
               onClick={() => onUpdate?.(editorValue)} 
               className="flex items-center gap-2"
             >
-              <Save className="w-4 h-4" /> Save
+              <Send className="w-4 h-4" /> Send to Agent
             </Button>
           )}
         </div>

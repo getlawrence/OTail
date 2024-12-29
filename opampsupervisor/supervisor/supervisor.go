@@ -871,8 +871,8 @@ func (s *Supervisor) setupOwnMetrics(_ context.Context, settings *protobufs.Tele
 		err = s.ownTelemetryTemplate.Execute(
 			&cfg,
 			map[string]any{
-				"PrometheusPort":  port,
-				"MetricsEndpoint": settings.DestinationEndpoint,
+				"PrometheusPort": port,
+				"OTLPEndpoint":   settings.DestinationEndpoint,
 			},
 		)
 		if err != nil {

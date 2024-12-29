@@ -14,7 +14,7 @@ services:
       - NODE_ENV=development
       - VITE_SHOW_SIDEBAR=true
     networks:
-      - otail-network
+      - otail-network    
   backend:
     build:
       context: ./otail-server
@@ -24,10 +24,13 @@ services:
       - "4320:4320"  # OpAMP WebSocket endpoint
     environment:
       - GO_ENV=development
+      - CLICKHOUSE_DSN=clickhouse://clickhouse:9000/logs?username=default&password=
     volumes:
       - ./otail-server:/src  # Mount source code to /src instead of /app
     networks:
       - otail-network
+    depends_on:
+      - clickhouse
 
   opampsupervisor:
     build:
@@ -45,9 +48,49 @@ services:
     depends_on:
       - backend
 
-networks:
-  otail-network:
-    driver: bridge
+  collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otelcol/config.yml"]
+    ports:
+      - "4417:4317"  
+      - "4418:4318"
+    volumes:
+      - ./otail-col/config.yml:/etc/otelcol/config.yml
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    networks:
+      - otail-network
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    ports:
+      - "8123:8123"  # HTTP port
+      - "9000:9000"  # Native port
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    networks:
+      - otail-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  ch-ui:
+    image: ghcr.io/caioricciuti/ch-ui:latest
+    restart: always
+    ports:
+      - "5521:5521"
+    environment:
+      VITE_CLICKHOUSE_URL: "http://localhost:8123"
+    depends_on:
+      - clickhouse
 
 volumes:
   opamp-storage:
+  clickhouse-data:
+
+networks:
+  otail-network:
+    driver: bridge

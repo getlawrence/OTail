@@ -418,10 +418,14 @@ func (agent *Agent) calcConnectionSettings(response *protobufs.ServerToAgent) {
 			// We just hard-code this to a port on a localhost on which we can
 			// run an Otel Collector for demo purposes. With real production
 			// servers this should likely point to an OTLP backend.
-			DestinationEndpoint: "http://localhost:4318/v1/metrics",
+			DestinationEndpoint: "http://collector:4318",
 		},
-		OwnTraces:        nil,
-		OwnLogs:          nil,
+		OwnLogs: &protobufs.TelemetryConnectionSettings{
+			DestinationEndpoint: "http://collector:4318",
+		},
+		OwnTraces: &protobufs.TelemetryConnectionSettings{
+			DestinationEndpoint: "http://collector:4318",
+		},
 		OtherConnections: nil,
 	}
 }
