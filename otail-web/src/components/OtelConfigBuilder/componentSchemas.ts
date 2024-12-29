@@ -78,7 +78,6 @@ export const componentSchemas: Record<string, ComponentSchema> = {
       },
     },
   },
-  // Add more component schemas as needed
 };
 
 export type ComponentType = keyof typeof componentSchemas;

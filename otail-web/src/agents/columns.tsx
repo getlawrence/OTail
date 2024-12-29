@@ -28,15 +28,26 @@ import { load } from 'js-yaml';
 export const columns: ColumnDef<Agent>[] = [
     {
         accessorKey: "InstanceId",
-        header: "InstanceId",
+        header: "Instance Id",
     },
     {
         accessorKey: "StartedAt",
-        header: "StartedAt",
+        header: "Started At",
+        cell: ({ getValue }) => {
+            const date = getValue() as string;
+            return date ? new Date(date).toLocaleString() : "";
+        },
     },
     {
         accessorKey: "Status.health.healthy",
-        header: "Status",
+        header: "Health",
+        cell: ({ row }) => {
+            const healthy = row.getValue("Status.health.healthy");
+            if (healthy === undefined) {
+                return row.original.Status?.health?.last_error || "Unknown";
+            }
+            return healthy ? "Yes" : "No";
+        },
     },
     {
         id: "actions",
