@@ -1,4 +1,7 @@
 receivers:
+  # Collect own logs
+  filelog/own_logs:
+    include: ['/var/lib/opamp/agent.log']
   # Collect own metrics
   prometheus/own_metrics:
     config:
@@ -8,8 +11,8 @@ receivers:
           static_configs:
             - targets: ['0.0.0.0:{{.PrometheusPort}}']  
 exporters:
-  otlphttp/own_metrics:
-    metrics_endpoint: "{{.MetricsEndpoint}}"
+  otlphttp/own_telemetry:
+    endpoint: "{{.OTLPEndpoint}}"
 
 service:
   telemetry:
@@ -18,4 +21,7 @@ service:
   pipelines:
     metrics/own_metrics:
       receivers: [prometheus/own_metrics]
-      exporters: [otlphttp/own_metrics]
+      exporters: [otlphttp/own_telemetry]
+    logs/own_logs:
+      receivers: [filelog/own_logs]
+      exporters: [otlphttp/own_telemetry]

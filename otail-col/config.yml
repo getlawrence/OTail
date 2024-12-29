@@ -15,12 +15,15 @@ exporters:
     traces_table_name: otel_traces
     logs_table_name: otel_logs
     metrics_table_name: otel_metrics
+  debug:
+    verbosity: detailed
+
 service:
   pipelines:
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [clickhouse]
+      exporters: [clickhouse, debug]
     traces:
       receivers: [otlp]
       processors: [batch]

@@ -92,12 +92,11 @@ func (c *Client) QueryLogs(ctx context.Context, serviceName string, startTime, e
 			ScopeAttributes,
 			LogAttributes
 		FROM default.otel_logs
-		WHERE ServiceName = ? AND Timestamp BETWEEN ? AND ?
+		WHERE Timestamp BETWEEN ? AND ?
 		ORDER BY Timestamp DESC
-		LIMIT ?
-	`
+		LIMIT ?`
 
-	rows, err := c.conn.Query(ctx, query, serviceName, startTime, endTime, limit)
+	rows, err := c.conn.Query(ctx, query, startTime, endTime, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query logs: %w", err)
 	}
