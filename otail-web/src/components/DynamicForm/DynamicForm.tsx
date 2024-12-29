@@ -31,8 +31,6 @@ const FieldWrapper = ({
 const ObjectField = ({
   fieldPath,
   field,
-  value,
-  onChange,
   errors,
   renderField,
 }: {

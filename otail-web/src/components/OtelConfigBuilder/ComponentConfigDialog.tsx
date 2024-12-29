@@ -64,8 +64,6 @@ export const ComponentConfigDialog = ({
   };
 
   const validateField = (field: any, value: any, path: string[] = []): string | null => {
-    const fieldPath = path.join('.');
-
     if (field.required && (value === undefined || value === null || value === '')) {
       return `${field.label} is required`;
     }
