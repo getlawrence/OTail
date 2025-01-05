@@ -1,10 +1,10 @@
 import React from 'react';
-import { Label } from '../ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BooleanTagPolicy } from '@/types/policy';
-import { Combobox } from '../ui/combobox';
+import { Combobox } from '@/components/ui/combobox';
 import { getOtelAttributes } from '@/utils/otel-attributes';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
 
 interface BooleanTagPolicyEditorProps {

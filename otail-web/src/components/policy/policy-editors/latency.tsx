@@ -1,8 +1,8 @@
 import React from 'react';
 import { LatencyPolicy } from '@/types/policy'
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
 
 interface LatencyPolicyEditorProps {

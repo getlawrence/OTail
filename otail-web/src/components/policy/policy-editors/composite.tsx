@@ -1,10 +1,10 @@
 import React from 'react';
 import { CompositePolicy, Policy, PolicyType } from '@/types/policy';
 import { PolicyCard } from '../policy-card';
-import { Input } from '../ui/input';
+import { Input } from '@/components/ui/input';
 import { createNewPolicy } from '@/lib/policy/utils';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { Label } from "@/components/ui/label";
 import { ChevronUp, ChevronDown, Trash2 } from "lucide-react";
 import { PolicySelect } from '../policy-select';

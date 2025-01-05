@@ -1,5 +1,5 @@
 
-import { SchemaField } from '../DynamicForm/types';
+import { SchemaField } from '@/components/shared/DynamicForm/types';
 
 export interface ComponentSchema {
   fields: Record<string, SchemaField>;

@@ -1,11 +1,11 @@
 import React from 'react';
 import { StringAttributePolicy } from '@/types/policy'
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
-import { Switch } from '../ui/switch';
-import { Combobox } from '../ui/combobox';
+import { Switch } from '@/components/ui/switch';
+import { Combobox } from '@/components/ui/combobox';
 import { getOtelAttributes } from '@/utils/otel-attributes';
 
 interface StringAttributePolicyEditorProps {

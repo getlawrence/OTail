@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { ConfigViewer } from '../components/config-viewer'
-import { SimulationViewer } from '../components/simulation-viewer'
-import { PolicyBuilder } from '../components/policy-builder'
-import { RecipeManager } from '../components/recipe-manager'
-import { Policy, Recipe } from '../types/policy'
+import { ConfigViewer } from '@/components/simulation/config-viewer'
+import { SimulationViewer } from '@/components/simulation/simulation-viewer'
+import { PolicyBuilder } from '@/components/policy/policy-builder'
+import { RecipeManager } from '@/components/recipes/recipe-manager'
+import { Policy, Recipe } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config'
 
 type Mode = 'Edit' | 'Test'

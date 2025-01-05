@@ -1,5 +1,5 @@
 import { Home, Settings, Telescope } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 import {
   Sidebar,
   SidebarContent,

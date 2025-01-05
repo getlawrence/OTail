@@ -19,6 +19,7 @@ type LogEntry struct {
 	SeverityText       string            `json:"severityText"`
 	SeverityNumber     uint8             `json:"severityNumber"`
 	ServiceName        string            `json:"serviceName"`
+	InstanceId         string            `json:"instanceId"`
 	Body               string            `json:"body"`
 	ResourceSchemaUrl  string            `json:"resourceSchemaUrl"`
 	ResourceAttributes map[string]string `json:"resourceAttributes,omitempty"`
@@ -44,7 +45,11 @@ func NewClient(dsn string, logger *zap.Logger) (*Client, error) {
 		ctx       = context.Background()
 		conn, err = clickhouse.Open(&clickhouse.Options{
 			Addr: []string{"clickhouse:9000"},
-
+			Auth: clickhouse.Auth{
+				Database: "default",
+				Username: "default",
+				Password: "default",
+			},
 			Debugf: func(format string, v ...interface{}) {
 				fmt.Printf(format, v)
 			},
@@ -83,6 +88,7 @@ func (c *Client) QueryLogs(ctx context.Context, serviceInstanceID string, startT
 			SeverityText,
 			SeverityNumber,
 			ServiceName,
+			InstanceId,
 			Body,
 			ResourceSchemaUrl,
 			ResourceAttributes,
@@ -92,11 +98,11 @@ func (c *Client) QueryLogs(ctx context.Context, serviceInstanceID string, startT
 			ScopeAttributes,
 			LogAttributes
 		FROM default.otel_logs
-		WHERE ResourceAttributes['service.instance.id'] = ?
+		WHERE InstanceId = ?
 		ORDER BY Timestamp DESC
 		LIMIT 1000`
 
-	rows, err := c.conn.Query(ctx, query, serviceInstanceID, limit)
+	rows, err := c.conn.Query(ctx, query, serviceInstanceID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query logs: %w", err)
 	}
@@ -113,6 +119,7 @@ func (c *Client) QueryLogs(ctx context.Context, serviceInstanceID string, startT
 			&log.SeverityText,
 			&log.SeverityNumber,
 			&log.ServiceName,
+			&log.InstanceId,
 			&log.Body,
 			&log.ResourceSchemaUrl,
 			&log.ResourceAttributes,
@@ -146,6 +153,7 @@ func (c *Client) StreamLogs(ctx context.Context, serviceName string) (<-chan Log
 			SeverityText,
 			SeverityNumber,
 			ServiceName,
+			InstanceId,
 			Body,
 			ResourceSchemaUrl,
 			ResourceAttributes,
@@ -180,6 +188,7 @@ func (c *Client) StreamLogs(ctx context.Context, serviceName string) (<-chan Log
 				&log.SeverityText,
 				&log.SeverityNumber,
 				&log.ServiceName,
+				&log.InstanceId,
 				&log.Body,
 				&log.ResourceSchemaUrl,
 				&log.ResourceAttributes,

@@ -1,12 +1,12 @@
 import React from 'react';
 import { NumericTagPolicy } from '@/types/policy'
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Card } from '../ui/card';
-import { Slider } from '../ui/slider';
-import { Combobox } from '../ui/combobox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
+import { Combobox } from '@/components/ui/combobox';
 import { getOtelAttributes } from '@/utils/otel-attributes';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
 
 interface NumericTagPolicyEditorProps {
