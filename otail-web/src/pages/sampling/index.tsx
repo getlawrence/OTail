@@ -7,7 +7,7 @@ import { ConfigViewer } from '@/components/simulation/config-viewer'
 import { SimulationViewer } from '@/components/simulation/simulation-viewer'
 import { PolicyBuilder } from '@/components/policy/policy-builder'
 import { RecipeManager } from '@/components/recipes/recipe-manager'
-import { Policy, Recipe } from '../types/policy'
+import { Policy, Recipe } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config'
 
 type Mode = 'Edit' | 'Test'

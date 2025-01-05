@@ -1,3 +1,2 @@
-import { DynamicForm } from './DynamicForm';
-
-export { DynamicForm };
+export { DynamicForm } from './DynamicForm';
+export type { DynamicFormProps } from './types';

@@ -6,7 +6,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import OtelConfig from "@/config/page"
+import OtelConfig from "@/pages/config"
 
 interface ConfigDialogProps {
     open: boolean
