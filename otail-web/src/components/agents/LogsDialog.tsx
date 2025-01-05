@@ -37,7 +37,7 @@ export function LogsDialog({ open, onOpenChange, logs, loading }: LogsDialogProp
             const formatted = JSON.stringify(parsed, null, 2);
             if (!query) return formatted;
             
-            return formatted.split('\n').map((line, i) => {
+            return formatted.split('\n').map((line) => {
                 if (line.toLowerCase().includes(query.toLowerCase())) {
                     return highlightText(line, query);
                 }
@@ -76,22 +76,11 @@ export function LogsDialog({ open, onOpenChange, logs, loading }: LogsDialogProp
                         <pre className="whitespace-pre-wrap break-words font-mono text-sm">
                             {logs.split('\n').filter(line => 
                                 line.toLowerCase().includes(searchQuery.toLowerCase())
-                            ).map((line, index) => {
-                                try {
-                                    const parsed = JSON.parse(line);
-                                    return (
-                                        <div key={index} className="mb-2 rounded bg-muted/50 p-2">
-                                            {formatAndHighlightJson(line, searchQuery)}
-                                        </div>
-                                    );
-                                } catch {
-                                    return line.includes(searchQuery) && (
-                                        <div key={index} className="mb-2">
-                                            {highlightText(line, searchQuery)}
-                                        </div>
-                                    );
-                                }
-                            })}
+                            ).map((line, index) => (
+                                <div key={index} className="mb-2 rounded bg-muted/50 p-2">
+                                    {formatAndHighlightJson(line, searchQuery)}
+                                </div>
+                            ))}
                         </pre>
                     )}
                 </ScrollArea>
