@@ -6,12 +6,15 @@ toolchain go1.23.4
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.30.0
+	github.com/go-chi/chi/v5 v5.2.0
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/open-telemetry/opamp-go v0.17.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.57.0
 	go.uber.org/zap v1.27.0
+	golang.org/x/crypto v0.28.0
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v2 v2.4.0
 )

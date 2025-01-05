@@ -5,10 +5,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"syscall"
+	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/mottibec/otail-server/api"
+	"github.com/mottibec/otail-server/auth"
 	"github.com/mottibec/otail-server/clickhouse"
 	"github.com/mottibec/otail-server/opamp"
 	"github.com/mottibec/otail-server/tailsampling"
@@ -35,18 +37,34 @@ func corsMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
+	// Initialize logger
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
-	// Create a context that we'll cancel when we need to shut down
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	// Initialize user store
+	userStore := auth.NewMemoryUserStore()
 
-	// Initialize OPAmp server
+	// Initialize agents manager
 	agents := &opamp.AllAgents
-	opampServer, err := opamp.NewServer(agents, logger)
+
+	// Create token verification function
+	verifyToken := func(token string) (string, error) {
+		user, err := userStore.GetUserByToken(token)
+		if err != nil {
+			return "", err
+		}
+		return user.ID, nil
+	}
+
+	// Initialize OPAMP server
+	opampServer, err := opamp.NewServer(agents, verifyToken, logger)
 	if err != nil {
 		logger.Fatal("Failed to create OpAMP server", zap.Error(err))
+	}
+
+	// Start OPAMP server
+	if err := opampServer.Start(); err != nil {
+		logger.Fatal("Failed to start OpAMP server", zap.Error(err))
 	}
 
 	// Initialize ClickHouse client
@@ -60,14 +78,20 @@ func main() {
 	samplingService := tailsampling.NewService(logger, opampServer)
 
 	// Create HTTP router
-	router := mux.NewRouter()
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	// Add authentication routes
+	authHandler := api.NewAuthHandler(userStore, logger)
+	r.Route("/api/auth", authHandler.RegisterRoutes)
 
 	// Create the HTTP API handler
 	apiHandler := api.NewHandler(logger, samplingService, clickhouseClient)
-	apiHandler.SetupRoutes(router)
+	apiHandler.SetupRoutes(r)
 
 	// Apply CORS middleware
-	corsRouter := corsMiddleware(router)
+	corsRouter := corsMiddleware(r)
 
 	// Create HTTP server with CORS middleware
 	httpServer := &http.Server{
@@ -75,33 +99,26 @@ func main() {
 		Handler: corsRouter,
 	}
 
-	// Start the OPAmp server
-	if err := opampServer.Start(); err != nil {
-		logger.Fatal("Failed to start OPAmp server", zap.Error(err))
-	}
-
-	// Start HTTP server in a goroutine
 	go func() {
-		logger.Info("Starting HTTP server on :8080")
-		if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
-			logger.Error("HTTP server error", zap.Error(err))
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Fatal("Failed to start HTTP server", zap.Error(err))
 		}
 	}()
 
-	// Handle graceful shutdown
+	// Wait for interrupt signal
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
+	signal.Notify(sigChan, os.Interrupt)
 	<-sigChan
-	logger.Info("Shutting down...")
 
-	// Shutdown HTTP server
+	// Graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	if err := httpServer.Shutdown(ctx); err != nil {
-		logger.Error("Error shutting down HTTP server", zap.Error(err))
+		logger.Error("HTTP server shutdown error", zap.Error(err))
 	}
 
-	// Stop the OPAmp server
 	if err := opampServer.Stop(ctx); err != nil {
-		logger.Error("Error stopping OPAmp server", zap.Error(err))
+		logger.Error("OpAMP server shutdown error", zap.Error(err))
 	}
 }

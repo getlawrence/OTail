@@ -26,6 +26,9 @@ type Agent struct {
 	InstanceId    uuid.UUID
 	InstanceIdStr string
 
+	// User ID of the Agent.
+	UserID string
+
 	// Connection to the Agent.
 	conn types.Connection
 
@@ -61,7 +64,11 @@ func NewAgent(
 	instanceId uuid.UUID,
 	conn types.Connection,
 ) *Agent {
-	agent := &Agent{InstanceId: instanceId, InstanceIdStr: uuid.UUID(instanceId).String(), conn: conn}
+	agent := &Agent{
+		InstanceId:    instanceId,
+		InstanceIdStr: instanceId.String(),
+		conn:          conn,
+	}
 	tslConn, ok := conn.Connection().(*tls.Conn)
 	if ok {
 		// Client is using TLS connection.
@@ -86,6 +93,7 @@ func (agent *Agent) CloneReadonly() *Agent {
 	return &Agent{
 		InstanceId:                  agent.InstanceId,
 		InstanceIdStr:               uuid.UUID(agent.InstanceId).String(),
+		UserID:                      agent.UserID,
 		Status:                      proto.Clone(agent.Status).(*protobufs.AgentToServer),
 		EffectiveConfig:             agent.EffectiveConfig,
 		CustomInstanceConfig:        agent.CustomInstanceConfig,

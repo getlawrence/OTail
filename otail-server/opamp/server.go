@@ -18,6 +18,7 @@ type Server struct {
 	logger      *zap.Logger
 	opampServer server.OpAMPServer
 	agents      *Agents
+	verifyToken func(string) (string, error)
 }
 
 // zapToOpAmpLogger adapts zap.Logger to opamp's logger interface
@@ -33,10 +34,11 @@ func (z *zapToOpAmpLogger) Errorf(ctx context.Context, format string, args ...in
 	z.Sugar().Errorf(format, args...)
 }
 
-func NewServer(agents *Agents, logger *zap.Logger) (*Server, error) {
+func NewServer(agents *Agents, verifyToken func(string) (string, error), logger *zap.Logger) (*Server, error) {
 	s := &Server{
-		logger: logger,
-		agents: agents,
+		logger:      logger,
+		agents:      agents,
+		verifyToken: verifyToken,
 	}
 
 	// Create the OPAmp server
@@ -52,6 +54,25 @@ func (s *Server) Start() error {
 		Settings: server.Settings{
 			Callbacks: server.CallbacksStruct{
 				OnConnectingFunc: func(request *http.Request) types.ConnectionResponse {
+					// Extract token from Authorization header
+					token := request.Header.Get("Authorization")
+					if token == "" {
+						s.logger.Error("No authorization token provided")
+						return types.ConnectionResponse{Accept: false}
+					}
+
+					// Remove "Bearer " prefix if present
+					if len(token) > 7 && token[:7] == "Bearer " {
+						token = token[7:]
+					}
+
+					// Verify token and get user ID
+					_, err := s.verifyToken(token)
+					if err != nil {
+						s.logger.Error("Invalid token", zap.Error(err))
+						return types.ConnectionResponse{Accept: false}
+					}
+
 					return types.ConnectionResponse{
 						Accept: true,
 						ConnectionCallbacks: server.ConnectionCallbacksStruct{

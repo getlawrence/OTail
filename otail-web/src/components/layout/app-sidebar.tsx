@@ -1,4 +1,4 @@
-import { Home, Settings, Telescope } from "lucide-react"
+import { Home, Settings, Telescope, LogOut } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import {
   Sidebar,
@@ -11,6 +11,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useAuth } from '@/hooks/use-auth'
+import { Link, useLocation } from 'react-router-dom'
 
 //hide items if VITE_SHOW_SIDEBAR=false in .env 
 const items = import.meta.env.VITE_SHOW_SIDEBAR === 'true'
@@ -40,6 +42,9 @@ const items = import.meta.env.VITE_SHOW_SIDEBAR === 'true'
   ];
 
 export function AppSidebar() {
+  const { logout, user } = useAuth()
+  const location = useLocation()
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -50,16 +55,30 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <nav className="grid items-start px-4 text-sm font-medium mt-auto">
+          <button
+            onClick={() => logout()}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </button>
+          {user && (
+            <div className="text-sm text-gray-500 mt-2 px-3">
+              {user.email}
+            </div>
+          )}
+        </nav>
       </SidebarContent>
       <SidebarFooter className="px-2">
         <ThemeToggle />
