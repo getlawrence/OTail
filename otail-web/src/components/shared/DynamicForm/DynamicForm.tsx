@@ -1,7 +1,7 @@
 import React from "react";
-import { Card } from "../ui/card";
-import { Input } from "../ui/input";
-import { Switch } from "../ui/switch";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { SchemaField, DynamicFormProps } from "./types";
 
 // Field-specific components

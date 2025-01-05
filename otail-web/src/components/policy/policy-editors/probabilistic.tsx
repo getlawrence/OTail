@@ -1,10 +1,10 @@
 import React from 'react';
 import { ProbabilisticPolicy } from '@/types/policy';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
-import { Slider } from '../ui/slider';
+import { Slider } from '@/components/ui/slider';
 
 interface ProbabilisticPolicyEditorProps {
   policy: ProbabilisticPolicy;

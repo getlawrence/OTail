@@ -1,7 +1,7 @@
 import { AlwaysSamplePolicy } from '@/types/policy';
 import React from 'react';
-import { Label } from '../ui/label';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
 
 interface AlwaysSamplePolicyEditorProps {

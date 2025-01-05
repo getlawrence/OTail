@@ -11,20 +11,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog"
-import { useState } from "react"
-import OtelConfig from "@/config/page"
 import { Agent } from "@/api/types"
-import { fetchAgentLogs, updateConfig } from "@/api/agent"
-import { load } from 'js-yaml';
 
+interface ColumnsProps {
+    onViewConfig: (agent: Agent) => void
+    onViewLogs: (agent: Agent) => void
+}
 
-export const columns: ColumnDef<Agent>[] = [
+export const columns = ({ onViewConfig, onViewLogs }: ColumnsProps): ColumnDef<Agent>[] => [
     {
         accessorKey: "InstanceId",
         header: "Instance Id",
@@ -38,44 +32,20 @@ export const columns: ColumnDef<Agent>[] = [
         },
     },
     {
-        accessorKey: "Status.health.healthy",
-        header: "Health",
+        accessorKey: "Status",
+        header: "Status",
         cell: ({ row }) => {
-            const healthy = row.getValue("Status.health.healthy");
-            if (healthy === undefined) {
+            const status = row.getValue("Status") as any;
+            if (status === undefined) {
                 return row.original.Status?.health?.last_error || "Unknown";
             }
-            return healthy ? "Yes" : "No";
+            return status?.health?.healthy ? "Healthy" : "No";
         },
     },
     {
         id: "actions",
         cell: ({ row }) => {
             const agent = row.original;
-            const [configOpen, setConfigOpen] = useState(false);
-            const [logsOpen, setLogsOpen] = useState(false);
-            const [logs, setLogs] = useState<string>("");
-            const [loading, setLoading] = useState(false);
-
-            const onUpdate = (value: string) => {
-                updateConfig(agent.InstanceId, JSON.stringify(load(value)));
-                setConfigOpen(false);
-            }
-
-            const handleViewLogs = async () => {
-                setLoading(true);
-                setLogsOpen(true);
-                try {
-                    const logsData = await fetchAgentLogs(agent.InstanceId);
-                    setLogs(logsData);
-                } catch (error) {
-                    console.error('Failed to fetch logs:', error);
-                    setLogs('Failed to fetch logs');
-                } finally {
-                    setLoading(false);
-                }
-            };
-
             return (
                 <>
                     <DropdownMenu>
@@ -87,41 +57,15 @@ export const columns: ColumnDef<Agent>[] = [
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => setConfigOpen(true)}>
+                            <DropdownMenuItem onClick={() => onViewConfig(agent)}>
                                 View config
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleViewLogs}>
+                            <DropdownMenuItem onClick={() => onViewLogs(agent)}>
                                 View logs
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                         </DropdownMenuContent>
                     </DropdownMenu>
-
-                    <Dialog open={configOpen} onOpenChange={setConfigOpen}>
-                        <DialogContent className="max-w-[90vw] max-h-[90vh]">
-                            <DialogHeader>
-                                <DialogTitle>Agent Configuration</DialogTitle>
-                            </DialogHeader>
-                            <div className="h-[80vh] overflow-auto">
-                                <OtelConfig config={agent.EffectiveConfig} onUpdate={onUpdate} />
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-
-                    <Dialog open={logsOpen} onOpenChange={setLogsOpen}>
-                        <DialogContent className="max-w-[90vw] max-h-[90vh]">
-                            <DialogHeader>
-                                <DialogTitle>Agent Logs</DialogTitle>
-                            </DialogHeader>
-                            <div className="h-[80vh] overflow-auto">
-                                {loading ? (
-                                    <div>Loading logs...</div>
-                                ) : (
-                                    <pre className="whitespace-pre-wrap break-words">{logs}</pre>
-                                )}
-                            </div>
-                        </DialogContent>
-                    </Dialog>
                 </>
             )
         },

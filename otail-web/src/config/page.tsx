@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import OtelConfigBuilder from '@/components/OtelConfigBuilder/OtelConfigBuilder';
+import OtelConfigBuilder from '@/components/config/OtelConfigBuilder';
 import Editor, { OnChange } from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { createDebounce } from '@/lib/utils'; 

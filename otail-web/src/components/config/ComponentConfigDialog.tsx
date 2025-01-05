@@ -1,12 +1,12 @@
 import { Node } from 'reactflow';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Button } from '../ui/button';
-import { PolicyBuilder } from '../policy-builder';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { PolicyBuilder } from '@/components/policy/policy-builder';
 import { usePolicyConfig } from '@/hooks/use-config';
 import { useState } from 'react';
 import { ReceiverConfig, ProcessorConfig } from './types';
 import { componentSchemas, ComponentType } from './componentSchemas';
-import { DynamicForm } from '../DynamicForm/DynamicForm';
+import { DynamicForm } from '@/components/shared/DynamicForm';
 
 interface ComponentConfigDialogProps {
   node: Node;
