@@ -1,4 +1,4 @@
-import { Home, Settings, Telescope, LogOut } from "lucide-react"
+import { Home, Settings, Telescope, LogOut, Building } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import {
   Sidebar,
@@ -13,6 +13,13 @@ import {
 } from "@/components/ui/sidebar"
 import { useAuth } from '@/hooks/use-auth'
 import { Link, useLocation } from 'react-router-dom'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 //hide items if VITE_SHOW_SIDEBAR=false in .env 
 const items = import.meta.env.VITE_SHOW_SIDEBAR === 'true'
@@ -42,14 +49,38 @@ const items = import.meta.env.VITE_SHOW_SIDEBAR === 'true'
   ];
 
 export function AppSidebar() {
-  const { logout, user } = useAuth()
+  const { logout, user, switchOrganization } = useAuth()
   const location = useLocation()
+
+  const handleOrganizationChange = (organizationId: string) => {
+    switchOrganization(organizationId).catch(console.error);
+  };
 
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>OTail</SidebarGroupLabel>
+          {user?.organizations && user.organizations.length > 0 && (
+            <div className="px-4 py-2">
+              <Select
+                value={user.current_organization?.id}
+                onValueChange={handleOrganizationChange}
+              >
+                <SelectTrigger className="w-full">
+                  <Building className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Select organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {user.organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name} {org.role === 'admin' && '(Admin)'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -76,6 +107,11 @@ export function AppSidebar() {
           {user && (
             <div className="text-sm text-gray-500 mt-2 px-3">
               {user.email}
+              {user.current_organization && (
+                <div className="text-xs mt-1">
+                  {user.current_organization.name}
+                </div>
+              )}
             </div>
           )}
         </nav>

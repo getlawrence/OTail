@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./otail-web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./otail-web:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_SHOW_SIDEBAR=true
+         
+  backend:
+    build:
+      context: ./otail-server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "4320:4320"
+    environment:
+      - GO_ENV=development
+      - CLICKHOUSE_DSN=clickhouse://clickhouse:9000/logs?username=default&password=
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DB=otail
+    volumes:
+      - ./otail-server:/src
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:

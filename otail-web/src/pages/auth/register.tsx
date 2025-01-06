@@ -10,6 +10,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [organization, setOrganization] = useState('');
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -23,8 +24,18 @@ export default function Register() {
       return;
     }
 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (!organization.trim()) {
+      setError('Organization name is required');
+      return;
+    }
+
     try {
-      await register(email, password);
+      await register(email, password, organization);
       navigate('/login', { state: { message: 'Registration successful. Please login.' } });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -47,6 +58,16 @@ export default function Register() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="w-full"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Input
+              type="text"
+              placeholder="Organization Name"
+              value={organization}
+              onChange={(e) => setOrganization(e.target.value)}
               className="w-full"
               required
             />

@@ -5,6 +5,7 @@ import OtelConfig from './pages/config'
 import Agents from './pages/agents'
 import Login from './pages/auth/login'
 import Register from './pages/auth/register'
+import ManageOrganization from './pages/organization/manage'
 import { ThemeProvider } from "@/hooks/use-theme"
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 
@@ -49,6 +50,7 @@ function App() {
               <Route path="/sampling" element={<Sampling />} />
               <Route path="/otel-config" element={<OtelConfig />} />
               <Route path="/agents" element={<Agents />} />
+              <Route path="/organization/manage" element={<ManageOrganization />} />
               <Route path="/" element={<Navigate to="/sampling" replace />} />
             </Route>
           </Routes>
