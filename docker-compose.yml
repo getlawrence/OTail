@@ -12,7 +12,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - VITE_NO_AUTH_REQUIRED=true
+      - VITE_NO_AUTH_REQUIRED=false
     networks:
       - otail-network    
   backend:
@@ -28,7 +28,7 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017
       - MONGODB_DB=otail
     volumes:
-      - ./otail-server:/src  # Mount source code to /src instead of /app
+      - ./otail-server:/src
     networks:
       - otail-network
     depends_on:
@@ -41,6 +41,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - OPAMP_SERVER_URL=http://backend:4320
+      - API_TOKEN=wgne8-5s5aDfc4ERIxfi-uPeSi-oqQcYyT0e8vRSWH0=
     ports:
       - "4317:4317"  # OTLP gRPC
       - "4318:4318"  # OTLP HTTP

@@ -1,16 +1,5 @@
-import { Organization, User } from "./types";
+import { User } from "./types";
 import { apiClient } from "./client";
-
-
-export const switchOrganization = async (organizationId: string) => {
-    const data = await apiClient.post<{ current_organization: Organization }>(
-        '/api/v1/auth/switch-organization',
-        { organization_id: organizationId },
-        { requiresOrg: false }
-    );
-    return data.current_organization;
-
-}
 
 export const register = async (email: string, password: string, organization: string) => {
     const data = await apiClient.post<{ user: User; api_token: string }>(

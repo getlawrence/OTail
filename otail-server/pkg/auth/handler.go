@@ -26,9 +26,14 @@ func (h *AuthHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/login", h.handleLogin)
 }
 
+type OrganizationRequest struct {
+	Name string `json:"name"`
+}
+
 type RegisterRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email        string              `json:"email"`
+	Password     string              `json:"password"`
+	Organization OrganizationRequest `json:"organization"`
 }
 
 type LoginRequest struct {
@@ -55,6 +60,7 @@ func (h *AuthHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.userStore.CreateUser(req.Email, req.Password)
 	if err != nil {
+		h.logger.Error("Failed to create user", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

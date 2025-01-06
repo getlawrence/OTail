@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 
 	"github.com/mottibec/otail-server/pkg/agents"
 	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
@@ -36,6 +37,7 @@ func main() {
 		if err != nil {
 			return "", err
 		}
+		logger.Info("Agent verified", zap.String("token", token), zap.String("email", user.Email))
 		return user.ID, nil
 	}
 
@@ -62,6 +64,14 @@ func main() {
 
 	// Create HTTP router
 	r := chi.NewRouter()
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:*", "http://127.0.0.1:*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 

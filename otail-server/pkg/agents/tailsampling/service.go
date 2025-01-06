@@ -87,6 +87,27 @@ func (s *Service) ListAgents() map[uuid.UUID]*opamp.Agent {
 	return s.opampServer.ListAgents()
 }
 
+// GetAgentToken returns the token associated with the agent
+func (s *Service) GetAgentToken(agentID uuid.UUID) string {
+	agent := s.opampServer.ListAgents()[agentID]
+	if agent == nil {
+		return ""
+	}
+	
+	// Get the connection for this agent
+	for conn, agents := range s.opampServer.GetConnections() {
+		if agents[agentID] {
+			return s.opampServer.GetUserToken(conn)
+		}
+	}
+	return ""
+}
+
+// GetAgentsByToken returns a list of agents associated with the given token
+func (s *Service) GetAgentsByToken(token string) map[uuid.UUID]*opamp.Agent {
+	return s.opampServer.GetAgentsByToken(token)
+}
+
 // convertToStringMap converts map[interface{}]interface{} to map[string]interface{}
 func convertToStringMap(m map[interface{}]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})

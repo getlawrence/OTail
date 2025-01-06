@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -80,7 +79,6 @@ func (s *MongoUserStore) CreateUser(email, password string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(apiToken)
 
 	user := &User{
 		ID:        uuid.New().String(),

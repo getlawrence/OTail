@@ -44,7 +44,20 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 }
 
 func (h *Handler) ListAgents(w http.ResponseWriter, r *http.Request) {
-	agents := h.samplingService.ListAgents()
+	// Get token from Authorization header
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		h.writeError(w, http.StatusUnauthorized, "No authorization token provided")
+		return
+	}
+
+	// Remove "Bearer " prefix if present
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	// Get agents for this user's token
+	agents := h.samplingService.GetAgentsByToken(token)
 	h.writeJSON(w, agents)
 }
 
