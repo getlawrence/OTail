@@ -1,4 +1,4 @@
-package api
+package agents
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"github.com/mottibec/otail-server/clickhouse"
-	"github.com/mottibec/otail-server/tailsampling"
+	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
+	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
 	"go.uber.org/zap"
 )
 
@@ -35,12 +35,12 @@ func NewHandler(logger *zap.Logger, samplingService *tailsampling.Service, click
 }
 
 // SetupRoutes configures the HTTP routes
-func (h *Handler) SetupRoutes(r *chi.Mux) {
-	r.Get("/api/v1/agents/{agentId}/config", h.GetConfig)
-	r.Put("/api/v1/agents/{agentId}/config", h.UpdateConfig)
-	r.Get("/api/v1/agents", h.ListAgents)
-	r.Get("/api/v1/agents/{agentId}/logs", h.GetLogs)
-	r.Get("/api/v1/agents/{agentId}/logs/stream", h.StreamLogs)
+func (h *Handler) RegisterRoutes(r chi.Router) {
+	r.Get("/{agentId}/config", h.GetConfig)
+	r.Put("/{agentId}/config", h.UpdateConfig)
+	r.Get("/", h.ListAgents)
+	r.Get("/{agentId}/logs", h.GetLogs)
+	r.Get("/{agentId}/logs/stream", h.StreamLogs)
 }
 
 func (h *Handler) ListAgents(w http.ResponseWriter, r *http.Request) {

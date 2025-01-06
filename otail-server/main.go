@@ -9,11 +9,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/mottibec/otail-server/api"
-	"github.com/mottibec/otail-server/auth"
-	"github.com/mottibec/otail-server/clickhouse"
-	"github.com/mottibec/otail-server/opamp"
-	"github.com/mottibec/otail-server/tailsampling"
+
+	"github.com/mottibec/otail-server/pkg/agents"
+	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
+	"github.com/mottibec/otail-server/pkg/agents/opamp"
+	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
+	"github.com/mottibec/otail-server/pkg/auth"
 	"go.uber.org/zap"
 )
 
@@ -42,10 +43,11 @@ func main() {
 	defer logger.Sync()
 
 	// Initialize user store
-	userStore := auth.NewMemoryUserStore()
-
-	// Initialize agents manager
-	agents := &opamp.AllAgents
+	userStore, err := auth.NewMongoUserStore(os.Getenv("MONGODB_URI"), os.Getenv("MONGODB_DB"))
+	if err != nil {
+		logger.Fatal("Failed to create user store", zap.Error(err))
+	}
+	defer userStore.Close()
 
 	// Create token verification function
 	verifyToken := func(token string) (string, error) {
@@ -57,7 +59,7 @@ func main() {
 	}
 
 	// Initialize OPAMP server
-	opampServer, err := opamp.NewServer(agents, verifyToken, logger)
+	opampServer, err := opamp.NewServer(&opamp.AllAgents, verifyToken, logger)
 	if err != nil {
 		logger.Fatal("Failed to create OpAMP server", zap.Error(err))
 	}
@@ -70,7 +72,7 @@ func main() {
 	// Initialize ClickHouse client
 	clickhouseClient, err := clickhouse.NewClient(os.Getenv("CLICKHOUSE_DSN"), logger)
 	if err != nil {
-		logger.Fatal("Failed to create ClickHouse client", zap.Error(err))
+		logger.Error("Failed to create ClickHouse client", zap.Error(err))
 	}
 	defer clickhouseClient.Close()
 
@@ -83,12 +85,12 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	// Add authentication routes
-	authHandler := api.NewAuthHandler(userStore, logger)
-	r.Route("/api/auth", authHandler.RegisterRoutes)
+	authHandler := auth.NewAuthHandler(userStore, logger)
+	r.Route("/api/v1/auth", authHandler.RegisterRoutes)
 
 	// Create the HTTP API handler
-	apiHandler := api.NewHandler(logger, samplingService, clickhouseClient)
-	apiHandler.SetupRoutes(r)
+	apiHandler := agents.NewHandler(logger, samplingService, clickhouseClient)
+	r.Route("/api/v1/agents", apiHandler.RegisterRoutes)
 
 	// Apply CORS middleware
 	corsRouter := corsMiddleware(r)

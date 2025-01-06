@@ -1,20 +1,8 @@
+import { User } from '@/api/types';
+import * as authApi from '@/api/auth';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '@/api/client';
 
-interface Organization {
-  id: string;
-  name: string;
-  role: 'admin' | 'member';
-}
-
-interface User {
-  id: string;
-  email: string;
-  api_token: string;
-  current_organization?: Organization;
-  organizations: Organization[];
-}
 
 interface AuthContextType {
   user: User | null;
@@ -55,15 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     try {
-      const data = await apiClient.post<{ current_organization: Organization }>(
-        '/api/auth/switch-organization',
-        { organization_id: organizationId },
-        { requiresOrg: false }
-      );
+      const organization = await authApi.switchOrganization(organizationId);
 
       const updatedUser = {
         ...user,
-        current_organization: data.current_organization,
+        current_organization: organization,
       };
 
       setUser(updatedUser);
@@ -78,15 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const data = await apiClient.post<{ user: User; api_token: string }>(
-        '/api/auth/login',
-        { email, password },
-        { requiresAuth: false, requiresOrg: false }
-      );
+      const organization = await authApi.login(email, password);
 
-      localStorage.setItem('api_token', data.api_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setUser(data.user);
+      localStorage.setItem('api_token', organization.api_token);
+      localStorage.setItem('user', JSON.stringify(organization.user));
+      setUser(organization.user);
       navigate('/');
     } catch (error) {
       throw error instanceof Error ? error : new Error('Login failed');
@@ -95,15 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, organization: string) => {
     try {
-      const data = await apiClient.post<{ user: User; api_token: string }>(
-        '/api/auth/register',
-        {
-          email,
-          password,
-          organization: { name: organization }
-        },
-        { requiresAuth: false, requiresOrg: false }
-      );
+      const data = await authApi.register(email, password, organization);
 
       localStorage.setItem('api_token', data.api_token);
       localStorage.setItem('user', JSON.stringify(data.user));

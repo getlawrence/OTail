@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/mottibec/otail-server/opamp"
+	"github.com/mottibec/otail-server/pkg/agents/opamp"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )

@@ -8,20 +8,22 @@ import (
 	"github.com/google/uuid"
 )
 
-type MemoryUserStore struct {
-	mu     sync.RWMutex
+// MockUserStore provides an in-memory implementation of UserStore for testing
+type MockUserStore struct {
 	users  map[string]*User // email -> user
 	tokens map[string]*User // token -> user
+	mu     sync.RWMutex
 }
 
-func NewMemoryUserStore() *MemoryUserStore {
-	return &MemoryUserStore{
+// NewMockUserStore creates a new MockUserStore
+func NewMockUserStore() *MockUserStore {
+	return &MockUserStore{
 		users:  make(map[string]*User),
 		tokens: make(map[string]*User),
 	}
 }
 
-func (s *MemoryUserStore) CreateUser(email, password string) (*User, error) {
+func (s *MockUserStore) CreateUser(email, password string) (*User, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -42,7 +44,7 @@ func (s *MemoryUserStore) CreateUser(email, password string) (*User, error) {
 	user := &User{
 		ID:        uuid.New().String(),
 		Email:     email,
-		Password:  hashedPassword,
+		Password:  []byte(hashedPassword),
 		APIToken:  apiToken,
 		CreatedAt: time.Now(),
 	}
@@ -53,7 +55,7 @@ func (s *MemoryUserStore) CreateUser(email, password string) (*User, error) {
 	return user, nil
 }
 
-func (s *MemoryUserStore) GetUserByEmail(email string) (*User, error) {
+func (s *MockUserStore) GetUserByEmail(email string) (*User, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -64,17 +66,21 @@ func (s *MemoryUserStore) GetUserByEmail(email string) (*User, error) {
 	return user, nil
 }
 
-func (s *MemoryUserStore) GetUserByToken(token string) (*User, error) {
+func (s *MockUserStore) GetUserByToken(token string) (*User, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	user, exists := s.tokens[token]
 	if !exists {
-		return nil, ErrInvalidToken
+		return nil, ErrUserNotFound
 	}
 	return user, nil
 }
 
-func (s *MemoryUserStore) ValidatePassword(user *User, password string) bool {
-	return ValidatePassword(user.Password, password)
+func (s *MockUserStore) ValidatePassword(user *User, password string) bool {
+	return CheckPasswordHash(password, string(user.Password))
+}
+
+func (s *MockUserStore) Close() error {
+	return nil
 }

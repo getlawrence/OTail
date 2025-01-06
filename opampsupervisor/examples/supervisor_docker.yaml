@@ -1,5 +1,7 @@
 server:
-  endpoint: ws://backend:4320/v1/opamp  # Changed from wss to ws since we're in development
+  endpoint: ws://backend:4320/v1/opamp
+  headers:
+    Authorization: Bearer Ml1FojvB6LVrgw4N6W3b6J0Kwpp0s19sIIyEDZlNoLw=
   tls:
     insecure: true
 

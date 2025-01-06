@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
+import { Log } from "@/api/types"
 
 interface LogsDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    logs: string
+    logs: Log[]
     loading: boolean
 }
 
@@ -74,11 +75,11 @@ export function LogsDialog({ open, onOpenChange, logs, loading }: LogsDialogProp
                         </div>
                     ) : (
                         <pre className="whitespace-pre-wrap break-words font-mono text-sm">
-                            {logs.split('\n').filter(line => 
-                                line.toLowerCase().includes(searchQuery.toLowerCase())
+                            {logs.filter(line => 
+                                line.body.toLowerCase().includes(searchQuery.toLowerCase())
                             ).map((line, index) => (
                                 <div key={index} className="mb-2 rounded bg-muted/50 p-2">
-                                    {formatAndHighlightJson(line, searchQuery)}
+                                    {formatAndHighlightJson(line.body, searchQuery)}
                                 </div>
                             ))}
                         </pre>

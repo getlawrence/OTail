@@ -25,15 +25,6 @@ class ApiClient {
         };
     }
 
-    private checkOrganization(): void {
-        const userData = localStorage.getItem('user');
-        if (!userData) return;
-        const user = JSON.parse(userData);
-        if (!user.current_organization) {
-            throw new Error('Please select an organization first');
-        }
-    }
-
     private async handleResponse<T>(response: Response): Promise<T> {
         if (!response.ok) {
             const message = await response.text();
@@ -55,7 +46,7 @@ class ApiClient {
         } = options;
 
         if (requiresOrg) {
-            this.checkOrganization();
+         
         }
 
         const requestHeaders: HeadersInit = {

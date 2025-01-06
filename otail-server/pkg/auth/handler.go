@@ -1,20 +1,20 @@
-package api
+package auth
 
 import (
 	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/mottibec/otail-server/auth"
+
 	"go.uber.org/zap"
 )
 
 type AuthHandler struct {
-	userStore auth.UserStore
+	userStore UserStore
 	logger    *zap.Logger
 }
 
-func NewAuthHandler(userStore auth.UserStore, logger *zap.Logger) *AuthHandler {
+func NewAuthHandler(userStore UserStore, logger *zap.Logger) *AuthHandler {
 	return &AuthHandler{
 		userStore: userStore,
 		logger:    logger,
@@ -37,14 +37,19 @@ type LoginRequest struct {
 }
 
 type AuthResponse struct {
-	User     *auth.User `json:"user"`
-	APIToken string     `json:"api_token"`
+	User     *User  `json:"user"`
+	APIToken string `json:"api_token"`
 }
 
 func (h *AuthHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Email == "" || req.Password == "" {
+		http.Error(w, "Email and password are required", http.StatusBadRequest)
 		return
 	}
 
