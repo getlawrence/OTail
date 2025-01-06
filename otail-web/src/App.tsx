@@ -8,6 +8,8 @@ import Register from './pages/auth/register'
 import { ThemeProvider } from "@/hooks/use-theme"
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 
+const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
+
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
@@ -39,18 +41,19 @@ function App() {
                 <Register />
               </div>
             } />
-            <Route
-              element={
-                <RequireAuth>
-                  <Layout />
-                </RequireAuth>
-              }
-            >
-              <Route path="/sampling" element={<Sampling />} />
-              <Route path="/otel-config" element={<OtelConfig />} />
-              <Route path="/agents" element={<Agents />} />
-              <Route path="/" element={<Navigate to="/sampling" replace />} />
-            </Route>
+            {noAuthRequired ? (
+              <Route element={<Layout />}>
+                <Route path="/sampling" element={<Sampling />} />
+                <Route path="/" element={<Navigate to="/sampling" replace />} />
+              </Route>
+            ) : (
+              <Route element={<RequireAuth><Layout /></RequireAuth>}>
+                <Route path="/sampling" element={<Sampling />} />
+                <Route path="/otel-config" element={<OtelConfig />} />
+                <Route path="/agents" element={<Agents />} />
+                <Route path="/" element={<Navigate to="/sampling" replace />} />
+              </Route>
+            )}
           </Routes>
         </AuthProvider>
       </Router>

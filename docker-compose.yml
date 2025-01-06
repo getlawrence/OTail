@@ -12,7 +12,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - VITE_SHOW_SIDEBAR=true
+      - VITE_NO_AUTH_REQUIRED=true
     networks:
       - otail-network    
   backend:

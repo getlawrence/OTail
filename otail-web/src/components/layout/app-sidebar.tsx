@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useAuth } from '@/hooks/use-auth'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   Select,
   SelectContent,
@@ -22,7 +22,8 @@ import {
 } from "@/components/ui/select"
 
 //hide items if VITE_SHOW_SIDEBAR=false in .env 
-const items = import.meta.env.VITE_SHOW_SIDEBAR === 'true'
+const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
+const items = !noAuthRequired
   ? [
     {
       title: "Home",
@@ -50,7 +51,6 @@ const items = import.meta.env.VITE_SHOW_SIDEBAR === 'true'
 
 export function AppSidebar() {
   const { logout, user, switchOrganization } = useAuth()
-  const location = useLocation()
 
   const handleOrganizationChange = (organizationId: string) => {
     switchOrganization(organizationId).catch(console.error);
@@ -96,7 +96,7 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <nav className="grid items-start px-4 text-sm font-medium mt-auto">
+        {user && <nav className="grid items-start px-4 text-sm font-medium mt-auto">
           <button
             onClick={() => logout()}
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
@@ -114,7 +114,7 @@ export function AppSidebar() {
               )}
             </div>
           )}
-        </nav>
+        </nav>}
       </SidebarContent>
       <SidebarFooter className="px-2">
         <ThemeToggle />
