@@ -132,6 +132,11 @@ func (s *Server) GetEffectiveConfig(agentId uuid.UUID) (string, error) {
 }
 
 func (s *Server) UpdateConfig(agentId uuid.UUID, config map[string]interface{}, notifyNextStatusUpdate chan<- struct{}) error {
+	agent := s.agents.FindAgent(agentId)
+	if agent == nil {
+		return fmt.Errorf("agent %s not found", agentId)
+	}
+
 	configByte, err := json.Marshal(config)
 	if err != nil {
 		return err

@@ -43,11 +43,15 @@ func (agents *Agents) RemoveConnection(conn types.Connection) {
 		}
 	}
 
+	// Get the list of agents to remove
+	agentsToRemove := agents.connections[conn]
+
 	// Remove from other maps
 	delete(agents.userTokens, conn)
 	delete(agents.connections, conn)
 
-	for instanceId := range agents.connections[conn] {
+	// Remove all agents associated with this connection
+	for instanceId := range agentsToRemove {
 		delete(agents.agentsById, instanceId)
 	}
 }
