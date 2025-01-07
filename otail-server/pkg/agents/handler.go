@@ -36,9 +36,9 @@ func NewHandler(logger *zap.Logger, samplingService *tailsampling.Service, click
 
 // SetupRoutes configures the HTTP routes
 func (h *Handler) RegisterRoutes(r chi.Router) {
+	r.Get("/", h.ListAgents)
 	r.Get("/{agentId}/config", h.GetConfig)
 	r.Put("/{agentId}/config", h.UpdateConfig)
-	r.Get("/", h.ListAgents)
 	r.Get("/{agentId}/logs", h.GetLogs)
 	r.Get("/{agentId}/logs/stream", h.StreamLogs)
 }

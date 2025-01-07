@@ -75,7 +75,12 @@ export function LogsDialog({ open, onOpenChange, logs, loading }: LogsDialogProp
                         </div>
                     ) : (
                         <pre className="whitespace-pre-wrap break-words font-mono text-sm">
-                            {logs.filter(line => 
+                            {!logs && !loading && (
+                                <span className="text-muted-foreground">
+                                    No logs found
+                                </span>
+                            )}
+                            {logs && logs.filter(line => 
                                 line.body.toLowerCase().includes(searchQuery.toLowerCase())
                             ).map((line, index) => (
                                 <div key={index} className="mb-2 rounded bg-muted/50 p-2">
