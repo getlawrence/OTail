@@ -151,14 +151,6 @@ func (s *Server) ListAgents() map[uuid.UUID]*Agent {
 	return s.agents.GetAllAgentsReadonlyClone()
 }
 
-func (s *Server) GetConnections() map[types.Connection]map[uuid.UUID]bool {
-	return s.agents.GetConnections()
-}
-
-func (s *Server) GetUserToken(conn types.Connection) string {
-	return s.agents.GetUserToken(conn)
-}
-
 func (s *Server) GetAgentsByToken(token string) map[uuid.UUID]*Agent {
 	return s.agents.GetAgentsByToken(token)
 }

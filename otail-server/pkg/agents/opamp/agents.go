@@ -175,49 +175,28 @@ func (agents *Agents) GetAgentsByToken(token string) map[uuid.UUID]*Agent {
 	agents.mux.RLock()
 	defer agents.mux.RUnlock()
 
-	logger.Printf("GetAgentsByToken for token %s\n", token)
-	logger.Printf("agents.tokenConns len: %d\n", len(agents.tokenConns))
-	logger.Printf("agents.connections len: %d\n", len(agents.connections))
-
 	result := make(map[uuid.UUID]*Agent)
-	if conns, ok := agents.tokenConns[token]; ok {
-		logger.Printf("Found %d connections for token %s\n", len(conns), token)
-		for _, conn := range conns {
-			if agentSet, ok := agents.connections[conn]; ok {
-				logger.Printf("Found %d agents for connection %s\n", len(agentSet), conn)
-				for agentId := range agentSet {
-					logger.Printf("Found agent %s\n", agentId)
-					if agent := agents.agentsById[agentId]; agent != nil {
-						logger.Printf("Found agent %s\n", agentId)
-						result[agentId] = agent.CloneReadonly()
-					}
-				}
+
+	conns, exists := agents.tokenConns[token]
+	if !exists {
+		return result
+	}
+
+	for _, conn := range conns {
+		agentSet, exists := agents.connections[conn]
+		if !exists {
+			continue
+		}
+
+		for agentId := range agentSet {
+			agent, exists := agents.agentsById[agentId]
+			if exists && agent != nil {
+				result[agentId] = agent
 			}
 		}
 	}
+
 	return result
-}
-
-func (agents *Agents) GetUserToken(conn types.Connection) string {
-	agents.mux.RLock()
-	defer agents.mux.RUnlock()
-	return agents.userTokens[conn]
-}
-
-func (a *Agents) GetConnections() map[types.Connection]map[uuid.UUID]bool {
-	a.mux.RLock()
-	defer a.mux.RUnlock()
-
-	// Create a copy of the connections map
-	connections := make(map[types.Connection]map[uuid.UUID]bool)
-	for conn, agents := range a.connections {
-		agentsCopy := make(map[uuid.UUID]bool)
-		for id, val := range agents {
-			agentsCopy[id] = val
-		}
-		connections[conn] = agentsCopy
-	}
-	return connections
 }
 
 var AllAgents = Agents{
