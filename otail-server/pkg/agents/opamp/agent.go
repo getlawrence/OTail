@@ -429,7 +429,7 @@ func (agent *Agent) calcConnectionSettings(response *protobufs.ServerToAgent) {
 			DestinationEndpoint: "http://collector:4318",
 		},
 		OwnLogs: &protobufs.TelemetryConnectionSettings{
-			DestinationEndpoint: "http://collector:4318",
+			DestinationEndpoint: "collector:4317",
 		},
 		OwnTraces: &protobufs.TelemetryConnectionSettings{
 			DestinationEndpoint: "http://collector:4318",

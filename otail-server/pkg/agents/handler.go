@@ -82,21 +82,23 @@ func (h *Handler) GetConfig(w http.ResponseWriter, r *http.Request) {
 
 // UpdateConfig handles PUT requests to update agent configurations
 func (h *Handler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
-	vars := chi.URLParam(r, "agentId")
-	agentID := vars
+	agentID := chi.URLParam(r, "agentId")
 	instanceID, err := uuid.Parse(agentID)
 	if err != nil {
+		h.logger.Error("Failed to parse agent ID", zap.Error(err))
 		h.writeError(w, http.StatusBadRequest, "Invalid agent ID")
 		return
 	}
 
 	var config map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+		h.logger.Error("Failed to decode request body", zap.Error(err))
 		h.writeError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	if err := h.samplingService.UpdateConfig(instanceID, config); err != nil {
+		h.logger.Error("Failed to update configuration", zap.Error(err))
 		h.writeError(w, http.StatusInternalServerError, "Failed to update configuration")
 		return
 	}

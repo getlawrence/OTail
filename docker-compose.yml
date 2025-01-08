@@ -41,7 +41,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - OPAMP_SERVER_URL=http://backend:4320
-      - API_TOKEN=wgne8-5s5aDfc4ERIxfi-uPeSi-oqQcYyT0e8vRSWH0=
+      - API_TOKEN=K7VwjJmlU8u3xHLcWpFDJ1ZD-bkTUCOhMuLu1k7Kxh0=
     ports:
       - "4317:4317"  # OTLP gRPC
       - "4318:4318"  # OTLP HTTP

@@ -58,6 +58,7 @@ var (
 
 	lastRecvRemoteConfigFile     = "last_recv_remote_config.dat"
 	lastRecvOwnMetricsConfigFile = "last_recv_own_metrics_config.dat"
+	lastRecvOwnLogsConfigFile    = "last_recv_own_logs_config.dat"
 )
 
 const (
@@ -82,6 +83,7 @@ func (c *configState) equal(other *configState) bool {
 // to work with an OpAMP Server.
 type Supervisor struct {
 	logger      *zap.Logger
+	logWriter   *OwnLogger
 	pidProvider pidProvider
 
 	// Commander that starts/stops the Agent process.
@@ -161,6 +163,7 @@ type Supervisor struct {
 func NewSupervisor(logger *zap.Logger, cfg config.Supervisor) (*Supervisor, error) {
 	s := &Supervisor{
 		logger:                       logger,
+		logWriter:                    NewOwnLogger(logger),
 		pidProvider:                  defaultPIDProvider{},
 		hasNewConfig:                 make(chan struct{}, 1),
 		agentConfigOwnMetricsSection: &atomic.Value{},
@@ -222,9 +225,11 @@ func (s *Supervisor) Start() error {
 		return fmt.Errorf("cannot start OpAMP client: %w", err)
 	}
 
+	logWriter := s.logWriter
 	s.commander, err = commander.NewCommander(
 		s.logger,
 		s.config.Storage.Directory,
+		logWriter,
 		s.config.Agent,
 		"--config", s.agentConfigFilePath(),
 	)
@@ -341,10 +346,11 @@ func (s *Supervisor) getBootstrapInfo() (err error) {
 			err = errors.Join(err, fmt.Errorf("error when stopping the opamp server: %w", stopErr))
 		}
 	}()
-
+	agentLogWriter := s.logWriter
 	cmd, err := commander.NewCommander(
 		s.logger,
 		s.config.Storage.Directory,
+		agentLogWriter,
 		s.config.Agent,
 		"--config", s.agentConfigFilePath(),
 	)
@@ -816,6 +822,22 @@ func (s *Supervisor) loadAndWriteInitialMergedConfig() error {
 		s.logger.Debug("Own metrics is not supported, will not attempt to load config from file")
 	}
 
+	if s.config.Capabilities.ReportsOwnLogs {
+		// Try to load the last received own logs config if it exists.
+		lastRecvOwnLogsConfig, err := os.ReadFile(filepath.Join(s.config.Storage.Directory, lastRecvOwnLogsConfigFile))
+		if err == nil {
+			set := &protobufs.TelemetryConnectionSettings{}
+			err = proto.Unmarshal(lastRecvOwnLogsConfig, set)
+			if err != nil {
+				s.logger.Error("Cannot parse last received own logs config", zap.Error(err))
+			} else {
+				s.setupOwnLogs(context.Background(), set)
+			}
+		}
+	} else {
+		s.logger.Debug("Own logs is not supported, will not attempt to load config from file")
+	}
+
 	_, err = s.composeMergedConfig(s.remoteConfig)
 	if err != nil {
 		return fmt.Errorf("could not compose initial merged config: %w", err)
@@ -890,6 +912,32 @@ func (s *Supervisor) setupOwnMetrics(_ context.Context, settings *protobufs.Tele
 	}
 
 	return configChanged
+}
+
+func (s *Supervisor) setupOwnLogs(ctx context.Context, settings *protobufs.TelemetryConnectionSettings) (configChanged bool) {
+	if settings.DestinationEndpoint == "" {
+		// No destination. Disable metric collection.
+		s.logger.Debug("Disabling own metrics pipeline in the config")
+	} else {
+		ad := s.agentDescription.Load().(*protobufs.AgentDescription)
+		if ad == nil {
+			return false
+		}
+		resourceAttrs := map[string]string{}
+		for _, attr := range ad.IdentifyingAttributes {
+			resourceAttrs[attr.Key] = attr.Value.GetStringValue()
+		}
+		err := s.logWriter.Configure(ctx, LoggerConfig{
+			Endpoint:      settings.DestinationEndpoint,
+			Insecure:      true,
+			resourceAttrs: resourceAttrs,
+		})
+		if err != nil {
+			s.logger.Error("Failed to configure own logger", zap.Error(err))
+			return false
+		}
+	}
+	return false
 }
 
 // composeMergedConfig composes the merged config from multiple sources:
@@ -1267,6 +1315,10 @@ func (s *Supervisor) onMessage(ctx context.Context, msg *types.MessageData) {
 		configChanged = s.processOwnMetricsConnSettingsMessage(ctx, msg.OwnMetricsConnSettings) || configChanged
 	}
 
+	if msg.OwnLogsConnSettings != nil {
+		configChanged = s.processOwnLogsConnSettingsMessage(ctx, msg.OwnLogsConnSettings) || configChanged
+	}
+
 	// Update the agent config if any messages have touched the config
 	if configChanged {
 		err := s.opampClient.UpdateEffectiveConfig(ctx)
@@ -1337,6 +1389,13 @@ func (s *Supervisor) processOwnMetricsConnSettingsMessage(ctx context.Context, m
 		s.logger.Error("Could not save last received own telemetry settings", zap.Error(err))
 	}
 	return s.setupOwnMetrics(ctx, msg)
+}
+
+func (s *Supervisor) processOwnLogsConnSettingsMessage(ctx context.Context, msg *protobufs.TelemetryConnectionSettings) bool {
+	if err := s.saveLastReceivedOwnTelemetrySettings(msg, lastRecvOwnLogsConfigFile); err != nil {
+		s.logger.Error("Could not save last received own telemetry settings", zap.Error(err))
+	}
+	return s.setupOwnLogs(ctx, msg)
 }
 
 // processAgentIdentificationMessage processes an AgentIdentification message, returning true if the agent config has changed.
