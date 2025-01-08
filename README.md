@@ -3,7 +3,7 @@
 OTail is a user-friendly web interface for creating and managing OpenTelemetry tail sampling agents. It provides a visual way to configure complex sampling policies without having to write YAML directly.
 
 ## UI
-<img width="1467" alt="Screenshot 2024-12-01 at 13 57 34" src="https://github.com/user-attachments/assets/c21b8795-190e-4bd3-a3df-7a6940236d35">
+<img width="1467" alt="Screenshot 2025-01-08 at 19 20 46" src="https://github.com/user-attachments/assets/40724856-f210-47e7-8e28-f9c35fcfc9c6" />
 
 
 ## Features
@@ -20,6 +20,7 @@ OTail is a user-friendly web interface for creating and managing OpenTelemetry t
 1. Clone the repository: `git clone https://github.com/your-username/otail.git`
 2. Start docker compose: `docker compose up -d`
 3. Open your browser and navigate to http://localhost:3000
+
 
 ## Contributing
 
