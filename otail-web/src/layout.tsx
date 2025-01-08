@@ -1,3 +1,4 @@
+import { Outlet } from "react-router-dom"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -6,7 +7,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout() {
   return (
     <SidebarProvider className="flex h-screen w-screen">
       <AppSidebar />
@@ -16,7 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Separator orientation="vertical" className="mr-2 h-4" />
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 w-full h-full">
-          {children}
+          <Outlet />
         </div>
       </SidebarInset>
     </SidebarProvider>

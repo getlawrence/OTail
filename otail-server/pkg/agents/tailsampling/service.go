@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/mottibec/otail-server/opamp"
+	"github.com/mottibec/otail-server/pkg/agents/opamp"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
@@ -85,6 +85,11 @@ func (s *Service) UpdateConfig(agentID uuid.UUID, config map[string]interface{})
 // ListAgents returns a list of all connected agents
 func (s *Service) ListAgents() map[uuid.UUID]*opamp.Agent {
 	return s.opampServer.ListAgents()
+}
+
+// GetAgentsByToken returns a list of agents associated with the given token
+func (s *Service) GetAgentsByToken(token string) map[uuid.UUID]*opamp.Agent {
+	return s.opampServer.GetAgentsByToken(token)
 }
 
 // convertToStringMap converts map[interface{}]interface{} to map[string]interface{}

@@ -1,51 +1,18 @@
-import { Agents } from "./types";
-
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+import { Agents, Log } from "./types";
+import { apiClient } from "./client";
 
 export async function getAgents(): Promise<Agents> {
-    const response = await fetch(`${baseUrl}/api/v1/agents`, {
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
-    return response.json();
+    return apiClient.get<Agents>('/api/v1/agents');
 }
 
 export async function getConfig(agentId: string): Promise<string> {
-    const response = await fetch(`${baseUrl}/api/v1/agents/${agentId}/config`, {
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
-    return response.text();
+    return apiClient.get<string>(`/api/v1/agents/${agentId}/config`);
 }
 
 export async function updateConfig(agentId: string, config: string): Promise<void> {
-    const response = await fetch(`${baseUrl}/api/v1/agents/${agentId}/config`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: config,
-    });
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
+    return apiClient.put<void>(`/api/v1/agents/${agentId}/config`, config);
 }
 
-export async function fetchAgentLogs(agentId: string): Promise<string> {
-    const response = await fetch(`${baseUrl}/api/v1/agents/${agentId}/logs`);
-    if (!response.ok) {
-        throw new Error('Failed to fetch logs');
-    }
-    return response.text();
+export async function fetchAgentLogs(agentId: string): Promise<Log[]> {
+    return apiClient.get<Log[]>(`/api/v1/agents/${agentId}/logs`);
 };

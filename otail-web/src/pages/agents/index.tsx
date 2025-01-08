@@ -2,22 +2,22 @@ import { useEffect, useState } from "react"
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
 import { getAgents, fetchAgentLogs, updateConfig } from "@/api/agent"
-import { Agent } from "@/api/types"
+import { Agent, Log } from "@/api/types"
 import { LogsDialog } from "@/components/agents/LogsDialog"
 import { ConfigDialog } from "@/components/agents/ConfigDialog"
 import { load } from 'js-yaml'
 
 const AgentsPage = () => {
-    const [data, setData] = useState<Agent[]>([])
+    const [agents, setAgents] = useState<Agent[]>([])
     const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
     const [configOpen, setConfigOpen] = useState(false)
     const [logsOpen, setLogsOpen] = useState(false)
-    const [logs, setLogs] = useState<string>("")
+    const [logs, setLogs] = useState<Log[]>([])
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         getAgents().then(data => {
-            setData(Object.values(data))
+            setAgents(Object.values(data))
         })
     }, [])
 
@@ -35,7 +35,7 @@ const AgentsPage = () => {
             setLogs(logsData)
         } catch (error) {
             console.error('Failed to fetch logs:', error)
-            setLogs('Failed to fetch logs')
+            setLogs([])
         } finally {
             setLoading(false)
         }
@@ -52,7 +52,7 @@ const AgentsPage = () => {
 
     return (
         <div className="container mx-auto py-10">
-            <DataTable columns={tableColumns} data={data} />
+            <DataTable columns={tableColumns} data={agents} />
             
             {selectedAgent && (
                 <>

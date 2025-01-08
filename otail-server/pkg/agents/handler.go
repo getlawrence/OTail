@@ -1,4 +1,4 @@
-package api
+package agents
 
 import (
 	"context"
@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/mottibec/otail-server/clickhouse"
-	"github.com/mottibec/otail-server/tailsampling"
+	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
+	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
 	"go.uber.org/zap"
 )
 
@@ -35,23 +35,36 @@ func NewHandler(logger *zap.Logger, samplingService *tailsampling.Service, click
 }
 
 // SetupRoutes configures the HTTP routes
-func (h *Handler) SetupRoutes(r *mux.Router) {
-	r.HandleFunc("/api/v1/agents/{agentId}/config", h.GetConfig).Methods("GET")
-	r.HandleFunc("/api/v1/agents/{agentId}/config", h.UpdateConfig).Methods("PUT")
-	r.HandleFunc("/api/v1/agents", h.ListAgents).Methods("GET")
-	r.HandleFunc("/api/v1/agents/{agentId}/logs", h.GetLogs).Methods("GET")
-	r.HandleFunc("/api/v1/agents/{agentId}/logs/stream", h.StreamLogs)
+func (h *Handler) RegisterRoutes(r chi.Router) {
+	r.Get("/", h.ListAgents)
+	r.Get("/{agentId}/config", h.GetConfig)
+	r.Put("/{agentId}/config", h.UpdateConfig)
+	r.Get("/{agentId}/logs", h.GetLogs)
+	r.Get("/{agentId}/logs/stream", h.StreamLogs)
 }
 
 func (h *Handler) ListAgents(w http.ResponseWriter, r *http.Request) {
-	agents := h.samplingService.ListAgents()
+	// Get token from Authorization header
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		h.writeError(w, http.StatusUnauthorized, "No authorization token provided")
+		return
+	}
+
+	// Remove "Bearer " prefix if present
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	// Get agents for this user's token
+	agents := h.samplingService.GetAgentsByToken(token)
 	h.writeJSON(w, agents)
 }
 
 // GetConfig handles GET requests for agent configurations
 func (h *Handler) GetConfig(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	agentID := vars["agentId"]
+	vars := chi.URLParam(r, "agentId")
+	agentID := vars
 	instanceID, err := uuid.Parse(agentID)
 	if err != nil {
 		h.writeError(w, http.StatusBadRequest, "Invalid agent ID")
@@ -69,21 +82,23 @@ func (h *Handler) GetConfig(w http.ResponseWriter, r *http.Request) {
 
 // UpdateConfig handles PUT requests to update agent configurations
 func (h *Handler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	agentID := vars["agentId"]
+	agentID := chi.URLParam(r, "agentId")
 	instanceID, err := uuid.Parse(agentID)
 	if err != nil {
+		h.logger.Error("Failed to parse agent ID", zap.Error(err))
 		h.writeError(w, http.StatusBadRequest, "Invalid agent ID")
 		return
 	}
 
 	var config map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+		h.logger.Error("Failed to decode request body", zap.Error(err))
 		h.writeError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	if err := h.samplingService.UpdateConfig(instanceID, config); err != nil {
+		h.logger.Error("Failed to update configuration", zap.Error(err))
 		h.writeError(w, http.StatusInternalServerError, "Failed to update configuration")
 		return
 	}
@@ -92,8 +107,7 @@ func (h *Handler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	agentID := vars["agentId"]
+	vars := chi.URLParam(r, "agentId")
 
 	// Parse query parameters
 	startTimeStr := r.URL.Query().Get("start_time")
@@ -114,7 +128,7 @@ func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	logs, err := h.clickhouse.QueryLogs(r.Context(), agentID, startTime, endTime, limit)
+	logs, err := h.clickhouse.QueryLogs(r.Context(), vars, startTime, endTime, limit)
 	if err != nil {
 		h.writeError(w, http.StatusInternalServerError, "Failed to query logs")
 		return
@@ -124,8 +138,7 @@ func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) StreamLogs(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	agentID := vars["agentId"]
+	vars := chi.URLParam(r, "agentId")
 
 	// Upgrade HTTP connection to WebSocket
 	conn, err := h.upgrader.Upgrade(w, r, nil)
@@ -140,7 +153,7 @@ func (h *Handler) StreamLogs(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	// Start streaming logs
-	logChan, err := h.clickhouse.StreamLogs(ctx, agentID)
+	logChan, err := h.clickhouse.StreamLogs(ctx, vars)
 	if err != nil {
 		h.logger.Error("Failed to start log stream", zap.Error(err))
 		return

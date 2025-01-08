@@ -1,0 +1,96 @@
+package user
+
+import (
+	"errors"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/mottibec/otail-server/pkg/auth"
+)
+
+type UserService struct {
+	store UserStore
+}
+
+func NewUserService(store UserStore) UserService {
+	return UserService{
+		store: store,
+	}
+}
+
+func (s *UserService) CreateUser(email, password string) (*User, error) {
+	// Validate input
+	if email == "" || password == "" {
+		return nil, errors.New("email and password are required")
+	}
+
+	// Check if user exists
+	existingUser, err := s.store.GetUserByEmail(email)
+	if err != nil && !errors.Is(err, ErrUserNotFound) {
+		return nil, err
+	}
+	if existingUser != nil {
+		return nil, errors.New("user already exists")
+	}
+
+	// Hash password
+	hashedPassword, err := auth.HashPassword(password)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate API token
+	apiToken, err := auth.GenerateAPIToken()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create user object
+	user := &User{
+		ID:        uuid.New().String(),
+		Email:     email,
+		Password:  []byte(hashedPassword),
+		APIToken:  apiToken,
+		CreatedAt: time.Now(),
+	}
+
+	// Save to store
+	return s.store.CreateUser(user)
+}
+
+func (s *UserService) AuthenticateUser(email, password string) (*User, error) {
+	if email == "" || password == "" {
+		return nil, errors.New("email and password are required")
+	}
+
+	user, err := s.store.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	if !auth.ValidatePassword(string(user.Password), password) {
+		return nil, errors.New("invalid credentials")
+	}
+
+	return user, nil
+}
+
+func (s *UserService) GetUserByEmail(email string) (*User, error) {
+	return s.store.GetUserByEmail(email)
+}
+
+func (s *UserService) GetUserByToken(token string) (*User, error) {
+	return s.store.GetUserByToken(token)
+}
+
+func (s *UserService) ValidatePassword(user *User, password string) bool {
+	return auth.ValidatePassword(string(user.Password), password)
+}
+
+func (s *UserService) ValidateAPIToken(token string) (*User, error) {
+	if token == "" {
+		return nil, errors.New("token is required")
+	}
+
+	return s.store.GetUserByToken(token)
+}

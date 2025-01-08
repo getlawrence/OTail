@@ -12,7 +12,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - VITE_SHOW_SIDEBAR=true
+      - VITE_NO_AUTH_REQUIRED=false
     networks:
       - otail-network    
   backend:
@@ -25,12 +25,15 @@ services:
     environment:
       - GO_ENV=development
       - CLICKHOUSE_DSN=clickhouse://clickhouse:9000/logs?username=default&password=
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DB=otail
     volumes:
-      - ./otail-server:/src  # Mount source code to /src instead of /app
+      - ./otail-server:/src
     networks:
       - otail-network
     depends_on:
       - clickhouse
+      - mongodb
 
   opampsupervisor:
     build:
@@ -38,6 +41,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - OPAMP_SERVER_URL=http://backend:4320
+      - API_TOKEN=K7VwjJmlU8u3xHLcWpFDJ1ZD-bkTUCOhMuLu1k7Kxh0=
     ports:
       - "4317:4317"  # OTLP gRPC
       - "4318:4318"  # OTLP HTTP
@@ -97,10 +101,20 @@ services:
     volumes:
       - 'grafana_storage:/var/lib/grafana'
 
+  mongodb:
+    image: mongo:latest
+    networks:
+      - otail-network
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
 volumes:
   opamp-storage:
   clickhouse-data:
   grafana_storage:
+  mongodb_data:
 
 networks:
   otail-network:

@@ -14,6 +14,8 @@ type Agents struct {
 	mux         sync.RWMutex
 	agentsById  map[uuid.UUID]*Agent
 	connections map[types.Connection]map[uuid.UUID]bool
+	userTokens  map[types.Connection]string
+	tokenConns  map[string][]types.Connection
 }
 
 var logger = log.New(log.Default().Writer(), "[AGENTS] ", log.Default().Flags()|log.Lmsgprefix|log.Lmicroseconds)
@@ -24,10 +26,34 @@ func (agents *Agents) RemoveConnection(conn types.Connection) {
 	agents.mux.Lock()
 	defer agents.mux.Unlock()
 
-	for instanceId := range agents.connections[conn] {
+	// Remove from tokenConns map
+	if token, ok := agents.userTokens[conn]; ok {
+		if conns, exists := agents.tokenConns[token]; exists {
+			newConns := make([]types.Connection, 0, len(conns)-1)
+			for _, c := range conns {
+				if c != conn {
+					newConns = append(newConns, c)
+				}
+			}
+			if len(newConns) > 0 {
+				agents.tokenConns[token] = newConns
+			} else {
+				delete(agents.tokenConns, token)
+			}
+		}
+	}
+
+	// Get the list of agents to remove
+	agentsToRemove := agents.connections[conn]
+
+	// Remove from other maps
+	delete(agents.userTokens, conn)
+	delete(agents.connections, conn)
+
+	// Remove all agents associated with this connection
+	for instanceId := range agentsToRemove {
 		delete(agents.agentsById, instanceId)
 	}
-	delete(agents.connections, conn)
 }
 
 func (agents *Agents) SetCustomConfigForAgent(
@@ -137,7 +163,49 @@ func (a *Agents) OfferAgentConnectionSettings(
 	}
 }
 
+func (agents *Agents) SetUserToken(conn types.Connection, token string) {
+	agents.mux.Lock()
+	defer agents.mux.Unlock()
+	agents.userTokens[conn] = token
+
+	// Update token -> connections mapping
+	if agents.tokenConns == nil {
+		agents.tokenConns = make(map[string][]types.Connection)
+	}
+	agents.tokenConns[token] = append(agents.tokenConns[token], conn)
+}
+
+func (agents *Agents) GetAgentsByToken(token string) map[uuid.UUID]*Agent {
+	agents.mux.RLock()
+	defer agents.mux.RUnlock()
+
+	result := make(map[uuid.UUID]*Agent)
+
+	conns, exists := agents.tokenConns[token]
+	if !exists {
+		return result
+	}
+
+	for _, conn := range conns {
+		agentSet, exists := agents.connections[conn]
+		if !exists {
+			continue
+		}
+
+		for agentId := range agentSet {
+			agent, exists := agents.agentsById[agentId]
+			if exists && agent != nil {
+				result[agentId] = agent
+			}
+		}
+	}
+
+	return result
+}
+
 var AllAgents = Agents{
 	agentsById:  map[uuid.UUID]*Agent{},
 	connections: map[types.Connection]map[uuid.UUID]bool{},
+	userTokens:  map[types.Connection]string{},
+	tokenConns:  map[string][]types.Connection{},
 }

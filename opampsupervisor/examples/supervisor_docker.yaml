@@ -1,11 +1,14 @@
 server:
-  endpoint: ws://backend:4320/v1/opamp  # Changed from wss to ws since we're in development
+  endpoint: ws://backend:4320/v1/opamp
+  headers:
+    Authorization: Bearer ${API_TOKEN}
   tls:
     insecure: true
 
 capabilities:
   reports_effective_config: true
   reports_own_metrics: true
+  reports_own_logs: true
   reports_health: true
   accepts_remote_config: true
   reports_remote_config: true

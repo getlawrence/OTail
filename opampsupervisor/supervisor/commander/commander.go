@@ -8,9 +8,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"sync/atomic"
 	"time"
 
@@ -22,23 +22,25 @@ import (
 // Commander can start/stop/restart the Agent executable and also watch for a signal
 // for the Agent process to finish.
 type Commander struct {
-	logger  *zap.Logger
-	cfg     config.Agent
-	logsDir string
-	args    []string
-	cmd     *exec.Cmd
-	doneCh  chan struct{}
-	exitCh  chan struct{}
-	running *atomic.Int64
+	logger         *zap.Logger
+	cfg            config.Agent
+	logsDir        string
+	args           []string
+	cmd            *exec.Cmd
+	doneCh         chan struct{}
+	exitCh         chan struct{}
+	running        *atomic.Int64
+	agentLogWriter io.Writer
 }
 
-func NewCommander(logger *zap.Logger, logsDir string, cfg config.Agent, args ...string) (*Commander, error) {
+func NewCommander(logger *zap.Logger, logsDir string, agentLogWriter io.Writer, cfg config.Agent, args ...string) (*Commander, error) {
 	return &Commander{
-		logger:  logger,
-		logsDir: logsDir,
-		cfg:     cfg,
-		args:    args,
-		running: &atomic.Int64{},
+		logger:         logger,
+		logsDir:        logsDir,
+		cfg:            cfg,
+		args:           args,
+		running:        &atomic.Int64{},
+		agentLogWriter: agentLogWriter,
 		// Buffer channels so we can send messages without blocking on listeners.
 		doneCh: make(chan struct{}, 1),
 		exitCh: make(chan struct{}, 1),
@@ -92,29 +94,17 @@ func (c *Commander) Restart(ctx context.Context) error {
 }
 
 func (c *Commander) startNormal() error {
-	logFilePath := filepath.Join(c.logsDir, "agent.log")
-	stdoutFile, err := os.Create(logFilePath)
-	if err != nil {
-		return fmt.Errorf("cannot create %s: %w", logFilePath, err)
-	}
-
-	// Capture standard output and standard error.
-	// https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/21072
-	c.cmd.Stdout = stdoutFile
-	c.cmd.Stderr = stdoutFile
+	c.cmd.Stdout = c.agentLogWriter
+	c.cmd.Stderr = c.agentLogWriter
 
 	if err := c.cmd.Start(); err != nil {
-		stdoutFile.Close()
 		return fmt.Errorf("startNormal: %w", err)
 	}
 
 	c.logger.Debug("Agent process started", zap.Int("pid", c.cmd.Process.Pid))
 	c.running.Store(1)
 
-	go func() {
-		defer stdoutFile.Close()
-		c.watch()
-	}()
+	go c.watch()
 
 	return nil
 }

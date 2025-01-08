@@ -1,7 +1,4 @@
 receivers:
-  # Collect own logs
-  filelog/own_logs:
-    include: ['/var/lib/opamp/agent.log']
   # Collect own metrics
   prometheus/own_metrics:
     config:
@@ -10,15 +7,6 @@ receivers:
           scrape_interval: 10s
           static_configs:
             - targets: ['0.0.0.0:{{.PrometheusPort}}']  
-processors:
-  resource:
-    attributes:
-      - key: "service.name"
-        value: "otel-collector"
-        action: insert
-      - key: "service.instance.id"
-        value: "0194028c-5be6-78a0-9ae3-e817d10b3a8d"
-        action: insert
 exporters:
   otlphttp/own_telemetry:
     endpoint: "{{.OTLPEndpoint}}"
@@ -30,8 +18,4 @@ service:
   pipelines:
     metrics/own_metrics:
       receivers: [prometheus/own_metrics]
-      exporters: [otlphttp/own_telemetry]
-    logs/own_logs:
-      receivers: [filelog/own_logs]
-      processors: [resource]
       exporters: [otlphttp/own_telemetry]
