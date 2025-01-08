@@ -1,6 +1,11 @@
 package auth
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"crypto/rand"
+	"encoding/base64"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 // HashPassword creates a bcrypt hash from a password string
 func HashPassword(password string) (string, error) {
@@ -20,4 +25,13 @@ func CheckPasswordHash(password, hash string) bool {
 // ValidatePassword is a helper function that checks if a password matches a hash
 func ValidatePassword(hash, password string) bool {
 	return CheckPasswordHash(password, hash)
+}
+
+func GenerateAPIToken() (string, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(b), nil
 }

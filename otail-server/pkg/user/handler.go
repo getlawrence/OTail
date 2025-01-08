@@ -1,4 +1,4 @@
-package auth
+package user
 
 import (
 	"encoding/json"
@@ -9,19 +9,19 @@ import (
 	"go.uber.org/zap"
 )
 
-type AuthHandler struct {
-	userStore UserStore
-	logger    *zap.Logger
+type UserHandler struct {
+	userSvc UserService
+	logger  *zap.Logger
 }
 
-func NewAuthHandler(userStore UserStore, logger *zap.Logger) *AuthHandler {
-	return &AuthHandler{
-		userStore: userStore,
-		logger:    logger,
+func NewUserHandler(userSvc UserService, logger *zap.Logger) *UserHandler {
+	return &UserHandler{
+		userSvc: userSvc,
+		logger:  logger,
 	}
 }
 
-func (h *AuthHandler) RegisterRoutes(r chi.Router) {
+func (h *UserHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/register", h.handleRegister)
 	r.Post("/login", h.handleLogin)
 }
@@ -46,7 +46,7 @@ type AuthResponse struct {
 	APIToken string `json:"api_token"`
 }
 
-func (h *AuthHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
@@ -58,7 +58,7 @@ func (h *AuthHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.userStore.CreateUser(req.Email, req.Password)
+	user, err := h.userSvc.CreateUser(req.Email, req.Password)
 	if err != nil {
 		h.logger.Error("Failed to create user", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -74,20 +74,20 @@ func (h *AuthHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-func (h *AuthHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	user, err := h.userStore.GetUserByEmail(req.Email)
+	user, err := h.userSvc.GetUserByEmail(req.Email)
 	if err != nil {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
 
-	if !h.userStore.ValidatePassword(user, req.Password) {
+	if !h.userSvc.ValidatePassword(user, req.Password) {
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}

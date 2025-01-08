@@ -15,7 +15,7 @@ import (
 	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
 	"github.com/mottibec/otail-server/pkg/agents/opamp"
 	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
-	"github.com/mottibec/otail-server/pkg/auth"
+	"github.com/mottibec/otail-server/pkg/user"
 	"go.uber.org/zap"
 )
 
@@ -25,15 +25,16 @@ func main() {
 	defer logger.Sync()
 
 	// Initialize user store
-	userStore, err := auth.NewMongoUserStore(os.Getenv("MONGODB_URI"), os.Getenv("MONGODB_DB"))
+	userStore, err := user.NewMongoUserStore(os.Getenv("MONGODB_URI"), os.Getenv("MONGODB_DB"))
 	if err != nil {
 		logger.Fatal("Failed to create user store", zap.Error(err))
 	}
 	defer userStore.Close()
 
+	userSvc := user.NewUserService(userStore)
 	// Create token verification function
 	verifyToken := func(token string) (string, error) {
-		user, err := userStore.GetUserByToken(token)
+		user, err := userSvc.GetUserByToken(token)
 		if err != nil {
 			return "", err
 		}
@@ -76,8 +77,8 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	// Add authentication routes
-	authHandler := auth.NewAuthHandler(userStore, logger)
-	r.Route("/api/v1/auth", authHandler.RegisterRoutes)
+	userHandler := user.NewUserHandler(userSvc, logger)
+	r.Route("/api/v1/auth", userHandler.RegisterRoutes)
 
 	// Create the HTTP API handler
 	apiHandler := agents.NewHandler(logger, samplingService, clickhouseClient)
