@@ -3,7 +3,7 @@
 import React from "react"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ChevronDown } from "lucide-react"
 import { AlwaysSamplePolicyEditor } from './policy-editors/always-sample'
 import { Policy } from '@/types/policy'
@@ -85,9 +85,9 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemo
             />
           </div>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="w-9 p-0">
-              <ChevronDown className={cn("h-4 w-4 transition-transform", {
-                "transform rotate-180": isOpen
+            <Button variant="outline" size="sm" className="w-9 p-0 hover:bg-transparent">
+              <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform duration-200 text-foreground", {
+                "-rotate-180": isOpen
               })}/>
               <span className="sr-only">Toggle</span>
             </Button>
