@@ -17,9 +17,11 @@ interface PolicyBuilderProps {
 
 export const PolicyBuilder: FC<PolicyBuilderProps> = ({ policies, addPolicy, updatePolicy, removePolicy, evaluationResult }) => {
   return (
-    <div className='space-y-4'>
-      <PolicySelect onSelect={addPolicy} />
-      <div className="mt-4 space-y-4 max-h-[60vh] overflow-y-auto">
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <PolicySelect onSelect={addPolicy} />
+      </div>
+      <div className="space-y-4">
         {policies.map((policy, index) => (
           <PolicyCard
             key={index}
