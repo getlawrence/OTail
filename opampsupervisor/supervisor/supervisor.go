@@ -836,6 +836,22 @@ func (s *Supervisor) loadAndWriteInitialMergedConfig() error {
 		s.logger.Debug("Own logs is not supported, will not attempt to load config from file")
 	}
 
+	if s.config.Capabilities.ReportsOwnLogs {
+		// Try to load the last received own logs config if it exists.
+		lastRecvOwnLogsConfig, err := os.ReadFile(filepath.Join(s.config.Storage.Directory, lastRecvOwnLogsConfigFile))
+		if err == nil {
+			set := &protobufs.TelemetryConnectionSettings{}
+			err = proto.Unmarshal(lastRecvOwnLogsConfig, set)
+			if err != nil {
+				s.logger.Error("Cannot parse last received own logs config", zap.Error(err))
+			} else {
+				s.setupOwnLogs(context.Background(), set)
+			}
+		}
+	} else {
+		s.logger.Debug("Own logs is not supported, will not attempt to load config from file")
+	}
+
 	_, err = s.composeMergedConfig(s.remoteConfig)
 	if err != nil {
 		return fmt.Errorf("could not compose initial merged config: %w", err)
@@ -1311,6 +1327,10 @@ func (s *Supervisor) onMessage(ctx context.Context, msg *types.MessageData) {
 
 	if msg.OwnMetricsConnSettings != nil {
 		configChanged = s.processOwnMetricsConnSettingsMessage(ctx, msg.OwnMetricsConnSettings) || configChanged
+	}
+
+	if msg.OwnLogsConnSettings != nil {
+		configChanged = s.processOwnLogsConnSettingsMessage(ctx, msg.OwnLogsConnSettings) || configChanged
 	}
 
 	if msg.OwnLogsConnSettings != nil {

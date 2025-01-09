@@ -1,9 +1,9 @@
-# OTail - OpenTelemetry Tail Sampling Configuration UI
+# OTail - OpenTelemetry Tail Sampling
 
-OTail is a user-friendly web interface for creating and managing OpenTelemetry tail sampling processor configurations. It provides a visual way to configure complex sampling policies without having to write YAML directly.
+OTail is a user-friendly web interface for creating and managing OpenTelemetry tail sampling agents. It provides a visual way to configure complex sampling policies without having to write YAML directly.
 
 ## UI
-<img width="1467" alt="Screenshot 2024-12-01 at 13 57 34" src="https://github.com/user-attachments/assets/c21b8795-190e-4bd3-a3df-7a6940236d35">
+<img width="1467" alt="Screenshot 2025-01-08 at 19 20 46" src="https://github.com/user-attachments/assets/40724856-f210-47e7-8e28-f9c35fcfc9c6" />
 
 
 ## Features
@@ -14,13 +14,13 @@ OTail is a user-friendly web interface for creating and managing OpenTelemetry t
 - **Send Updated Config To Agent**: Send the updated YAML configuration to the agent
 - **Dark Mode Toggle**: Switch between light and dark themes
 - **Configuration Validation**: Validate sampling policy configurations before applying
-- **Export Configuration**: Export current configuration as a downloadable YAML file
 
 ## Local Setup
 
 1. Clone the repository: `git clone https://github.com/your-username/otail.git`
-2. Start docker compose: `docker compose up`
+2. Start docker compose: `docker compose up -d`
 3. Open your browser and navigate to http://localhost:3000
+
 
 ## Contributing
 
@@ -38,13 +38,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- Built with React and TypeScript
+- Built with React TypeScript and Go
 - Uses Monaco Editor for YAML editing
 - Inspired by OpenTelemetry Collector configuration needs
-
-## Roadmap
-
-- [ ] Dark mode support
-- [ ] Configuration persistence
-- [ ] Policy grouping and organization
-- [ ] Test sampling policy with real OTEL data
