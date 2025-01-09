@@ -19,9 +19,9 @@ import { NumericTagPolicyEditor } from './policy-editors/numeric-attribute'
 import { TraceStatePolicyEditor } from './policy-editors/trace-state'
 import { RateLimitingPolicyEditor } from './policy-editors/rate-limiting'
 import { AndPolicyEditor } from './policy-editors/and'
-import { Input } from "@/components/ui/input"
 import { Decision } from "@/types/trace"
 import { Badge } from "@/components/ui/badge";
+import { EditableText } from "@/components/ui/editable-text"
 import { cn } from "@/lib/utils";
 
 interface PolicyCardProps {
@@ -79,7 +79,10 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemo
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="w-fit">{policy.type}</Badge>
-            <span className="text-sm text-muted-foreground">{policy.name}</span>
+            <EditableText
+              value={policy.name}
+              onChange={(value) => onUpdate({ ...policy, name: value })}
+            />
           </div>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="w-9 p-0">
@@ -92,11 +95,6 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemo
         </div>
         <CollapsibleContent>
           <CardContent className="space-y-4 pt-0">
-            <Input 
-              value={policy.name} 
-              onChange={(e) => onUpdate({ ...policy, name: e.target.value })}
-              className="focus-visible:ring-2"
-            />
             {renderPolicyEditor()}
           </CardContent>
           <CardFooter>
