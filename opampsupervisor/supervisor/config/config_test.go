@@ -463,6 +463,7 @@ func TestCapabilities_SupportedCapabilities(t *testing.T) {
 			capabilities: DefaultSupervisor().Capabilities,
 			expectedAgentCapabilities: protobufs.AgentCapabilities_AgentCapabilities_ReportsStatus |
 				protobufs.AgentCapabilities_AgentCapabilities_ReportsOwnMetrics |
+				protobufs.AgentCapabilities_AgentCapabilities_ReportsOwnLogs |
 				protobufs.AgentCapabilities_AgentCapabilities_ReportsEffectiveConfig |
 				protobufs.AgentCapabilities_AgentCapabilities_ReportsHealth,
 		},
@@ -560,6 +561,7 @@ server:
 capabilities:
   reports_effective_config: false
   reports_own_metrics: false
+  reports_own_logs: false
   reports_health: false
   accepts_remote_config: true
   reports_remote_config: true
@@ -600,6 +602,7 @@ telemetry:
 					Capabilities: Capabilities{
 						ReportsEffectiveConfig:         false,
 						ReportsOwnMetrics:              false,
+						ReportsOwnLogs:                 false,
 						ReportsHealth:                  false,
 						AcceptsRemoteConfig:            true,
 						ReportsRemoteConfig:            true,
