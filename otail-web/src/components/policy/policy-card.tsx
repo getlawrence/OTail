@@ -1,7 +1,10 @@
 'use client'
 
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import React from "react"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible"
+import { ChevronDown } from "lucide-react"
 import { AlwaysSamplePolicyEditor } from './policy-editors/always-sample'
 import { Policy } from '@/types/policy'
 import { ProbabilisticPolicyEditor } from './policy-editors/probabilistic'
@@ -30,6 +33,7 @@ interface PolicyCardProps {
 }
 
 export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemove, samplingDecision }) => {
+  const [isOpen, setIsOpen] = React.useState(true);
   const renderPolicyEditor = () => {
     switch (policy.type) {
       case 'probabilistic':
@@ -71,27 +75,41 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemo
 
   return (
     <Card className={cn("transition-colors", samplingDecisionClass)}>
-      <CardHeader className="space-y-1">
-        <Badge variant="outline" className="w-fit">{policy.type}</Badge>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Input 
-          value={policy.name} 
-          onChange={(e) => onUpdate({ ...policy, name: e.target.value })}
-          className="focus-visible:ring-2"
-        />
-        {renderPolicyEditor()}
-      </CardContent>
-      <CardFooter>
-        <Button 
-          variant="destructive"
-          className="hover:bg-destructive/90 transition-colors"
-          onClick={onRemove}
-        >
-          Remove
-        </Button>
-      </CardFooter>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="w-fit">{policy.type}</Badge>
+            <span className="text-sm text-muted-foreground">{policy.name}</span>
+          </div>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="w-9 p-0">
+              <ChevronDown className={cn("h-4 w-4 transition-transform", {
+                "transform rotate-180": isOpen
+              })}/>
+              <span className="sr-only">Toggle</span>
+            </Button>
+          </CollapsibleTrigger>
+        </div>
+        <CollapsibleContent>
+          <CardContent className="space-y-4 pt-0">
+            <Input 
+              value={policy.name} 
+              onChange={(e) => onUpdate({ ...policy, name: e.target.value })}
+              className="focus-visible:ring-2"
+            />
+            {renderPolicyEditor()}
+          </CardContent>
+          <CardFooter>
+            <Button 
+              variant="destructive"
+              className="hover:bg-destructive/90 transition-colors"
+              onClick={onRemove}
+            >
+              Remove
+            </Button>
+          </CardFooter>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   )
 }
-

@@ -3,6 +3,14 @@
 import { FC } from 'react'
 import { Editor } from '@monaco-editor/react';
 import { Decision } from '@/types/trace';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 
 interface SimulationViewerProps {
   value: string;
@@ -21,13 +29,25 @@ export const SimulationViewer: FC<SimulationViewerProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="rounded-lg p-5 shadow-custom h-[calc(100vh-240px)] lg:h-[300px] md:h-[250px] md:p-3 w-full max-w-5xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">Decision:  <span className={finalDecision == Decision.Sampled ? 'text-green-500' : 'text-destructive'}>
-          {Decision[finalDecision]}
-        </span></h2>
+    <Card className="h-full shadow-custom">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-2xl">Sampling Decision:</CardTitle>
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "px-4 py-1 text-sm font-medium",
+              finalDecision === Decision.Sampled 
+                ? "border-green-500/50 bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-500" 
+                : "border-destructive/50 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive"
+            )}
+          >
+            {Decision[finalDecision]}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0 h-[calc(100%-4rem)]">
         <Editor
-          className='p-2 rounded-md bg-bg-secondary'
           height="100%"
           defaultLanguage="json"
           value={value}
@@ -40,7 +60,7 @@ export const SimulationViewer: FC<SimulationViewerProps> = ({
             padding: { top: 16, bottom: 16 },
           }}
         />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

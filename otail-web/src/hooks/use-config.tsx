@@ -103,6 +103,7 @@ export const useConfigState = (policies?: Policy[]) => {
     const { mode, toggleMode } = useConfigMode();
 
     const handleViewerChange = useCallback((value: string) => {
+        console.log("test", value);
         if (mode === 'Test') {
             try {
                 const parsedData = JSON.parse(value);
