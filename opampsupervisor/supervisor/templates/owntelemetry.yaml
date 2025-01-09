@@ -8,8 +8,8 @@ receivers:
           static_configs:
             - targets: ['0.0.0.0:{{.PrometheusPort}}']  
 exporters:
-  otlphttp/own_telemetry:
-    endpoint: "{{.OTLPEndpoint}}"
+  otlphttp/own_metrics:
+    metrics_endpoint: "{{.OTLPEndpoint}}"
 
 service:
   telemetry:
@@ -18,4 +18,4 @@ service:
   pipelines:
     metrics/own_metrics:
       receivers: [prometheus/own_metrics]
-      exporters: [otlphttp/own_telemetry]
+      exporters: [otlphttp/own_metrics]

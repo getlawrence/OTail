@@ -83,7 +83,7 @@ func (c *configState) equal(other *configState) bool {
 // to work with an OpAMP Server.
 type Supervisor struct {
 	logger      *zap.Logger
-	logWriter   *OwnLogger
+	agentLogger *AgentOwnLogger
 	pidProvider pidProvider
 
 	// Commander that starts/stops the Agent process.
@@ -163,7 +163,7 @@ type Supervisor struct {
 func NewSupervisor(logger *zap.Logger, cfg config.Supervisor) (*Supervisor, error) {
 	s := &Supervisor{
 		logger:                       logger,
-		logWriter:                    NewOwnLogger(logger),
+		agentLogger:                  NewAgentOwnLogger(logger),
 		pidProvider:                  defaultPIDProvider{},
 		hasNewConfig:                 make(chan struct{}, 1),
 		agentConfigOwnMetricsSection: &atomic.Value{},
@@ -225,11 +225,10 @@ func (s *Supervisor) Start() error {
 		return fmt.Errorf("cannot start OpAMP client: %w", err)
 	}
 
-	logWriter := s.logWriter
 	s.commander, err = commander.NewCommander(
 		s.logger,
 		s.config.Storage.Directory,
-		logWriter,
+		s.agentLogger,
 		s.config.Agent,
 		"--config", s.agentConfigFilePath(),
 	)
@@ -346,11 +345,10 @@ func (s *Supervisor) getBootstrapInfo() (err error) {
 			err = errors.Join(err, fmt.Errorf("error when stopping the opamp server: %w", stopErr))
 		}
 	}()
-	agentLogWriter := s.logWriter
 	cmd, err := commander.NewCommander(
 		s.logger,
 		s.config.Storage.Directory,
-		agentLogWriter,
+		s.agentLogger,
 		s.config.Agent,
 		"--config", s.agentConfigFilePath(),
 	)
@@ -927,10 +925,10 @@ func (s *Supervisor) setupOwnLogs(ctx context.Context, settings *protobufs.Telem
 		for _, attr := range ad.IdentifyingAttributes {
 			resourceAttrs[attr.Key] = attr.Value.GetStringValue()
 		}
-		err := s.logWriter.Configure(ctx, LoggerConfig{
-			Endpoint:      settings.DestinationEndpoint,
-			Insecure:      true,
-			resourceAttrs: resourceAttrs,
+		err := s.agentLogger.Configure(ctx, AgentOwnLoggerConfig{
+			Endpoint:           settings.DestinationEndpoint,
+			Insecure:           true,
+			agentResourceAttrs: resourceAttrs,
 		})
 		if err != nil {
 			s.logger.Error("Failed to configure own logger", zap.Error(err))

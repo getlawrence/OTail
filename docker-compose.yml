@@ -14,7 +14,8 @@ services:
       - NODE_ENV=development
       - VITE_NO_AUTH_REQUIRED=false
     networks:
-      - otail-network    
+      - otail-network
+
   backend:
     build:
       context: ./otail-server
