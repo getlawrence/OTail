@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { useTheme } from "@/hooks/use-theme"
 
 interface SimulationViewerProps {
   value: string;
@@ -23,6 +24,7 @@ export const SimulationViewer: FC<SimulationViewerProps> = ({
   onChange,
   finalDecision
 }) => {
+  const { theme } = useTheme();
   const handleEditorChange = (value: string | undefined) => {
     if (!value) return;
     onChange(value);
@@ -52,7 +54,7 @@ export const SimulationViewer: FC<SimulationViewerProps> = ({
           defaultLanguage="json"
           value={value}
           onChange={handleEditorChange}
-          theme='vs-dark'
+          theme={theme === 'dark' ? 'vs-dark' : 'light'}
           options={{
             minimap: { enabled: false },
             scrollBeyondLastLine: false,

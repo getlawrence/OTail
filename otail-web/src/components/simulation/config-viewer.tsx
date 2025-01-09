@@ -5,6 +5,7 @@ import { Editor } from '@monaco-editor/react';
 import { TailSamplingConfig } from '@/types/tailsampling';
 import { generateYamlConfig } from '@/lib/config/generator';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useTheme } from '@/hooks/use-theme';
 
 interface ConfigViewerProps {
   config: TailSamplingConfig;
@@ -12,6 +13,8 @@ interface ConfigViewerProps {
 }
 
 export const ConfigViewer: FC<ConfigViewerProps> = ({ config, onChange }) => {
+  const { theme } = useTheme();
+
   const editorValue = generateYamlConfig(config);
 
   const handleEditorChange = (value: string | undefined) => {
@@ -32,7 +35,7 @@ export const ConfigViewer: FC<ConfigViewerProps> = ({ config, onChange }) => {
           defaultLanguage="yaml"
           value={editorValue}
           onChange={handleEditorChange}
-          theme='vs-dark'
+          theme={theme === 'dark' ? 'vs-dark' : 'light'}
           options={{
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
