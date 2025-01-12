@@ -1,8 +1,10 @@
-import * as conventions from '@opentelemetry/semantic-conventions';
+import * as stableConventions from '@opentelemetry/semantic-conventions';
+import * as incubatingConventions from '@opentelemetry/semantic-conventions/incubating';
 
 export interface AttributeOption {
   label: string;
   value: string;
+  isIncubating?: boolean;
 }
 
 // Function to clean up the attribute name for display
@@ -18,18 +20,40 @@ export function cleanAttributeName(name: string): string {
 }
 
 // Get all available OpenTelemetry attributes
-export function getOtelAttributes(): AttributeOption[] {
-  return Object.keys(conventions)
+export function getOtelAttributes(includeIncubating: boolean = true): AttributeOption[] {
+  const stableAttrs = Object.keys(stableConventions)
     .filter(key => key.startsWith('ATTR_'))
     .map(key => ({
       label: cleanAttributeName(key),
-      value: (conventions as any)[key]
-    }))
+      value: (stableConventions as any)[key],
+      isIncubating: false
+    }));
+
+  if (!includeIncubating) {
+    return stableAttrs.sort((a, b) => a.label.localeCompare(b.label));
+  }
+
+  const incubatingAttrs = Object.keys(incubatingConventions)
+    .filter(key => key.startsWith('ATTR_'))
+    .map(key => ({
+      label: cleanAttributeName(key),
+      value: (incubatingConventions as any)[key],
+      isIncubating: true
+    }));
+
+  return [...stableAttrs, ...incubatingAttrs]
     .sort((a, b) => a.label.localeCompare(b.label));
 }
 
 // Function to check if a value matches any OpenTelemetry attribute
-export function isOtelAttribute(value: string): boolean {
-  return Object.values(conventions)
+export function isOtelAttribute(value: string, includeIncubating: boolean = false): boolean {
+  const isStableAttr = Object.values(stableConventions)
+    .some(attrValue => typeof attrValue === 'string' && attrValue === value);
+  
+  if (!includeIncubating || isStableAttr) {
+    return isStableAttr;
+  }
+
+  return Object.values(incubatingConventions)
     .some(attrValue => typeof attrValue === 'string' && attrValue === value);
 }

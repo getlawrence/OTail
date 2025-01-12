@@ -4,6 +4,7 @@ import { PolicyEvaluator } from "../evaluators/BaseEvaluator";
 import { BooleanAttributeFilterEvaluator } from "../evaluators/BooleanAttributeFilter";
 import { CompositeEvaluator } from "../evaluators/Composite";
 import { LatencyEvaluator } from "../evaluators/Latency";
+import { NotSampledEvaluator } from "../evaluators/NotSampled";
 import { NumericAttributeFilterEvaluator } from "../evaluators/NumericAttributeFilter";
 import { SpanCountEvaluator } from "../evaluators/SpanCount";
 import { StatusCodeFilterEvaluator } from "../evaluators/StatusCodeFilter";
@@ -32,7 +33,7 @@ const getSharedPolicyEvaluator = (policy: Policy): PolicyEvaluator => {
             return getNewCompositePolicy(policy);
         default:
             console.error(`Unsupported policy type: ${policy.type}`);
-            return new AlwaysSampleEvaluator(policy.name);
+            return new NotSampledEvaluator(policy.name);
     }
 };
 
