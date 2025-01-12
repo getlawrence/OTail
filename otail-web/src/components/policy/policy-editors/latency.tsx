@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
+import { Button } from '@/components/ui/button';
 
 interface LatencyPolicyEditorProps {
   policy: LatencyPolicy;
@@ -27,8 +28,10 @@ export const LatencyPolicyEditor: React.FC<LatencyPolicyEditorProps> = ({
         <div className="flex items-center gap-2">
           <Label htmlFor="threshold">Minimum Latency Threshold</Label>
           <Tooltip>
-            <TooltipTrigger>
-              <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+                <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+              </Button>
             </TooltipTrigger>
             <TooltipContent>
               <p>Spans with latency above this threshold will be sampled</p>
