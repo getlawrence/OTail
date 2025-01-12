@@ -2,7 +2,8 @@ import { AlwaysSamplePolicy } from '@/types/policy';
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { InfoCircledIcon } from '@radix-ui/react-icons';
+import { Button } from '@/components/ui/button';
+import { Info } from "lucide-react"
 
 interface AlwaysSamplePolicyEditorProps {
   policy: AlwaysSamplePolicy;
@@ -16,8 +17,10 @@ export const AlwaysSamplePolicyEditor: React.FC<AlwaysSamplePolicyEditorProps> =
       <div className="flex items-center gap-2">
         <Label>Always Sample Policy</Label>
         <Tooltip>
-          <TooltipTrigger>
-            <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+              <Info className="h-4 w-4 text-muted-foreground" />
+            </Button>
           </TooltipTrigger>
           <TooltipContent>
             <p>

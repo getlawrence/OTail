@@ -7,6 +7,7 @@ import { InfoCircledIcon } from '@radix-ui/react-icons';
 import { Switch } from '@/components/ui/switch';
 import { Combobox } from '@/components/ui/combobox';
 import { getOtelAttributes } from '@/utils/otel-attributes';
+import { Button } from '@/components/ui/button';
 
 interface StringAttributePolicyEditorProps {
   policy: StringAttributePolicy;
@@ -32,8 +33,10 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
         <div className="flex items-center gap-2">
           <Label htmlFor="attributeKey">Attribute Key</Label>
           <Tooltip>
-            <TooltipTrigger>
-              <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+                <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+              </Button>
             </TooltipTrigger>
             <TooltipContent>
               <p>Select from standard OpenTelemetry attributes or enter a custom key</p>
@@ -54,8 +57,10 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
         <div className="flex items-center gap-2">
           <Label htmlFor="attributeValue">Attribute Value</Label>
           <Tooltip>
-            <TooltipTrigger>
-              <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+                <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+              </Button>
             </TooltipTrigger>
             <TooltipContent>
               <p>The value of the attribute to match against (e.g., GET, POST)</p>
@@ -75,8 +80,10 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
           <div className="flex items-center gap-2">
             <Label htmlFor="regexToggle">Regular Expression Matching</Label>
             <Tooltip>
-              <TooltipTrigger>
-                <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+                  <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+                </Button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Enable to use regex patterns instead of exact matching</p>
@@ -105,8 +112,10 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
             <div className="flex items-center gap-2">
               <Label htmlFor="cacheSize">Cache Size</Label>
               <Tooltip>
-                <TooltipTrigger>
-                  <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+                    <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Maximum number of regex patterns to cache for better performance</p>
