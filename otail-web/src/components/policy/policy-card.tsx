@@ -32,7 +32,7 @@ interface PolicyCardProps {
   samplingDecision?: Decision;
 }
 
-export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemove, samplingDecision }) => {
+export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemove, samplingDecision, nested }) => {
   const [isOpen, setIsOpen] = React.useState(true);
   const renderPolicyEditor = () => {
     switch (policy.type) {
@@ -73,8 +73,10 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemo
       ? 'border-green-500	' 
       : 'border-destructive';
 
+  const WrapperType = nested ? React.Fragment : Card;  
+
   return (
-    <Card className={cn("transition-colors", samplingDecisionClass)}>
+    <WrapperType {...(!nested ? { className: cn("transition-colors", samplingDecisionClass) } : {})}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
@@ -108,6 +110,6 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemo
           </CardFooter>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </WrapperType>
   )
 }

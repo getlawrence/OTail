@@ -6,7 +6,7 @@ import { createNewPolicy } from '@/lib/policy/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from "@/components/ui/label";
-import { ChevronUp, ChevronDown, Trash2 } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { PolicySelect } from '../policy-select';
 
 interface SubPolicyItemProps {
@@ -26,45 +26,37 @@ const SubPolicyItem: React.FC<SubPolicyItemProps> = ({
     onUpdate,
     onRemove,
 }) => (
-    <Card className="mb-4 group hover:shadow-md transition-all duration-200">
-        <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
+    <Card className="mb-1.5 group hover:shadow-sm transition-all duration-200 border-muted">
+        <CardContent className="py-2 px-3">
+            <div className="flex items-center gap-2">
+                <div className="flex-grow">
+                    <PolicyCard policy={policy} onUpdate={onUpdate} onRemove={onRemove} nested={true} />
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/5 text-xs font-medium text-primary/70">
                         {index + 1}
                     </span>
-                    <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => onMove('up')}
                             disabled={index === 0}
-                            className="h-6 hover:bg-primary/10"
+                            className="h-4 hover:bg-primary/5 px-1 -my-px"
                         >
-                            <ChevronUp className="h-4 w-4" />
+                            <ChevronUp className="h-3 w-3" />
                         </Button>
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => onMove('down')}
                             disabled={index === total - 1}
-                            className="h-6 hover:bg-primary/10"
+                            className="h-4 hover:bg-primary/5 px-1 -my-px"
                         >
-                            <ChevronDown className="h-4 w-4" />
+                            <ChevronDown className="h-3 w-3" />
                         </Button>
                     </div>
                 </div>
-                <div className="flex-grow">
-                    <PolicyCard policy={policy} onUpdate={onUpdate} onRemove={onRemove} />
-                </div>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onRemove}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                    <Trash2 className="h-4 w-4" />
-                </Button>
             </div>
         </CardContent>
     </Card>
