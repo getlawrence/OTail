@@ -2,7 +2,7 @@
 
 import { FC } from 'react'
 import { Editor } from '@monaco-editor/react';
-import { Decision } from '@/types/trace';
+import { Decision, defaultTrace } from '@/types/trace';
 import {
   Card,
   CardContent,
@@ -12,6 +12,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/hooks/use-theme"
+
+
 
 interface SimulationViewerProps {
   value: string;
@@ -26,8 +28,9 @@ export const SimulationViewer: FC<SimulationViewerProps> = ({
 }) => {
   const { theme } = useTheme();
   const handleEditorChange = (value: string | undefined) => {
-    if (!value) return;
-    onChange(value);
+    if (value) {
+      onChange(value);
+    }
   };
 
   return (
@@ -51,8 +54,8 @@ export const SimulationViewer: FC<SimulationViewerProps> = ({
       <CardContent className="p-0 h-[calc(100%-4rem)]">
         <Editor
           height="100%"
+          defaultValue={value || JSON.stringify(defaultTrace, null, 2)}
           defaultLanguage="json"
-          value={value}
           onChange={handleEditorChange}
           theme={theme === 'dark' ? 'vs-dark' : 'light'}
           options={{
