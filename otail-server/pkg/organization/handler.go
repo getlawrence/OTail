@@ -15,10 +15,6 @@ type CreateInviteResponse struct {
 	ExpiresAt string `json:"expiresAt"`
 }
 
-type InviteRequest struct {
-	Email string `json:"email"`
-}
-
 type OrgHandler struct {
 	orgSvc OrgService
 	logger *zap.Logger
@@ -61,14 +57,15 @@ func (h *OrgHandler) handleGetOrg(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *OrgHandler) handleCreateInvite(w http.ResponseWriter, r *http.Request) {
-	// Get organization ID from context
 	orgID, ok := r.Context().Value(middleware.OrganizationIDKey).(string)
 	if !ok {
 		h.logger.Error("Failed to get organization ID from context")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	var req InviteRequest
+	var req struct {
+		Email string `json:"email"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return

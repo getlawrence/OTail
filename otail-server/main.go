@@ -92,7 +92,10 @@ func main() {
 
 	// Add organization routes with auth middleware
 	orgHandler := organization.NewOrgHandler(orgService, logger)
-	r.Route("/api/v1/organizations", func(r chi.Router) {
+	agentsHandler := agents.NewHandler(logger, samplingService, clickhouseClient)
+
+	// Protected routes (auth required)
+	r.Route("/api/v1", func(r chi.Router) {
 		r.Use(authmiddleware.AuthMiddleware(func(token string) (string, string, error) {
 			user, err := userSvc.GetUserByToken(token)
 			if err != nil {
@@ -100,12 +103,9 @@ func main() {
 			}
 			return user.ID, user.OrganizationID, nil
 		}))
-		orgHandler.RegisterRoutes(r)
+		r.Route("/organization", orgHandler.RegisterRoutes)
+		r.Route("/agents", agentsHandler.RegisterRoutes)
 	})
-
-	// Create the HTTP API handler
-	apiHandler := agents.NewHandler(logger, samplingService, clickhouseClient)
-	r.Route("/api/v1/agents", apiHandler.RegisterRoutes)
 
 	// Create HTTP server
 	httpServer := &http.Server{
