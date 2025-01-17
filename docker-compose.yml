@@ -41,7 +41,7 @@ services:
       context: ./opampsupervisor
       dockerfile: Dockerfile
     environment:
-      - OPAMP_SERVER_URL=http://backend:4320
+      - OPAMP_SERVER_ENDPOINT=ws://backend:4320/v1/opamp
       - API_TOKEN=K7VwjJmlU8u3xHLcWpFDJ1ZD-bkTUCOhMuLu1k7Kxh0=
     ports:
       - "4317:4317"  # OTLP gRPC
