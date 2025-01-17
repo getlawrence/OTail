@@ -15,6 +15,7 @@ import (
 	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
 	"github.com/mottibec/otail-server/pkg/agents/opamp"
 	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
+	authmiddleware "github.com/mottibec/otail-server/pkg/middleware"
 	"github.com/mottibec/otail-server/pkg/organization"
 	"github.com/mottibec/otail-server/pkg/user"
 	"go.uber.org/zap"
@@ -38,7 +39,7 @@ func main() {
 		logger.Fatal("Failed to create org store", zap.Error(err))
 	}
 	defer orgStore.Close()
-	orgService := organization.NewOrgService(*orgStore)
+	orgService := organization.NewOrgService(orgStore)
 	userSvc := user.NewUserService(userStore, orgService)
 
 	// Create token verification function
@@ -88,6 +89,19 @@ func main() {
 	// Add authentication routes
 	userHandler := user.NewUserHandler(userSvc, logger)
 	r.Route("/api/v1/auth", userHandler.RegisterRoutes)
+
+	// Add organization routes with auth middleware
+	orgHandler := organization.NewOrgHandler(orgService, logger)
+	r.Route("/api/v1/organizations", func(r chi.Router) {
+		r.Use(authmiddleware.AuthMiddleware(func(token string) (string, string, error) {
+			user, err := userSvc.GetUserByToken(token)
+			if err != nil {
+				return "", "", err
+			}
+			return user.ID, user.OrganizationID, nil
+		}))
+		orgHandler.RegisterRoutes(r)
+	})
 
 	// Create the HTTP API handler
 	apiHandler := agents.NewHandler(logger, samplingService, clickhouseClient)

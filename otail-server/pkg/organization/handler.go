@@ -1,11 +1,19 @@
 package organization
 
 import (
+	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/mottibec/otail-server/pkg/middleware"
 	"go.uber.org/zap"
 )
+
+type CreateInviteResponse struct {
+	Token     string `json:"token"`
+	ExpiresAt string `json:"expiresAt"`
+}
 
 type OrgHandler struct {
 	orgSvc OrgService
@@ -20,9 +28,59 @@ func NewOrgHandler(orgSvc OrgService, logger *zap.Logger) *OrgHandler {
 }
 
 func (h *OrgHandler) RegisterRoutes(r chi.Router) {
-	r.Get("/", h.handleInvite)
+	r.Get("/{orgId}", h.handleGetOrg)
+	r.Post("/invite", h.handleCreateInvite)
 }
 
-func (h *OrgHandler) handleInvite(w http.ResponseWriter, r *http.Request) {
+func (h *OrgHandler) handleGetOrg(w http.ResponseWriter, r *http.Request) {
+	requestedOrgID := chi.URLParam(r, "orgId")
+	orgID, ok := r.Context().Value(middleware.OrganizationIDKey).(string)
+	if !ok {
+		h.logger.Error("Failed to get organization ID from context")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
+	if requestedOrgID != orgID {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	org, err := h.orgSvc.GetOrganization(orgID)
+	if err != nil {
+		h.logger.Error("Failed to get organization", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(org)
+}
+
+func (h *OrgHandler) handleCreateInvite(w http.ResponseWriter, r *http.Request) {
+	// Get organization ID from context
+	orgID, ok := r.Context().Value(middleware.OrganizationIDKey).(string)
+	if !ok {
+		h.logger.Error("Failed to get organization ID from context")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	invite, err := h.orgSvc.CreateInvite(orgID)
+	if err != nil {
+		h.logger.Error("Failed to create invite", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := CreateInviteResponse{
+		Token:     invite.Token,
+		ExpiresAt: invite.ExpiresAt.Format(time.RFC3339),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.logger.Error("Failed to encode response", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

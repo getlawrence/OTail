@@ -1,4 +1,4 @@
-import { Home, Settings, Telescope, LogOut } from "lucide-react"
+import { Home, Settings, Telescope, LogOut, Users } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import {
   Sidebar,
@@ -28,6 +28,11 @@ const items = !noAuthRequired
       title: "Agents",
       url: "/agents",
       icon: Telescope,
+    },
+    {
+      title: "Organization",
+      url: "/organization",
+      icon: Users,
     },
     {
       title: "config",

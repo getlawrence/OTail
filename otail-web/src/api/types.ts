@@ -1,3 +1,5 @@
+import exp from "constants";
+
 export type Agent = {
     InstanceId: string;
     status: "pending" | "processing" | "success" | "failed";
@@ -17,15 +19,31 @@ export type Agents = {
 export interface Organization {
     id: string;
     name: string;
-    role: 'admin' | 'member';
+    members: OrganizationMember[];
+    invites: OrganizationInvite[];
 }
 
 export interface User {
     id: string;
     email: string;
     api_token: string;
-    current_organization?: Organization;
+    organization_id?: string;
     organizations: Organization[];
+}
+
+export interface OrganizationMember {
+    user_id: string;
+    email: string;
+    joined_at: string;
+    role: string;
+}
+
+export interface OrganizationInvite {
+    email: string;
+    created_at: string;
+    expires_at: string;
+    token: string;
+    used: boolean;
 }
 
 export type Log = {
@@ -40,4 +58,9 @@ export type Log = {
     timestamp: string;
     traceFlags: number;
     traceId: string;
+}
+
+export interface CreateInviteResponse {
+    token: string;
+    expiresAt: string;
 }
