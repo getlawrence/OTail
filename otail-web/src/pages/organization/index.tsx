@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, Plus, Users } from "lucide-react";
+import { Copy, Plus } from "lucide-react";
 import { organizationApi } from '../../api/organization';
 import { useAuth } from '@/hooks/use-auth';
 import { Organization } from '@/api/types';
