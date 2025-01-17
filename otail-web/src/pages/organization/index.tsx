@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Copy } from "lucide-react";
+import { Copy, Plus, Users } from "lucide-react";
 import { organizationApi } from '../../api/organization';
 import { useAuth } from '@/hooks/use-auth';
 import { Organization } from '@/api/types';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Table,
     TableBody,
@@ -59,81 +61,129 @@ const OrganizationPage: React.FC = () => {
     };
 
     if (!organization) {
-        return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+        return (
+            <div className="space-y-4">
+                <div className="space-y-4">
+                    <Skeleton className="h-8 w-[250px]" />
+                    <Card>
+                        <CardHeader>
+                            <Skeleton className="h-6 w-[100px]" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-full" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
     }
 
+    const getRoleBadgeVariant = (role: string) => {
+        switch (role.toLowerCase()) {
+            case 'admin':
+                return 'default';
+            case 'member':
+                return 'secondary';
+            default:
+                return 'outline';
+        }
+    };
+
     return (
-        <div className="container mx-auto py-8 space-y-8">
+        <div className="flex flex-col h-full gap-4 p-4">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold">{organization.name}</h1>
+                <div className="space-y-1">
+                    <h1 className="text-3xl font-bold">{organization.name}</h1>
+                    <p className="text-sm text-muted-foreground">
+                        Manage your organization members and invites
+                    </p>
+                </div>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Members</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Role</TableHead>
-                                <TableHead>Joined</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {organization.members.map((member) => (
-                                <TableRow key={member.user_id}>
-                                    <TableCell>{member.email}</TableCell>
-                                    <TableCell className="capitalize">{member.role}</TableCell>
-                                    <TableCell>{new Date(member.joined_at).toLocaleDateString()}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Invite Members</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div>
-                        <Button
-                            onClick={handleCreateInvite}
-                            disabled={loading}
-                        >
-                            Generate Invite Link
-                        </Button>
-                    </div>
-
-                    {inviteToken && (
-                        <div className="space-y-2">
-                            <div className="text-sm font-medium">New Invite Link:</div>
-                            <div className="flex items-center gap-2">
-                                <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm truncate flex-1">
-                                    {getInviteLink(inviteToken)}
-                                </code>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => copyToClipboard(getInviteLink(inviteToken))}
-                                >
-                                    <Copy className="h-4 w-4" />
-                                </Button>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 flex-1">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Members</CardTitle>
+                                <CardDescription>
+                                    Your organization has {organization.members.length} members
+                                </CardDescription>
                             </div>
+                            <Button onClick={handleCreateInvite} disabled={loading}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Invite Member
+                            </Button>
                         </div>
-                    )}
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Role</TableHead>
+                                    <TableHead>Joined</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {organization.members.map((member) => (
+                                    <TableRow key={member.user_id}>
+                                        <TableCell className="font-medium">{member.email}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getRoleBadgeVariant(member.role)}>
+                                                {member.role}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">
+                                            {new Date(member.joined_at).toLocaleDateString(undefined, {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
 
-                    {organization.invites?.length > 0 && (
-                        <div className="space-y-2">
-                            <div className="text-sm font-medium">Active Invite Links:</div>
-                            <div className="space-y-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Active Invites</CardTitle>
+                        <CardDescription>
+                            Share these links with people you want to invite to your organization
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        {inviteToken && (
+                            <div className="rounded-lg border p-4 bg-muted/50">
+                                <div className="text-sm font-medium mb-2">New Invite Link:</div>
+                                <div className="flex items-center gap-2">
+                                    <code className="relative rounded bg-background px-[0.3rem] py-[0.2rem] font-mono text-sm truncate flex-1">
+                                        {getInviteLink(inviteToken)}
+                                    </code>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 w-8 p-0"
+                                        onClick={() => copyToClipboard(getInviteLink(inviteToken))}
+                                    >
+                                        <Copy className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {organization.invites?.length > 0 && (
+                            <div className="space-y-4">
                                 {organization.invites.filter(invite => !invite.used).map((invite, index) => (
-                                    <div key={index} className="flex items-center gap-2">
-                                        <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm truncate flex-1">
+                                    <div key={index} className="flex items-center gap-2 rounded-lg border p-3">
+                                        <code className="relative rounded bg-background px-[0.3rem] py-[0.2rem] font-mono text-sm truncate flex-1">
                                             {getInviteLink(invite.token)}
                                         </code>
                                         <Button
@@ -144,16 +194,21 @@ const OrganizationPage: React.FC = () => {
                                         >
                                             <Copy className="h-4 w-4" />
                                         </Button>
-                                        <span className="text-sm text-muted-foreground whitespace-nowrap">
-                                            Expires: {new Date(invite.expires_at).toLocaleString()}
-                                        </span>
+                                        <Badge variant="outline" className="whitespace-nowrap">
+                                            Expires {new Date(invite.expires_at).toLocaleDateString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </Badge>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 };
