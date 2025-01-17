@@ -3,6 +3,7 @@ export interface Span {
   traceId: string;
   spanId: string;
   parentSpanId?: string;
+  traceState?: string;
   name: string;
   kind: string;
   startTime: number;
