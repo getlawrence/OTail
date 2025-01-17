@@ -1,24 +1,19 @@
-import { User } from "./types";
-import { apiClient } from "./client";
+import { apiClient } from './client';
+import { LoginResponse, RegisterParams, User } from './types';
 
-export const register = async (email: string, password: string, organization: string) => {
-    const data = await apiClient.post<{ user: User; api_token: string }>(
-        '/api/v1/auth/register',
-        {
-            email,
-            password,
-            organization: { name: organization }
-        },
-        { requiresAuth: false, requiresOrg: false }
-    );
-    return data;
-}
+export const authApi = {
+  login: async (email: string, password: string): Promise<LoginResponse> => {
+    return await apiClient.post<LoginResponse>('/api/v1/auth/login', {
+      email,
+      password,
+    });
+  },
 
-export const login = async (email: string, password: string) => {
-    const data = await apiClient.post<{ user: User; api_token: string }>(
-        '/api/v1/auth/login',
-        { email, password },
-        { requiresAuth: false, requiresOrg: false }
-      );
-    return data;
-}
+  register: async (params: RegisterParams): Promise<LoginResponse> => {
+    return await apiClient.post<LoginResponse>('/api/v1/auth/register', params);
+  },
+
+  me: async (): Promise<User> => {
+    return await apiClient.get<User>('/api/v1/auth/me');
+  },
+};

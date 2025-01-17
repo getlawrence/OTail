@@ -20,6 +20,10 @@ const OrganizationPage: React.FC = () => {
     const [organization, setOrganization] = useState<Organization | null>(null);
     const { user } = useAuth();
 
+    const getInviteLink = (token: string) => {
+        return `${window.location.origin}/register?invite=${token}`;
+    };
+
     useEffect(() => {
         const fetchOrganization = async () => {
             if (!user?.organization_id) {
@@ -100,22 +104,22 @@ const OrganizationPage: React.FC = () => {
                             onClick={handleCreateInvite}
                             disabled={loading}
                         >
-                            Generate Invite Token
+                            Generate Invite Link
                         </Button>
                     </div>
 
                     {inviteToken && (
                         <div className="space-y-2">
-                            <div className="text-sm font-medium">New Invite Token:</div>
+                            <div className="text-sm font-medium">New Invite Link:</div>
                             <div className="flex items-center gap-2">
-                                <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-                                    {inviteToken}
+                                <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm truncate flex-1">
+                                    {getInviteLink(inviteToken)}
                                 </code>
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     className="h-8 w-8 p-0"
-                                    onClick={() => copyToClipboard(inviteToken)}
+                                    onClick={() => copyToClipboard(getInviteLink(inviteToken))}
                                 >
                                     <Copy className="h-4 w-4" />
                                 </Button>
@@ -125,22 +129,22 @@ const OrganizationPage: React.FC = () => {
 
                     {organization.invites?.length > 0 && (
                         <div className="space-y-2">
-                            <div className="text-sm font-medium">Pending Invites:</div>
+                            <div className="text-sm font-medium">Active Invite Links:</div>
                             <div className="space-y-2">
-                                {organization.invites.map((invite, index) => (
+                                {organization.invites.filter(invite => !invite.used).map((invite, index) => (
                                     <div key={index} className="flex items-center gap-2">
-                                        <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-                                            {invite.token}
+                                        <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm truncate flex-1">
+                                            {getInviteLink(invite.token)}
                                         </code>
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             className="h-8 w-8 p-0"
-                                            onClick={() => copyToClipboard(invite.token)}
+                                            onClick={() => copyToClipboard(getInviteLink(invite.token))}
                                         >
                                             <Copy className="h-4 w-4" />
                                         </Button>
-                                        <span className="text-sm text-muted-foreground">
+                                        <span className="text-sm text-muted-foreground whitespace-nowrap">
                                             Expires: {new Date(invite.expires_at).toLocaleString()}
                                         </span>
                                     </div>

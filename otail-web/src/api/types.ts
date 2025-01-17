@@ -1,5 +1,3 @@
-import exp from "constants";
-
 export type Agent = {
     InstanceId: string;
     status: "pending" | "processing" | "success" | "failed";
@@ -64,3 +62,16 @@ export interface CreateInviteResponse {
     token: string;
     expiresAt: string;
 }
+
+export interface LoginResponse {
+    token: string;
+    user: User;
+  }
+  
+  export interface RegisterParams {
+    email: string;
+    password: string;
+    organization?: string;
+    invite?: string;
+  }
+  
