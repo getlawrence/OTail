@@ -34,6 +34,7 @@ type RegisterRequest struct {
 	Email        string              `json:"email"`
 	Password     string              `json:"password"`
 	Organization OrganizationRequest `json:"organization"`
+	Invite       string              `json:"invite"`
 }
 
 type LoginRequest struct {
@@ -58,7 +59,7 @@ func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.userSvc.CreateUser(req.Email, req.Password)
+	user, err := h.userSvc.RegisterUser(req.Email, req.Password, req.Organization.Name, req.Invite)
 	if err != nil {
 		h.logger.Error("Failed to create user", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)

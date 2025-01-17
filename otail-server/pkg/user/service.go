@@ -6,19 +6,77 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/mottibec/otail-server/pkg/auth"
+	"github.com/mottibec/otail-server/pkg/organization"
 )
 
 type UserService struct {
-	store UserStore
+	store  UserStore
+	orgSvc organization.OrgService
 }
 
-func NewUserService(store UserStore) UserService {
+func NewUserService(store UserStore, orgService organization.OrgService) UserService {
 	return UserService{
-		store: store,
+		store:  store,
+		orgSvc: orgService,
 	}
 }
 
-func (s *UserService) CreateUser(email, password string) (*User, error) {
+func (s *UserService) RegisterUser(email, password, organization string, inviteToken string) (*User, error) {
+	if email == "" || password == "" {
+		return nil, errors.New("email and password are required")
+	}
+
+	var orgId string
+	var err error
+
+	if inviteToken != "" {
+		// Join existing organization using invite
+		invite, err := s.orgSvc.ValidateInvite(inviteToken)
+		if err != nil {
+			return nil, errors.New("invalid invite: " + err.Error())
+		}
+		orgId = invite.OrganizationID
+		// Create user first
+		user, err := s.CreateUser(email, password, orgId)
+		if err != nil {
+			return nil, err
+		}
+		// Then join organization
+		success, err := s.orgSvc.JoinOrganization("", user.ID, email, inviteToken)
+		if err != nil || !success {
+			return nil, errors.New("failed to join organization: " + err.Error())
+		}
+		return user, nil
+	} else {
+		// Create new organization
+		if organization == "" {
+			return nil, errors.New("organization name is required")
+		}
+		var err error
+		orgId, err = s.orgSvc.CreateOrganization(organization)
+		if err != nil {
+			return nil, errors.New("failed to create organization: " + err.Error())
+		}
+	}
+
+	// Create user
+	user, err := s.CreateUser(email, password, orgId)
+	if err != nil {
+		return nil, err
+	}
+
+	// If this is a new organization, add the user as root admin
+	if inviteToken == "" {
+		err = s.orgSvc.AddRootUser(orgId, user.ID, email)
+		if err != nil {
+			return nil, errors.New("failed to add root user to organization: " + err.Error())
+		}
+	}
+
+	return user, nil
+}
+
+func (s *UserService) CreateUser(email, password, orgId string) (*User, error) {
 	// Validate input
 	if email == "" || password == "" {
 		return nil, errors.New("email and password are required")
@@ -47,11 +105,12 @@ func (s *UserService) CreateUser(email, password string) (*User, error) {
 
 	// Create user object
 	user := &User{
-		ID:        uuid.New().String(),
-		Email:     email,
-		Password:  []byte(hashedPassword),
-		APIToken:  apiToken,
-		CreatedAt: time.Now(),
+		ID:             uuid.New().String(),
+		Email:          email,
+		Password:       []byte(hashedPassword),
+		APIToken:       apiToken,
+		OrganizationID: orgId,
+		CreatedAt:      time.Now(),
 	}
 
 	// Save to store

@@ -12,7 +12,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - VITE_NO_AUTH=true
+      - VITE_NO_AUTH_REQUIRED=false
          
   backend:
     build:
