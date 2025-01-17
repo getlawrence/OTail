@@ -15,6 +15,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Input } from '@/components/ui/input';
 
 const OrganizationPage: React.FC = () => {
     const [inviteToken, setInviteToken] = useState<string | null>(null);
@@ -161,7 +162,7 @@ const OrganizationPage: React.FC = () => {
                     <CardContent>
                         <div className="flex flex-col gap-4">
                             <div className="flex gap-4">
-                                <input
+                                <Input
                                     type="email"
                                     placeholder="Enter email address"
                                     className="flex-1 px-3 py-2 border rounded-md"
