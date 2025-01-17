@@ -15,6 +15,7 @@ import (
 	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
 	"github.com/mottibec/otail-server/pkg/agents/opamp"
 	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
+	"github.com/mottibec/otail-server/pkg/organization"
 	"github.com/mottibec/otail-server/pkg/user"
 	"go.uber.org/zap"
 )
@@ -24,14 +25,22 @@ func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
+	mongoUri, mongoDb := os.Getenv("MONGODB_URI"), os.Getenv("MONGODB_DB")
 	// Initialize user store
-	userStore, err := user.NewMongoUserStore(os.Getenv("MONGODB_URI"), os.Getenv("MONGODB_DB"))
+	userStore, err := user.NewMongoUserStore(mongoUri, mongoDb)
 	if err != nil {
 		logger.Fatal("Failed to create user store", zap.Error(err))
 	}
 	defer userStore.Close()
 
-	userSvc := user.NewUserService(userStore)
+	orgStore, err := organization.NewMongOrgStore(mongoUri, mongoDb)
+	if err != nil {
+		logger.Fatal("Failed to create org store", zap.Error(err))
+	}
+	defer orgStore.Close()
+	orgService := organization.NewOrgService(*orgStore)
+	userSvc := user.NewUserService(userStore, orgService)
+
 	// Create token verification function
 	verifyToken := func(token string) (string, error) {
 		user, err := userSvc.GetUserByToken(token)

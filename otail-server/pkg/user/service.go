@@ -6,16 +6,28 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/mottibec/otail-server/pkg/auth"
+	"github.com/mottibec/otail-server/pkg/organization"
 )
 
 type UserService struct {
-	store UserStore
+	store  UserStore
+	orgSvc organization.OrgService
 }
 
-func NewUserService(store UserStore) UserService {
+func NewUserService(store UserStore, orgService organization.OrgService) UserService {
 	return UserService{
-		store: store,
+		store:  store,
+		orgSvc: orgService,
 	}
+}
+
+func (s *UserService) RegisterUser(email, password, organization string) (*User, error) {
+	s.orgSvc.CreateOrganization(organization)
+	user, err := s.CreateUser(email, password)
+	if err != nil {
+		return nil, err
+	}
+
 }
 
 func (s *UserService) CreateUser(email, password string) (*User, error) {
