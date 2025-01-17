@@ -48,7 +48,7 @@ func main() {
 		if err != nil {
 			return "", err
 		}
-		return apiToken.ID, nil
+		return apiToken.OrganizationID, nil
 	}
 
 	// Initialize OPAMP server

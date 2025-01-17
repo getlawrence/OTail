@@ -44,7 +44,7 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 
 func (h *Handler) ListAgents(w http.ResponseWriter, r *http.Request) {
 	organizationID := r.Context().Value(auth.OrganizationIDKey).(string)
-	agents := h.samplingService.GetAgentsByToken(organizationID)
+	agents := h.samplingService.GetAgentsByOrganization(organizationID)
 	h.writeJSON(w, agents)
 }
 
