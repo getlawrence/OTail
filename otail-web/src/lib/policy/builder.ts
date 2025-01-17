@@ -9,7 +9,9 @@ import { NumericAttributeFilterEvaluator } from "../evaluators/NumericAttributeF
 import { SpanCountEvaluator } from "../evaluators/SpanCount";
 import { StatusCodeFilterEvaluator } from "../evaluators/StatusCodeFilter";
 import { StringAttributeEvaluator } from "../evaluators/StringAttribute";
+import { ProbabilisticEvaluator } from "../evaluators/Probabilistic";
 import { AndPolicy, CompositePolicy, Policy } from "@/types/policy";
+import { TraceStateEvaluator } from "../evaluators/TraceState";
 
 const getSharedPolicyEvaluator = (policy: Policy): PolicyEvaluator => {
     switch (policy.type) {
@@ -27,6 +29,10 @@ const getSharedPolicyEvaluator = (policy: Policy): PolicyEvaluator => {
             return new StatusCodeFilterEvaluator(policy.name, policy.statusCodes);
         case 'latency':
             return new LatencyEvaluator(policy.name, policy.thresholdMs, policy.upperThresholdMs ?? 0);
+        case 'probabilistic':
+            return new ProbabilisticEvaluator(policy.name, policy.hashSalt, policy.samplingPercentage);
+        case 'trace_state':
+            return new TraceStateEvaluator(policy.name, policy.key, policy.values);
         case 'and':
             return getNewAndPolicy(policy);
         case 'composite':
