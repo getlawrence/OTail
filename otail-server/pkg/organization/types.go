@@ -29,10 +29,20 @@ type OrganizationMember struct {
 	Role     string    `json:"role" bson:"role"`
 }
 
+type APIToken struct {
+	ID             string    `json:"id" bson:"_id"`
+	OrganizationID string    `json:"organization_id" bson:"organization_id"`
+	Token          string    `json:"token" bson:"token"`
+	CreatedAt      time.Time `json:"created_at" bson:"created_at"`
+	CreatedBy      string    `json:"created_by" bson:"created_by"`
+	Description    string    `json:"description" bson:"description"`
+}
+
 type OrganizationDetails struct {
 	Organization
 	Members []OrganizationMember `json:"members"`
 	Invites []OrganizationInvite `json:"invites"`
+	APITokens []APIToken         `json:"api_tokens"`
 }
 
 type OrgService interface {
@@ -42,4 +52,7 @@ type OrgService interface {
 	CreateInvite(organizationId string, email string) (*OrganizationInvite, error)
 	ValidateInvite(token string) (*OrganizationInvite, error)
 	AddRootUser(orgId string, userId string, email string) error
+	CreateAPIToken(orgId string, userId string, description string) (*APIToken, error)
+	ValidateAPIToken(token string) (*APIToken, error)
+	DeleteAPIToken(orgId string, tokenId string) error
 }

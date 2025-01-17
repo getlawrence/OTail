@@ -18,6 +18,7 @@ type mongoOrgStore struct {
 	collection  *mongo.Collection
 	invitesColl *mongo.Collection
 	membersColl *mongo.Collection
+	apiTokens   *mongo.Collection
 }
 
 type MongoOrgStore interface {
@@ -30,6 +31,10 @@ type MongoOrgStore interface {
 	GetInvite(token string) (*OrganizationInvite, error)
 	MarkInviteAsUsed(token string) error
 	AddUserToOrganization(organizationId string, userId string, email string, role string) error
+	CreateAPIToken(token *APIToken) error
+	GetAPITokenByToken(token string) (*APIToken, error)
+	GetAPITokens(orgId string) ([]APIToken, error)
+	DeleteAPIToken(orgId string, tokenId string) error
 	Close() error
 }
 
@@ -49,6 +54,7 @@ func NewMongOrgStore(uri string, dbName string) (MongoOrgStore, error) {
 		collection:  db.Collection("organizations"),
 		invitesColl: db.Collection("organization_invites"),
 		membersColl: db.Collection("organization_members"),
+		apiTokens:   db.Collection("api_tokens"),
 	}
 
 	// Create indexes
@@ -97,6 +103,17 @@ func (s *mongoOrgStore) createIndexes(ctx context.Context) error {
 		},
 	}
 
+	// API Token indexes
+	apiTokenIndexes := []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				bson.E{Key: "organization_id", Value: 1},
+				bson.E{Key: "token", Value: 1},
+			},
+			Options: options.Index().SetUnique(true),
+		},
+	}
+
 	// Create indexes for each collection
 	if _, err := s.collection.Indexes().CreateMany(ctx, orgIndexes); err != nil {
 		return fmt.Errorf("failed to create organization indexes: %v", err)
@@ -108,6 +125,10 @@ func (s *mongoOrgStore) createIndexes(ctx context.Context) error {
 
 	if _, err := s.membersColl.Indexes().CreateMany(ctx, memberIndexes); err != nil {
 		return fmt.Errorf("failed to create member indexes: %v", err)
+	}
+
+	if _, err := s.apiTokens.Indexes().CreateMany(ctx, apiTokenIndexes); err != nil {
+		return fmt.Errorf("failed to create api token indexes: %v", err)
 	}
 
 	return nil
@@ -260,6 +281,42 @@ func (s *mongoOrgStore) GetOrganizationInvites(id string) ([]OrganizationInvite,
 		return nil, fmt.Errorf("failed to decode organization invites: %w", err)
 	}
 	return invites, nil
+}
+
+func (s *mongoOrgStore) CreateAPIToken(token *APIToken) error {
+	_, err := s.apiTokens.InsertOne(context.Background(), token)
+	return err
+}
+
+func (s *mongoOrgStore) GetAPITokenByToken(token string) (*APIToken, error) {
+	var apiToken APIToken
+	err := s.apiTokens.FindOne(context.Background(), bson.M{"token": token}).Decode(&apiToken)
+	if err != nil {
+		return nil, err
+	}
+	return &apiToken, nil
+}
+
+func (s *mongoOrgStore) GetAPITokens(orgId string) ([]APIToken, error) {
+	cursor, err := s.apiTokens.Find(context.Background(), bson.M{"organization_id": orgId})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var tokens []APIToken
+	if err = cursor.All(context.Background(), &tokens); err != nil {
+		return nil, err
+	}
+	return tokens, nil
+}
+
+func (s *mongoOrgStore) DeleteAPIToken(orgId string, tokenId string) error {
+	_, err := s.apiTokens.DeleteOne(context.Background(), bson.M{
+		"_id":            tokenId,
+		"organization_id": orgId,
+	})
+	return err
 }
 
 func (s *mongoOrgStore) Close() error {

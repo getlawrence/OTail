@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/mottibec/otail-server/pkg/middleware"
+	"github.com/mottibec/otail-server/pkg/auth"
 	"go.uber.org/zap"
 )
 
@@ -34,7 +34,7 @@ func (h *OrgHandler) RegisterRoutes(r chi.Router) {
 
 func (h *OrgHandler) handleGetOrg(w http.ResponseWriter, r *http.Request) {
 	requestedOrgID := chi.URLParam(r, "orgId")
-	orgID, ok := r.Context().Value(middleware.OrganizationIDKey).(string)
+	orgID, ok := r.Context().Value(auth.OrganizationIDKey).(string)
 	if !ok {
 		h.logger.Error("Failed to get organization ID from context")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -57,7 +57,7 @@ func (h *OrgHandler) handleGetOrg(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *OrgHandler) handleCreateInvite(w http.ResponseWriter, r *http.Request) {
-	orgID, ok := r.Context().Value(middleware.OrganizationIDKey).(string)
+	orgID, ok := r.Context().Value(auth.OrganizationIDKey).(string)
 	if !ok {
 		h.logger.Error("Failed to get organization ID from context")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)

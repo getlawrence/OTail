@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
 	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
-	"github.com/mottibec/otail-server/pkg/middleware"
+	"github.com/mottibec/otail-server/pkg/auth"
 	"go.uber.org/zap"
 )
 
@@ -43,8 +43,8 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 }
 
 func (h *Handler) ListAgents(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value(middleware.UserIDKey).(string)
-	agents := h.samplingService.GetAgentsByToken(userID)
+	organizationID := r.Context().Value(auth.OrganizationIDKey).(string)
+	agents := h.samplingService.GetAgentsByToken(organizationID)
 	h.writeJSON(w, agents)
 }
 
