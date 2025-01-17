@@ -15,6 +15,10 @@ type CreateInviteResponse struct {
 	ExpiresAt string `json:"expiresAt"`
 }
 
+type InviteRequest struct {
+	Email string `json:"email"`
+}
+
 type OrgHandler struct {
 	orgSvc OrgService
 	logger *zap.Logger
@@ -64,8 +68,13 @@ func (h *OrgHandler) handleCreateInvite(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	var req InviteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
 
-	invite, err := h.orgSvc.CreateInvite(orgID)
+	invite, err := h.orgSvc.CreateInvite(orgID, req.Email)
 	if err != nil {
 		h.logger.Error("Failed to create invite", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)

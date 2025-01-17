@@ -6,7 +6,7 @@ export const organizationApi = {
     return await apiClient.get<Organization>(`/api/v1/organizations/${id}`);
   },
 
-  createInvite: async (): Promise<CreateInviteResponse> => {
-    return await apiClient.post<CreateInviteResponse>('/api/v1/organizations/invite');
+  createInvite: async (email: string): Promise<CreateInviteResponse> => {
+    return await apiClient.post<CreateInviteResponse>('/api/v1/organizations/invite', { email });
   },
 };

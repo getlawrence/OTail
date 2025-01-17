@@ -33,15 +33,16 @@ func (o *orgService) CreateOrganization(name string) (string, error) {
 	return o.store.CreateOrganization(name)
 }
 
-func (o *orgService) CreateInvite(organizationId string) (*OrganizationInvite, error) {
+func (o *orgService) CreateInvite(organizationId string, email string) (*OrganizationInvite, error) {
 	// Create expiration time (24 hours from now)
 	expiresAt := time.Now().Add(24 * time.Hour)
 
-	// Create JWT token
+	// Create JWT token with email claim
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"organization_id": organizationId,
-		"exp":             expiresAt.Unix(),
-		"iat":             time.Now().Unix(),
+		"email":          email,
+		"exp":            expiresAt.Unix(),
+		"iat":            time.Now().Unix(),
 	})
 
 	// Sign token
@@ -53,6 +54,7 @@ func (o *orgService) CreateInvite(organizationId string) (*OrganizationInvite, e
 	// Create invite
 	invite := &OrganizationInvite{
 		OrganizationID: organizationId,
+		Email:          email,
 		CreatedAt:      time.Now(),
 		ExpiresAt:      expiresAt,
 		Token:          tokenString,
@@ -85,6 +87,18 @@ func (o *orgService) ValidateInvite(tokenString string) (*OrganizationInvite, er
 		return nil, errors.New("invalid token")
 	}
 
+	// Get claims
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("invalid token claims")
+	}
+
+	// Get email from claims
+	email, ok := claims["email"].(string)
+	if !ok {
+		return nil, errors.New("invalid email in token")
+	}
+
 	// Get invite from store
 	invite, err := o.store.GetInvite(tokenString)
 	if err != nil {
@@ -96,9 +110,9 @@ func (o *orgService) ValidateInvite(tokenString string) (*OrganizationInvite, er
 		return nil, errors.New("invite already used")
 	}
 
-	// Check if invite is expired
-	if time.Now().After(invite.ExpiresAt) {
-		return nil, errors.New("invite expired")
+	// Verify email matches
+	if invite.Email != email {
+		return nil, errors.New("email does not match invite")
 	}
 
 	return invite, nil
@@ -109,19 +123,25 @@ func (o *orgService) AddRootUser(orgId string, userId string, email string) erro
 }
 
 func (o *orgService) JoinOrganization(name string, userId string, email string, inviteToken string) (bool, error) {
+	// Validate invite and check email
 	invite, err := o.ValidateInvite(inviteToken)
+	if err != nil {
+		return false, err
+	}
+
+	// Verify email matches invite
+	if invite.Email != email {
+		return false, errors.New("email does not match invite")
+	}
+
+	// Add user to organization
+	err = o.store.AddUserToOrganization(invite.OrganizationID, userId, email, RoleMember)
 	if err != nil {
 		return false, err
 	}
 
 	// Mark invite as used
 	err = o.store.MarkInviteAsUsed(inviteToken)
-	if err != nil {
-		return false, err
-	}
-
-	// Add user to organization as a member
-	err = o.store.AddUserToOrganization(invite.OrganizationID, userId, email, RoleMember)
 	if err != nil {
 		return false, err
 	}

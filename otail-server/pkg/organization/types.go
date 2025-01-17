@@ -15,6 +15,7 @@ type Organization struct {
 
 type OrganizationInvite struct {
 	OrganizationID string    `json:"organization_id" bson:"organization_id"`
+	Email          string    `json:"email" bson:"email"`
 	CreatedAt      time.Time `json:"created_at" bson:"created_at"`
 	ExpiresAt      time.Time `json:"expires_at" bson:"expires_at"`
 	Token          string    `json:"token" bson:"token"`
@@ -38,7 +39,7 @@ type OrgService interface {
 	CreateOrganization(name string) (string, error)
 	GetOrganization(id string) (*OrganizationDetails, error)
 	JoinOrganization(name string, userId string, email string, invite string) (bool, error)
-	CreateInvite(organizationId string) (*OrganizationInvite, error)
+	CreateInvite(organizationId string, email string) (*OrganizationInvite, error)
 	ValidateInvite(token string) (*OrganizationInvite, error)
 	AddRootUser(orgId string, userId string, email string) error
 }
