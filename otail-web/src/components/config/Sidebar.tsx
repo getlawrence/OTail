@@ -1,5 +1,6 @@
 import { DragEvent, useState } from 'react';
 import { ArrowDown, Bolt, ArrowUp } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const componentTypes = {
   receiver: ['otlp', 'jaeger', 'zipkin'],
@@ -31,17 +32,18 @@ export const Sidebar = () => {
       {/* Main sidebar with icons */}
       <div className="w-12 h-full bg-background/95 backdrop-blur-sm shadow-lg z-20 flex flex-col gap-1 p-1">
         {Object.entries(componentTypes).map(([type]) => (
-          <button
+          <Button
+            variant="outline"
             key={type}
             onClick={() => toggleType(type)}
             className={`p-2 rounded-md transition-colors flex items-center justify-center
-              ${activeType === type 
-                ? 'bg-primary text-primary-foreground' 
+              ${activeType === type
+                ? 'bg-primary text-primary-foreground'
                 : 'hover:bg-accent/50'}`}
             title={type}
           >
             {componentIcons[type as keyof typeof componentIcons]}
-          </button>
+          </Button>
         ))}
       </div>
 
