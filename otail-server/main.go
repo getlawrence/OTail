@@ -15,7 +15,7 @@ import (
 	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
 	"github.com/mottibec/otail-server/pkg/agents/opamp"
 	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
-	authmiddleware "github.com/mottibec/otail-server/pkg/middleware"
+	"github.com/mottibec/otail-server/pkg/auth"
 	"github.com/mottibec/otail-server/pkg/organization"
 	"github.com/mottibec/otail-server/pkg/user"
 	"go.uber.org/zap"
@@ -34,7 +34,7 @@ func main() {
 	}
 	defer userStore.Close()
 
-	orgStore, err := organization.NewMongOrgStore(mongoUri, mongoDb)
+	orgStore, err := organization.NewMongoOrgStore(mongoUri, mongoDb)
 	if err != nil {
 		logger.Fatal("Failed to create org store", zap.Error(err))
 	}
@@ -44,12 +44,11 @@ func main() {
 
 	// Create token verification function
 	verifyToken := func(token string) (string, error) {
-		user, err := userSvc.GetUserByToken(token)
+		apiToken, err := orgService.ValidateAPIToken(token)
 		if err != nil {
 			return "", err
 		}
-		logger.Info("Agent verified", zap.String("token", token), zap.String("email", user.Email))
-		return user.ID, nil
+		return apiToken.OrganizationID, nil
 	}
 
 	// Initialize OPAMP server
@@ -92,20 +91,14 @@ func main() {
 
 	// Add organization routes with auth middleware
 	orgHandler := organization.NewOrgHandler(orgService, logger)
-	r.Route("/api/v1/organizations", func(r chi.Router) {
-		r.Use(authmiddleware.AuthMiddleware(func(token string) (string, string, error) {
-			user, err := userSvc.GetUserByToken(token)
-			if err != nil {
-				return "", "", err
-			}
-			return user.ID, user.OrganizationID, nil
-		}))
-		orgHandler.RegisterRoutes(r)
-	})
+	agentsHandler := agents.NewHandler(logger, samplingService, clickhouseClient)
 
-	// Create the HTTP API handler
-	apiHandler := agents.NewHandler(logger, samplingService, clickhouseClient)
-	r.Route("/api/v1/agents", apiHandler.RegisterRoutes)
+	// Protected routes (auth required)
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Use(auth.AuthMiddleware())
+		r.Route("/organization", orgHandler.RegisterRoutes)
+		r.Route("/agents", agentsHandler.RegisterRoutes)
+	})
 
 	// Create HTTP server
 	httpServer := &http.Server{

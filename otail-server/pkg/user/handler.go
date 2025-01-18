@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-
+	"github.com/mottibec/otail-server/pkg/auth"
 	"go.uber.org/zap"
 )
 
@@ -43,14 +43,14 @@ type LoginRequest struct {
 }
 
 type AuthResponse struct {
-	User     *User  `json:"user"`
-	APIToken string `json:"api_token"`
+	User  *User  `json:"user"`
+	Token string `json:"token"`
 }
 
 func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -66,9 +66,16 @@ func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Generate JWT token
+	token, err := auth.GenerateJWT(user.ID, user.Email, user.OrganizationID)
+	if err != nil {
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return
+	}
+
 	resp := AuthResponse{
-		User:     user,
-		APIToken: user.APIToken,
+		User:  user,
+		Token: token,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -78,7 +85,7 @@ func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -93,9 +100,16 @@ func (h *UserHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Generate JWT token
+	token, err := auth.GenerateJWT(user.ID, user.Email, user.OrganizationID)
+	if err != nil {
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return
+	}
+
 	resp := AuthResponse{
-		User:     user,
-		APIToken: user.APIToken,
+		User:  user,
+		Token: token,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

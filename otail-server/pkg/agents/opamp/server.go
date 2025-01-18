@@ -67,20 +67,17 @@ func (s *Server) Start() error {
 					}
 
 					// Verify token and get user ID
-					_, err := s.verifyToken(token)
+					organizationID, err := s.verifyToken(token)
 					if err != nil {
 						s.logger.Error("Invalid token", zap.Error(err), zap.String("token", token))
 						return types.ConnectionResponse{Accept: false, HTTPStatusCode: http.StatusUnauthorized}
 					}
 
-					// Store the token temporarily
-					tempToken := token
-
 					return types.ConnectionResponse{
 						Accept: true,
 						ConnectionCallbacks: server.ConnectionCallbacksStruct{
 							OnConnectedFunc: func(ctx context.Context, conn types.Connection) {
-								s.agents.SetUserToken(conn, tempToken)
+								s.agents.SetOrganizationID(conn, organizationID)
 							},
 							OnMessageFunc:         s.onMessage,
 							OnConnectionCloseFunc: s.onDisconnect,
@@ -156,6 +153,6 @@ func (s *Server) ListAgents() map[uuid.UUID]*Agent {
 	return s.agents.GetAllAgentsReadonlyClone()
 }
 
-func (s *Server) GetAgentsByToken(token string) map[uuid.UUID]*Agent {
-	return s.agents.GetAgentsByToken(token)
+func (s *Server) GetAgentsByOrganization(organizationId string) map[uuid.UUID]*Agent {
+	return s.agents.GetAgentsByOrganization(organizationId)
 }

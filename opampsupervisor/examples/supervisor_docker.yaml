@@ -1,5 +1,5 @@
 server:
-  endpoint: ws://backend:4320/v1/opamp
+  endpoint: ${OPAMP_SERVER_ENDPOINT}
   headers:
     Authorization: Bearer ${API_TOKEN}
   tls:

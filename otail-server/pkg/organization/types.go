@@ -29,10 +29,20 @@ type OrganizationMember struct {
 	Role     string    `json:"role" bson:"role"`
 }
 
+type APIToken struct {
+	ID             string    `json:"id" bson:"_id"`
+	OrganizationID string    `json:"organization_id" bson:"organization_id"`
+	Token          string    `json:"token" bson:"token"`
+	CreatedAt      time.Time `json:"created_at" bson:"created_at"`
+	CreatedBy      string    `json:"created_by" bson:"created_by"`
+	Description    string    `json:"description" bson:"description"`
+}
+
 type OrganizationDetails struct {
 	Organization
-	Members []OrganizationMember `json:"members"`
-	Invites []OrganizationInvite `json:"invites"`
+	Members   []OrganizationMember `json:"members"`
+	Invites   []OrganizationInvite `json:"invites"`
+	APITokens []APIToken           `json:"tokens"`
 }
 
 type OrgService interface {
@@ -42,4 +52,24 @@ type OrgService interface {
 	CreateInvite(organizationId string, email string) (*OrganizationInvite, error)
 	ValidateInvite(token string) (*OrganizationInvite, error)
 	AddRootUser(orgId string, userId string, email string) error
+	CreateAPIToken(orgId string, userId string, description string) (*APIToken, error)
+	ValidateAPIToken(token string) (*APIToken, error)
+	DeleteAPIToken(orgId string, tokenId string) error
+}
+
+type OrgStore interface {
+	CreateOrganization(name string) (string, error)
+	OrganizationExists(name string) bool
+	GetOrganization(id string) (*Organization, error)
+	GetOrganizationMembers(id string) ([]OrganizationMember, error)
+	GetOrganizationInvites(id string) ([]OrganizationInvite, error)
+	SaveInvite(invite *OrganizationInvite) error
+	GetInvite(token string) (*OrganizationInvite, error)
+	MarkInviteAsUsed(token string) error
+	AddUserToOrganization(organizationId string, userId string, email string, role string) error
+	CreateAPIToken(token *APIToken) error
+	GetAPITokenByToken(token string) (*APIToken, error)
+	GetAPITokens(orgId string) ([]APIToken, error)
+	DeleteAPIToken(orgId string, tokenId string) error
+	Close() error
 }

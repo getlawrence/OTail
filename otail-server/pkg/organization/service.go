@@ -3,19 +3,20 @@ package organization
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	"github.com/mottibec/otail-server/pkg/auth"
 )
 
 var jwtSecret = []byte("your-secret-key") // TODO: Move to configuration
 
 type orgService struct {
-	store MongoOrgStore
+	store OrgStore
 }
 
-func NewOrgService(orgStore MongoOrgStore) *orgService {
+func NewOrgService(orgStore OrgStore) *orgService {
 	return &orgService{
 		store: orgStore,
 	}
@@ -40,9 +41,9 @@ func (o *orgService) CreateInvite(organizationId string, email string) (*Organiz
 	// Create JWT token with email claim
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"organization_id": organizationId,
-		"email":          email,
-		"exp":            expiresAt.Unix(),
-		"iat":            time.Now().Unix(),
+		"email":           email,
+		"exp":             expiresAt.Unix(),
+		"iat":             time.Now().Unix(),
 	})
 
 	// Sign token
@@ -165,13 +166,45 @@ func (o *orgService) GetOrganization(id string) (*OrganizationDetails, error) {
 		return nil, fmt.Errorf("failed to get organization invites: %w", err)
 	}
 
+	tokens, err := o.store.GetAPITokens(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get organization api tokens: %w", err)
+	}
+
 	return &OrganizationDetails{
 		Organization: *org,
-		Members:     members,
-		Invites:     invites,
+		Members:      members,
+		Invites:      invites,
+		APITokens:    tokens,
 	}, nil
 }
 
-func (o *orgService) verifyInvite(invite string) bool {
-	return len(strings.Split("super-random-string", invite)) > 1
+func (o *orgService) CreateAPIToken(orgId string, userId string, description string) (*APIToken, error) {
+	token, err := auth.GenerateAPIToken()
+	if err != nil {
+		return nil, err
+	}
+
+	apiToken := &APIToken{
+		ID:             uuid.New().String(),
+		OrganizationID: orgId,
+		Token:          token,
+		CreatedAt:      time.Now(),
+		CreatedBy:      userId,
+		Description:    description,
+	}
+
+	if err := o.store.CreateAPIToken(apiToken); err != nil {
+		return nil, err
+	}
+
+	return apiToken, nil
+}
+
+func (o *orgService) ValidateAPIToken(token string) (*APIToken, error) {
+	return o.store.GetAPITokenByToken(token)
+}
+
+func (o *orgService) DeleteAPIToken(orgId string, tokenId string) error {
+	return o.store.DeleteAPIToken(orgId, tokenId)
 }

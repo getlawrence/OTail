@@ -6,7 +6,6 @@ type User struct {
 	ID             string    `json:"id" bson:"_id"`
 	Email          string    `json:"email" bson:"email"`
 	Password       []byte    `json:"-" bson:"password"`
-	APIToken       string    `json:"api_token" bson:"api_token"`
 	OrganizationID string    `json:"organization_id" bson:"organization_id"`
 	CreatedAt      time.Time `json:"created_at" bson:"created_at"`
 }

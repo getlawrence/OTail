@@ -1,7 +1,6 @@
 package agents
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
 	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
+	"github.com/mottibec/otail-server/pkg/auth"
 	"go.uber.org/zap"
 )
 
@@ -40,28 +40,14 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 	r.Get("/{agentId}/config", h.GetConfig)
 	r.Put("/{agentId}/config", h.UpdateConfig)
 	r.Get("/{agentId}/logs", h.GetLogs)
-	r.Get("/{agentId}/logs/stream", h.StreamLogs)
 }
 
 func (h *Handler) ListAgents(w http.ResponseWriter, r *http.Request) {
-	// Get token from Authorization header
-	token := r.Header.Get("Authorization")
-	if token == "" {
-		h.writeError(w, http.StatusUnauthorized, "No authorization token provided")
-		return
-	}
-
-	// Remove "Bearer " prefix if present
-	if len(token) > 7 && token[:7] == "Bearer " {
-		token = token[7:]
-	}
-
-	// Get agents for this user's token
-	agents := h.samplingService.GetAgentsByToken(token)
+	organizationID := r.Context().Value(auth.OrganizationIDKey).(string)
+	agents := h.samplingService.GetAgentsByOrganization(organizationID)
 	h.writeJSON(w, agents)
 }
 
-// GetConfig handles GET requests for agent configurations
 func (h *Handler) GetConfig(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "agentId")
 	agentID := vars
@@ -80,7 +66,6 @@ func (h *Handler) GetConfig(w http.ResponseWriter, r *http.Request) {
 	h.writeJSON(w, config)
 }
 
-// UpdateConfig handles PUT requests to update agent configurations
 func (h *Handler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
 	agentID := chi.URLParam(r, "agentId")
 	instanceID, err := uuid.Parse(agentID)
@@ -107,7 +92,7 @@ func (h *Handler) UpdateConfig(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
-	vars := chi.URLParam(r, "agentId")
+	agentId := chi.URLParam(r, "agentId")
 
 	// Parse query parameters
 	startTimeStr := r.URL.Query().Get("start_time")
@@ -128,44 +113,13 @@ func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	logs, err := h.clickhouse.QueryLogs(r.Context(), vars, startTime, endTime, limit)
+	logs, err := h.clickhouse.QueryLogs(r.Context(), agentId, startTime, endTime, limit)
 	if err != nil {
 		h.writeError(w, http.StatusInternalServerError, "Failed to query logs")
 		return
 	}
 
 	h.writeJSON(w, logs)
-}
-
-func (h *Handler) StreamLogs(w http.ResponseWriter, r *http.Request) {
-	vars := chi.URLParam(r, "agentId")
-
-	// Upgrade HTTP connection to WebSocket
-	conn, err := h.upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		h.logger.Error("Failed to upgrade connection", zap.Error(err))
-		return
-	}
-	defer conn.Close()
-
-	// Create a context that's cancelled when the connection is closed
-	ctx, cancel := context.WithCancel(r.Context())
-	defer cancel()
-
-	// Start streaming logs
-	logChan, err := h.clickhouse.StreamLogs(ctx, vars)
-	if err != nil {
-		h.logger.Error("Failed to start log stream", zap.Error(err))
-		return
-	}
-
-	for log := range logChan {
-		err := conn.WriteJSON(log)
-		if err != nil {
-			h.logger.Error("Failed to write to websocket", zap.Error(err))
-			return
-		}
-	}
 }
 
 // writeJSON writes a JSON response

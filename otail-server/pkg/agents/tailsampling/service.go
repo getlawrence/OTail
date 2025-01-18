@@ -88,8 +88,8 @@ func (s *Service) ListAgents() map[uuid.UUID]*opamp.Agent {
 }
 
 // GetAgentsByToken returns a list of agents associated with the given token
-func (s *Service) GetAgentsByToken(token string) map[uuid.UUID]*opamp.Agent {
-	return s.opampServer.GetAgentsByToken(token)
+func (s *Service) GetAgentsByOrganization(organizationID string) map[uuid.UUID]*opamp.Agent {
+	return s.opampServer.GetAgentsByOrganization(organizationID)
 }
 
 // convertToStringMap converts map[interface{}]interface{} to map[string]interface{}

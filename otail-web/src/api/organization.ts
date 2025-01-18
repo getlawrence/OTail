@@ -3,10 +3,14 @@ import { CreateInviteResponse, Organization } from './types';
 
 export const organizationApi = {
   getOrganization: async (id: string): Promise<Organization> => {
-    return await apiClient.get<Organization>(`/api/v1/organizations/${id}`);
+    return await apiClient.get<Organization>(`/api/v1/organization/${id}`);
   },
 
   createInvite: async (email: string): Promise<CreateInviteResponse> => {
-    return await apiClient.post<CreateInviteResponse>('/api/v1/organizations/invite', { email });
+    return await apiClient.post<CreateInviteResponse>('/api/v1/organization/invite', { email });
+  },
+
+  createToken: async (orgId: string, description: string): Promise<string> => {
+    return await apiClient.post<string>(`/api/v1/organization/${orgId}/token`, { description });
   },
 };
