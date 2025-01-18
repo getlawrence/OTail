@@ -1,4 +1,4 @@
-import { Home, Settings, Telescope, LogOut, Users } from "lucide-react"
+import { Settings, Telescope, LogOut, Users, Wrench } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import {
   Sidebar,
@@ -27,9 +27,9 @@ const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
 const items = !noAuthRequired
   ? [
     {
-      title: "Home",
+      title: "Policy Builder",
       url: "/sampling",
-      icon: Home,
+      icon: Wrench,
     },
     {
       title: "Agents",
@@ -45,9 +45,9 @@ const items = !noAuthRequired
   ]
   : [
     {
-      title: "Home",
+      title: "Policy Builder",
       url: "/sampling",
-      icon: Home,
+      icon: Wrench,
     },
   ];
 
@@ -101,10 +101,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {user && (
-          <div className="mt-auto border-t border-border">
-            <div className="px-4 py-3">
-              <div className="flex items-center justify-between">
+        <div className="mt-auto border-t border-border">
+          <div className="px-4 py-3">
+            <div className="flex items-center justify-between">
+              {user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -140,11 +140,11 @@ export function AppSidebar() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <ThemeToggle />
-              </div>
+              )}
+              <ThemeToggle />
             </div>
           </div>
-        )}
+        </div>
       </SidebarContent>
     </Sidebar>
   )
