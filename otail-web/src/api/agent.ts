@@ -10,7 +10,7 @@ export async function getConfig(agentId: string): Promise<string> {
 }
 
 export async function updateConfig(agentId: string, config: string): Promise<void> {
-    return apiClient.put<void>(`/api/v1/agents/${agentId}/config`, config);
+    return apiClient.put<void>(`/api/v1/agents/${agentId}/config`, JSON.parse(config));
 }
 
 export async function fetchAgentLogs(agentId: string): Promise<Log[]> {
