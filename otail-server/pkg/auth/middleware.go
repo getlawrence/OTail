@@ -47,6 +47,7 @@ func AuthMiddleware() func(http.Handler) http.Handler {
 			// Add claims to the request context
 			ctx := context.WithValue(r.Context(), OrganizationIDKey, claims["organization_id"])
 			ctx = context.WithValue(ctx, EmailKey, claims["email"])
+			ctx = context.WithValue(ctx, UserIDKey, claims["user_id"])
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -72,15 +73,16 @@ func validateJWT(tokenString string) (jwt.MapClaims, error) {
 	return nil, errors.New("invalid token claims")
 }
 
-func GenerateJWT(email string, organizationId string) (string, error) {
+func GenerateJWT(userId string, email string, organizationId string) (string, error) {
 	expiresAt := time.Now().Add(24 * time.Hour) // Token expires in 24 hours
 
 	// Create JWT token with claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id":         userId,
 		"organization_id": organizationId,
-		"email":          email,
-		"exp":            expiresAt.Unix(),
-		"iat":            time.Now().Unix(),
+		"email":           email,
+		"exp":             expiresAt.Unix(),
+		"iat":             time.Now().Unix(),
 	})
 
 	// Sign token with secret key

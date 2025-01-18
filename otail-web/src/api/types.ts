@@ -19,6 +19,7 @@ export interface Organization {
     name: string;
     members: OrganizationMember[];
     invites: OrganizationInvite[];
+    tokens: OrganizationToken[];
 }
 
 export interface User {
@@ -44,6 +45,14 @@ export interface OrganizationInvite {
     used: boolean;
 }
 
+export interface OrganizationToken {
+    id: string;
+    description: string;
+    token: string;
+    created_at: string;
+    last_used?: string;
+}
+
 export type Log = {
     body: string;
     instanceId: string;
@@ -66,12 +75,11 @@ export interface CreateInviteResponse {
 export interface LoginResponse {
     token: string;
     user: User;
-  }
-  
-  export interface RegisterParams {
+}
+
+export interface RegisterParams {
     email: string;
     password: string;
     organization?: string;
     invite?: string;
-  }
-  
+}

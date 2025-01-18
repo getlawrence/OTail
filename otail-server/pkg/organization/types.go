@@ -40,9 +40,9 @@ type APIToken struct {
 
 type OrganizationDetails struct {
 	Organization
-	Members []OrganizationMember `json:"members"`
-	Invites []OrganizationInvite `json:"invites"`
-	APITokens []APIToken         `json:"api_tokens"`
+	Members   []OrganizationMember `json:"members"`
+	Invites   []OrganizationInvite `json:"invites"`
+	APITokens []APIToken           `json:"tokens"`
 }
 
 type OrgService interface {
@@ -55,4 +55,21 @@ type OrgService interface {
 	CreateAPIToken(orgId string, userId string, description string) (*APIToken, error)
 	ValidateAPIToken(token string) (*APIToken, error)
 	DeleteAPIToken(orgId string, tokenId string) error
+}
+
+type OrgStore interface {
+	CreateOrganization(name string) (string, error)
+	OrganizationExists(name string) bool
+	GetOrganization(id string) (*Organization, error)
+	GetOrganizationMembers(id string) ([]OrganizationMember, error)
+	GetOrganizationInvites(id string) ([]OrganizationInvite, error)
+	SaveInvite(invite *OrganizationInvite) error
+	GetInvite(token string) (*OrganizationInvite, error)
+	MarkInviteAsUsed(token string) error
+	AddUserToOrganization(organizationId string, userId string, email string, role string) error
+	CreateAPIToken(token *APIToken) error
+	GetAPITokenByToken(token string) (*APIToken, error)
+	GetAPITokens(orgId string) ([]APIToken, error)
+	DeleteAPIToken(orgId string, tokenId string) error
+	Close() error
 }

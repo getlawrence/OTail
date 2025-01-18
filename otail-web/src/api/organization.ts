@@ -9,4 +9,8 @@ export const organizationApi = {
   createInvite: async (email: string): Promise<CreateInviteResponse> => {
     return await apiClient.post<CreateInviteResponse>('/api/v1/organization/invite', { email });
   },
+
+  createToken: async (orgId: string, description: string): Promise<string> => {
+    return await apiClient.post<string>(`/api/v1/organization/${orgId}/token`, { description });
+  },
 };

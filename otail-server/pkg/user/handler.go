@@ -67,7 +67,7 @@ func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate JWT token
-	token, err := auth.GenerateJWT(user.Email, user.OrganizationID)
+	token, err := auth.GenerateJWT(user.ID, user.Email, user.OrganizationID)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
@@ -101,7 +101,7 @@ func (h *UserHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate JWT token
-	token, err := auth.GenerateJWT(user.Email, user.OrganizationID)
+	token, err := auth.GenerateJWT(user.ID, user.Email, user.OrganizationID)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return

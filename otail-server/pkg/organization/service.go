@@ -3,7 +3,6 @@ package organization
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -14,10 +13,10 @@ import (
 var jwtSecret = []byte("your-secret-key") // TODO: Move to configuration
 
 type orgService struct {
-	store MongoOrgStore
+	store OrgStore
 }
 
-func NewOrgService(orgStore MongoOrgStore) *orgService {
+func NewOrgService(orgStore OrgStore) *orgService {
 	return &orgService{
 		store: orgStore,
 	}
@@ -167,15 +166,17 @@ func (o *orgService) GetOrganization(id string) (*OrganizationDetails, error) {
 		return nil, fmt.Errorf("failed to get organization invites: %w", err)
 	}
 
+	tokens, err := o.store.GetAPITokens(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get organization api tokens: %w", err)
+	}
+
 	return &OrganizationDetails{
 		Organization: *org,
 		Members:      members,
 		Invites:      invites,
+		APITokens:    tokens,
 	}, nil
-}
-
-func (o *orgService) verifyInvite(invite string) bool {
-	return len(strings.Split("super-random-string", invite)) > 1
 }
 
 func (o *orgService) CreateAPIToken(orgId string, userId string, description string) (*APIToken, error) {

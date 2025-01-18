@@ -21,24 +21,7 @@ type mongoOrgStore struct {
 	apiTokens   *mongo.Collection
 }
 
-type MongoOrgStore interface {
-	CreateOrganization(name string) (string, error)
-	OrganizationExists(name string) bool
-	GetOrganization(id string) (*Organization, error)
-	GetOrganizationMembers(id string) ([]OrganizationMember, error)
-	GetOrganizationInvites(id string) ([]OrganizationInvite, error)
-	SaveInvite(invite *OrganizationInvite) error
-	GetInvite(token string) (*OrganizationInvite, error)
-	MarkInviteAsUsed(token string) error
-	AddUserToOrganization(organizationId string, userId string, email string, role string) error
-	CreateAPIToken(token *APIToken) error
-	GetAPITokenByToken(token string) (*APIToken, error)
-	GetAPITokens(orgId string) ([]APIToken, error)
-	DeleteAPIToken(orgId string, tokenId string) error
-	Close() error
-}
-
-func NewMongOrgStore(uri string, dbName string) (MongoOrgStore, error) {
+func NewMongoOrgStore(uri string, dbName string) (OrgStore, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -183,18 +166,18 @@ func (s *mongoOrgStore) MarkInviteAsUsed(token string) error {
 func (s *mongoOrgStore) AddUserToOrganization(organizationId string, userId string, email string, role string) error {
 	ctx := context.Background()
 	member := OrganizationMember{
-		UserID:    userId,
-		Email:     email,
-		JoinedAt:  time.Now(),
-		Role:      role,
+		UserID:   userId,
+		Email:    email,
+		JoinedAt: time.Now(),
+		Role:     role,
 	}
 
 	_, err := s.membersColl.InsertOne(ctx, bson.M{
 		"organization_id": organizationId,
-		"user_id":        member.UserID,
-		"email":          member.Email,
-		"joined_at":      member.JoinedAt,
-		"role":           member.Role,
+		"user_id":         member.UserID,
+		"email":           member.Email,
+		"joined_at":       member.JoinedAt,
+		"role":            member.Role,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to add user to organization: %w", err)
@@ -313,7 +296,7 @@ func (s *mongoOrgStore) GetAPITokens(orgId string) ([]APIToken, error) {
 
 func (s *mongoOrgStore) DeleteAPIToken(orgId string, tokenId string) error {
 	_, err := s.apiTokens.DeleteOne(context.Background(), bson.M{
-		"_id":            tokenId,
+		"_id":             tokenId,
 		"organization_id": orgId,
 	})
 	return err

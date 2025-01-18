@@ -34,7 +34,7 @@ func main() {
 	}
 	defer userStore.Close()
 
-	orgStore, err := organization.NewMongOrgStore(mongoUri, mongoDb)
+	orgStore, err := organization.NewMongoOrgStore(mongoUri, mongoDb)
 	if err != nil {
 		logger.Fatal("Failed to create org store", zap.Error(err))
 	}
