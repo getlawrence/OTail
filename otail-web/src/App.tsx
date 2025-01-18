@@ -8,6 +8,7 @@ import Register from './pages/auth/register'
 import Organization from './pages/organization'
 import { ThemeProvider } from "@/hooks/use-theme"
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
+import { Toaster } from "@/components/ui/toaster"
 
 const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
 
@@ -57,6 +58,7 @@ function App() {
               </Route>
             )}
           </Routes>
+          <Toaster />
         </AuthProvider>
       </Router>
     </ThemeProvider>

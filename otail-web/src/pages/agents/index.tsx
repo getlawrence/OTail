@@ -6,6 +6,7 @@ import { Agent, Log } from "@/api/types"
 import { LogsDialog } from "@/components/agents/LogsDialog"
 import { ConfigDialog } from "@/components/agents/ConfigDialog"
 import { load } from 'js-yaml'
+import { useToast } from "@/hooks/use-toast"
 
 const AgentsPage = () => {
     const [agents, setAgents] = useState<Agent[]>([])
@@ -14,11 +15,23 @@ const AgentsPage = () => {
     const [logsOpen, setLogsOpen] = useState(false)
     const [logs, setLogs] = useState<Log[]>([])
     const [loading, setLoading] = useState(false)
+    const { toast } = useToast()
 
     useEffect(() => {
-        getAgents().then(data => {
-            setAgents(Object.values(data))
-        })
+        const fetchAgents = async () => {
+            try {
+                const data = await getAgents()
+                setAgents(Object.values(data))
+            } catch (error) {
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to fetch agents",
+                })
+                console.error(error)
+            }
+        }
+        fetchAgents()
     }, [])
 
     const handleViewConfig = (agent: Agent) => {
@@ -41,10 +54,25 @@ const AgentsPage = () => {
         }
     }
 
-    const handleUpdateConfig = (value: string) => {
-        if (selectedAgent) {
-            updateConfig(selectedAgent.InstanceId, JSON.stringify(load(value)))
+    const handleUpdateConfig = async (value: string) => {
+        if (!selectedAgent) return
+
+        try {
+            const parsedConfig = JSON.stringify(load(value))
+            await updateConfig(selectedAgent.InstanceId, parsedConfig)
+            toast({
+                variant: "default",
+                title: "Success",
+                description: "Configuration updated successfully",
+            })
             setConfigOpen(false)
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to update configuration",
+            })
+            console.error('Failed to update config:', error)
         }
     }
 

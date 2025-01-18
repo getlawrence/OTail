@@ -1,96 +1,151 @@
-import { Home, Settings, Telescope, LogOut, Users } from "lucide-react"
+import { Settings, Telescope, LogOut, Users, Wrench } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useAuth } from '@/hooks/use-auth'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { cn } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
-//hide items if VITE_SHOW_SIDEBAR=false in .env 
 const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
 const items = !noAuthRequired
   ? [
     {
-      title: "Home",
+      title: "Policy Builder",
       url: "/sampling",
-      icon: Home,
+      icon: Wrench,
     },
     {
       title: "Agents",
       url: "/agents",
       icon: Telescope,
+      badge: "New"
     },
     {
-      title: "config",
+      title: "Configuration",
       url: "/otel-config",
       icon: Settings,
     },
   ]
   : [
     {
-      title: "Home",
+      title: "Policy Builder",
       url: "/sampling",
-      icon: Home,
+      icon: Wrench,
     },
   ];
 
 export function AppSidebar() {
   const { logout, user } = useAuth()
+  const location = useLocation()
 
   return (
-    <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>OTail</SidebarGroupLabel>
+    <Sidebar className="border-r border-border">
+      <SidebarContent className="flex flex-col h-full">
+        <div className="flex items-center px-6 py-4 mb-2">
+          <div className="flex items-center space-x-2">
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Telescope className="h-4 w-4 text-primary" />
+            </div>
+            <h2 className="text-xl font-semibold tracking-tight">OTail</h2>
+          </div>
+        </div>
+        <SidebarGroup className="px-2">
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const isActive = location.pathname === item.url
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <Link
+                        to={item.url}
+                        className={cn(
+                          "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-all",
+                          isActive
+                            ? "bg-muted text-primary font-medium"
+                            : "text-muted-foreground hover:bg-muted hover:text-primary"
+                        )}
+                      >
+                        <span className="flex items-center gap-3">
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </span>
+                        {item.badge && (
+                          <Badge variant="secondary" className="ml-auto text-xs">
+                            {item.badge}
+                          </Badge>
+                        )}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {user && <nav className="grid items-start px-4 text-sm font-medium mt-auto">
-          <Link
-            to="/organization"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-          >
-            <Users className="h-4 w-4" />
-            Organization
-          </Link>
-          <Button
-            onClick={() => logout()}
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
-          {user && (
-            <div className="text-sm text-gray-500 mt-2 px-3">
-              {user.email}
+
+        <div className="mt-auto border-t border-border">
+          <div className="px-4 py-3">
+            <div className="flex items-center justify-between">
+              {user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          {user.email.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          {user.email.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.email}</p>
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/organization" className="flex items-center">
+                        <Users className="h-4 w-4 mr-2" />
+                        <span>Organization</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => logout()} className="text-destructive">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              <ThemeToggle />
             </div>
-          )}
-        </nav>}
+          </div>
+        </div>
       </SidebarContent>
-      <SidebarFooter className="px-2">
-        <ThemeToggle />
-      </SidebarFooter>
     </Sidebar>
   )
 }

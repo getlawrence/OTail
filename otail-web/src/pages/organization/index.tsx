@@ -61,13 +61,19 @@ const OrganizationPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 flex-1">
-                <MembersCard members={organization.members} />
-                <InvitesCard invites={organization.invites} />
-                <TokensCard 
-                    tokens={organization.tokens} 
-                    organizationId={organization.id}
-                    onTokenCreated={fetchOrganization}
-                />
+                <div className="h-[calc(35vh)]">
+                    <MembersCard members={organization.members} />
+                </div>
+                <div className="h-[calc(35vh)]">
+                    <InvitesCard invites={organization.invites} />
+                </div>
+                <div className="h-[calc(35vh)]">
+                    <TokensCard 
+                        tokens={organization.tokens} 
+                        organizationId={organization.id}
+                        onTokenCreated={fetchOrganization}
+                    />
+                </div>
             </div>
         </div>
     );
