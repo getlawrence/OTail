@@ -1,4 +1,4 @@
-import { Home, Settings, Telescope, LogOut, Users, MoreHorizontal } from "lucide-react"
+import { Home, Settings, Telescope, LogOut, Users } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import {
   Sidebar,
