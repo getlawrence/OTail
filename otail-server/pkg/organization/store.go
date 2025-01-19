@@ -2,7 +2,6 @@ package organization
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -117,123 +116,84 @@ func (s *mongoOrgStore) createIndexes(ctx context.Context) error {
 	return nil
 }
 
-func (s *mongoOrgStore) SaveInvite(invite *OrganizationInvite) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
+func (s *mongoOrgStore) SaveInvite(ctx context.Context, invite *OrganizationInvite) error {
 	_, err := s.invitesColl.InsertOne(ctx, invite)
 	return err
 }
 
-func (s *mongoOrgStore) GetInvite(token string) (*OrganizationInvite, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
+func (s *mongoOrgStore) GetInvite(ctx context.Context, token string) (*OrganizationInvite, error) {
 	var invite OrganizationInvite
 	err := s.invitesColl.FindOne(ctx, bson.M{"token": token}).Decode(&invite)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, errors.New("invite not found")
+			return nil, nil
 		}
 		return nil, err
 	}
-
 	return &invite, nil
 }
 
-func (s *mongoOrgStore) MarkInviteAsUsed(token string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	update := bson.M{
-		"$set": bson.M{
-			"used": true,
-		},
-	}
-
-	result, err := s.invitesColl.UpdateOne(ctx, bson.M{"token": token}, update)
+func (s *mongoOrgStore) MarkInviteAsUsed(ctx context.Context, token string) error {
+	result, err := s.invitesColl.UpdateOne(
+		ctx,
+		bson.M{"token": token},
+		bson.M{"$set": bson.M{"used": true}},
+	)
 	if err != nil {
 		return err
 	}
-
-	if result.MatchedCount == 0 {
-		return errors.New("invite not found")
+	if result.ModifiedCount == 0 {
+		return fmt.Errorf("invite not found")
 	}
-
 	return nil
 }
 
-func (s *mongoOrgStore) AddUserToOrganization(organizationId string, userId string, email string, role string) error {
-	ctx := context.Background()
+func (s *mongoOrgStore) AddUserToOrganization(ctx context.Context, organizationId string, userId string, email string, role string) error {
 	member := OrganizationMember{
 		UserID:   userId,
 		Email:    email,
 		JoinedAt: time.Now(),
 		Role:     role,
 	}
-
-	_, err := s.membersColl.InsertOne(ctx, bson.M{
-		"organization_id": organizationId,
-		"user_id":         member.UserID,
-		"email":           member.Email,
-		"joined_at":       member.JoinedAt,
-		"role":            member.Role,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to add user to organization: %w", err)
-	}
-
-	return nil
+	_, err := s.membersColl.InsertOne(ctx, member)
+	return err
 }
 
-func (s *mongoOrgStore) CreateOrganization(name string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	org := &Organization{
-		ID:        uuid.New().String(),
+func (s *mongoOrgStore) CreateOrganization(ctx context.Context, name string) (string, error) {
+	id := uuid.New().String()
+	org := Organization{
+		ID:        id,
 		Name:      name,
 		CreatedAt: time.Now(),
 	}
-
 	_, err := s.collection.InsertOne(ctx, org)
 	if err != nil {
 		return "", err
 	}
-
-	return org.ID, nil
+	return id, nil
 }
 
-func (s *mongoOrgStore) OrganizationExists(name string) bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
+func (s *mongoOrgStore) OrganizationExists(ctx context.Context, name string) bool {
 	count, err := s.collection.CountDocuments(ctx, bson.M{"name": name})
 	if err != nil {
 		return false
 	}
-
 	return count > 0
 }
 
-func (s *mongoOrgStore) GetOrganization(id string) (*Organization, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
+func (s *mongoOrgStore) GetOrganization(ctx context.Context, id string) (*Organization, error) {
 	var org Organization
 	err := s.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&org)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, errors.New("organization not found")
+			return nil, nil
 		}
 		return nil, err
 	}
-
 	return &org, nil
 }
 
-func (s *mongoOrgStore) GetOrganizationMembers(id string) ([]OrganizationMember, error) {
-	ctx := context.Background()
+func (s *mongoOrgStore) GetOrganizationMembers(ctx context.Context, id string) ([]OrganizationMember, error) {
 	cursor, err := s.membersColl.Find(ctx, bson.M{"organization_id": id})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get organization members: %w", err)
@@ -247,8 +207,7 @@ func (s *mongoOrgStore) GetOrganizationMembers(id string) ([]OrganizationMember,
 	return members, nil
 }
 
-func (s *mongoOrgStore) GetOrganizationInvites(id string) ([]OrganizationInvite, error) {
-	ctx := context.Background()
+func (s *mongoOrgStore) GetOrganizationInvites(ctx context.Context, id string) ([]OrganizationInvite, error) {
 	cursor, err := s.invitesColl.Find(ctx, bson.M{
 		"organization_id": id,
 		"used":            false,
@@ -266,44 +225,42 @@ func (s *mongoOrgStore) GetOrganizationInvites(id string) ([]OrganizationInvite,
 	return invites, nil
 }
 
-func (s *mongoOrgStore) CreateAPIToken(token *APIToken) error {
-	_, err := s.apiTokens.InsertOne(context.Background(), token)
+func (s *mongoOrgStore) CreateAPIToken(ctx context.Context, token *APIToken) error {
+	_, err := s.apiTokens.InsertOne(ctx, token)
 	return err
 }
 
-func (s *mongoOrgStore) GetAPITokenByToken(token string) (*APIToken, error) {
+func (s *mongoOrgStore) GetAPITokenByToken(ctx context.Context, token string) (*APIToken, error) {
 	var apiToken APIToken
-	err := s.apiTokens.FindOne(context.Background(), bson.M{"token": token}).Decode(&apiToken)
+	err := s.apiTokens.FindOne(ctx, bson.M{"token": token}).Decode(&apiToken)
 	if err != nil {
 		return nil, err
 	}
 	return &apiToken, nil
 }
 
-func (s *mongoOrgStore) GetAPITokens(orgId string) ([]APIToken, error) {
-	cursor, err := s.apiTokens.Find(context.Background(), bson.M{"organization_id": orgId})
+func (s *mongoOrgStore) GetAPITokens(ctx context.Context, orgId string) ([]APIToken, error) {
+	cursor, err := s.apiTokens.Find(ctx, bson.M{"organization_id": orgId})
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(context.Background())
+	defer cursor.Close(ctx)
 
 	var tokens []APIToken
-	if err = cursor.All(context.Background(), &tokens); err != nil {
+	if err = cursor.All(ctx, &tokens); err != nil {
 		return nil, err
 	}
 	return tokens, nil
 }
 
-func (s *mongoOrgStore) DeleteAPIToken(orgId string, tokenId string) error {
-	_, err := s.apiTokens.DeleteOne(context.Background(), bson.M{
+func (s *mongoOrgStore) DeleteAPIToken(ctx context.Context, orgId string, tokenId string) error {
+	_, err := s.apiTokens.DeleteOne(ctx, bson.M{
 		"_id":             tokenId,
 		"organization_id": orgId,
 	})
 	return err
 }
 
-func (s *mongoOrgStore) Close() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+func (s *mongoOrgStore) Close(ctx context.Context) error {
 	return s.client.Disconnect(ctx)
 }

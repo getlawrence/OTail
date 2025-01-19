@@ -28,6 +28,7 @@ services:
       - CLICKHOUSE_DSN=clickhouse://clickhouse:9000/logs?username=default&password=
       - MONGODB_URI=mongodb://mongodb:27017
       - MONGODB_DB=otail
+      - OTLP_ENDPOINT=collector:4327
     volumes:
       - ./otail-server:/src
     networks:
@@ -59,6 +60,7 @@ services:
     ports:
       - "4417:4317"  
       - "4418:4318"
+      - "4327:4327"
     volumes:
       - ./otail-col/config.yml:/etc/otelcol/config.yml
     depends_on:
@@ -101,6 +103,17 @@ services:
       - '3001:3000'
     volumes:
       - 'grafana_storage:/var/lib/grafana'
+
+  jaeger:
+    image: jaegertracing/jaeger:2.0.0
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+    environment:
+      - LOG_LEVEL=debug
+    networks:
+      - otail-network
 
   mongodb:
     image: mongo:latest

@@ -59,7 +59,7 @@ func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.userSvc.RegisterUser(req.Email, req.Password, req.Organization.Name, req.Invite)
+	user, err := h.userSvc.RegisterUser(r.Context(), req.Email, req.Password, req.Organization.Name, req.Invite)
 	if err != nil {
 		h.logger.Error("Failed to create user", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
