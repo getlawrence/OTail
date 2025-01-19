@@ -1,36 +1,56 @@
 receivers:
-  otlp:
+  otlp/app:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4327
+  otlp/agent:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+
 processors:
   batch:
     timeout: 5s
     send_batch_size: 1
+
 exporters:
-  clickhouse:
+  clickhouse/agent:
     endpoint: tcp://clickhouse:9000?dial_timeout=10s&compress=lz4&async_insert=1
     username: default
     password: default
     traces_table_name: otel_traces
     logs_table_name: otel_logs
     metrics_table_name: otel_metrics
+  otlp/jeager:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+  prometheus:
+    endpoint: "0.0.0.0:8889"
   debug:
     verbosity: detailed
 
 service:
   pipelines:
-    logs:
-      receivers: [otlp]
+    traces/app:
+      receivers: [otlp/app]
       processors: [batch]
-      exporters: [clickhouse, debug]
-    traces:
-      receivers: [otlp]
+      exporters: [debug, otlp/jeager]
+    logs/agent:
+      receivers: [otlp/agent]
       processors: [batch]
-      exporters: [clickhouse]
-    metrics:
-      receivers: [otlp]
+      exporters: [clickhouse/agent]
+    traces/agent:
+      receivers: [otlp/agent]
       processors: [batch]
-      exporters: [clickhouse]
+      exporters: [clickhouse/agent]
+    metrics/agent:
+      receivers: [otlp/agent]
+      processors: [batch]
+      exporters: [clickhouse/agent]
+    metrics/app:
+      receivers: [otlp/app]
+      processors: [batch]
+      exporters: [prometheus, debug]

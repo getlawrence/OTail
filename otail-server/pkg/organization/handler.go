@@ -51,7 +51,7 @@ func (h *OrgHandler) handleGetOrg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	org, err := h.orgSvc.GetOrganization(orgID)
+	org, err := h.orgSvc.GetOrganization(r.Context(), orgID)
 	if err != nil {
 		h.logger.Error("Failed to get organization", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -76,7 +76,7 @@ func (h *OrgHandler) handleCreateInvite(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	invite, err := h.orgSvc.CreateInvite(orgID, req.Email)
+	invite, err := h.orgSvc.CreateInvite(r.Context(), orgID, req.Email)
 	if err != nil {
 		h.logger.Error("Failed to create invite", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -117,7 +117,7 @@ func (h *OrgHandler) handlerCreateApiToken(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	apiToken, err := h.orgSvc.CreateAPIToken(orgID, userID, req.Description)
+	apiToken, err := h.orgSvc.CreateAPIToken(r.Context(), orgID, userID, req.Description)
 
 	if err != nil {
 		h.logger.Error("Failed to create invite", zap.Error(err))

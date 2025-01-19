@@ -1,6 +1,9 @@
 package organization
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 const (
 	RoleAdmin  = "admin"
@@ -46,30 +49,30 @@ type OrganizationDetails struct {
 }
 
 type OrgService interface {
-	CreateOrganization(name string) (string, error)
-	GetOrganization(id string) (*OrganizationDetails, error)
-	JoinOrganization(name string, userId string, email string, invite string) (bool, error)
-	CreateInvite(organizationId string, email string) (*OrganizationInvite, error)
-	ValidateInvite(token string) (*OrganizationInvite, error)
-	AddRootUser(orgId string, userId string, email string) error
-	CreateAPIToken(orgId string, userId string, description string) (*APIToken, error)
-	ValidateAPIToken(token string) (*APIToken, error)
-	DeleteAPIToken(orgId string, tokenId string) error
+	CreateOrganization(ctx context.Context, name string) (string, error)
+	GetOrganization(ctx context.Context, id string) (*OrganizationDetails, error)
+	JoinOrganization(ctx context.Context, name string, userId string, email string, invite string) (bool, error)
+	CreateInvite(ctx context.Context, organizationId string, email string) (*OrganizationInvite, error)
+	ValidateInvite(ctx context.Context, token string) (*OrganizationInvite, error)
+	AddRootUser(ctx context.Context, orgId string, userId string, email string) error
+	CreateAPIToken(ctx context.Context, orgId string, userId string, description string) (*APIToken, error)
+	ValidateAPIToken(ctx context.Context, token string) (*APIToken, error)
+	DeleteAPIToken(ctx context.Context, orgId string, tokenId string) error
 }
 
 type OrgStore interface {
-	CreateOrganization(name string) (string, error)
-	OrganizationExists(name string) bool
-	GetOrganization(id string) (*Organization, error)
-	GetOrganizationMembers(id string) ([]OrganizationMember, error)
-	GetOrganizationInvites(id string) ([]OrganizationInvite, error)
-	SaveInvite(invite *OrganizationInvite) error
-	GetInvite(token string) (*OrganizationInvite, error)
-	MarkInviteAsUsed(token string) error
-	AddUserToOrganization(organizationId string, userId string, email string, role string) error
-	CreateAPIToken(token *APIToken) error
-	GetAPITokenByToken(token string) (*APIToken, error)
-	GetAPITokens(orgId string) ([]APIToken, error)
-	DeleteAPIToken(orgId string, tokenId string) error
-	Close() error
+	CreateOrganization(ctx context.Context, name string) (string, error)
+	OrganizationExists(ctx context.Context, name string) bool
+	GetOrganization(ctx context.Context, id string) (*Organization, error)
+	GetOrganizationMembers(ctx context.Context, id string) ([]OrganizationMember, error)
+	GetOrganizationInvites(ctx context.Context, id string) ([]OrganizationInvite, error)
+	SaveInvite(ctx context.Context, invite *OrganizationInvite) error
+	GetInvite(ctx context.Context, token string) (*OrganizationInvite, error)
+	MarkInviteAsUsed(ctx context.Context, token string) error
+	AddUserToOrganization(ctx context.Context, organizationId string, userId string, email string, role string) error
+	CreateAPIToken(ctx context.Context, token *APIToken) error
+	GetAPITokenByToken(ctx context.Context, token string) (*APIToken, error)
+	GetAPITokens(ctx context.Context, orgId string) ([]APIToken, error)
+	DeleteAPIToken(ctx context.Context, orgId string, tokenId string) error
+	Close(ctx context.Context) error
 }

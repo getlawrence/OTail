@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -21,7 +22,7 @@ func NewUserService(store UserStore, orgService organization.OrgService) UserSer
 	}
 }
 
-func (s *UserService) RegisterUser(email, password, organization string, inviteToken string) (*User, error) {
+func (s *UserService) RegisterUser(ctx context.Context, email, password, organization string, inviteToken string) (*User, error) {
 	if email == "" || password == "" {
 		return nil, errors.New("email and password are required")
 	}
@@ -31,7 +32,7 @@ func (s *UserService) RegisterUser(email, password, organization string, inviteT
 
 	if inviteToken != "" {
 		// Join existing organization using invite
-		invite, err := s.orgSvc.ValidateInvite(inviteToken)
+		invite, err := s.orgSvc.ValidateInvite(ctx, inviteToken)
 		if err != nil {
 			return nil, errors.New("invalid invite: " + err.Error())
 		}
@@ -42,7 +43,7 @@ func (s *UserService) RegisterUser(email, password, organization string, inviteT
 			return nil, err
 		}
 		// Then join organization
-		success, err := s.orgSvc.JoinOrganization("", user.ID, email, inviteToken)
+		success, err := s.orgSvc.JoinOrganization(ctx, "", user.ID, email, inviteToken)
 		if err != nil || !success {
 			return nil, errors.New("failed to join organization: " + err.Error())
 		}
@@ -53,7 +54,7 @@ func (s *UserService) RegisterUser(email, password, organization string, inviteT
 			return nil, errors.New("organization name is required")
 		}
 		var err error
-		orgId, err = s.orgSvc.CreateOrganization(organization)
+		orgId, err = s.orgSvc.CreateOrganization(ctx, organization)
 		if err != nil {
 			return nil, errors.New("failed to create organization: " + err.Error())
 		}
@@ -67,7 +68,7 @@ func (s *UserService) RegisterUser(email, password, organization string, inviteT
 
 	// If this is a new organization, add the user as root admin
 	if inviteToken == "" {
-		err = s.orgSvc.AddRootUser(orgId, user.ID, email)
+		err = s.orgSvc.AddRootUser(ctx, orgId, user.ID, email)
 		if err != nil {
 			return nil, errors.New("failed to add root user to organization: " + err.Error())
 		}
@@ -102,7 +103,7 @@ func (s *UserService) CreateUser(email, password, orgId string) (*User, error) {
 	return s.store.CreateUser(user)
 }
 
-func (s *UserService) AuthenticateUser(email, password string) (*User, error) {
+func (s *UserService) AuthenticateUser(ctx context.Context, email, password string) (*User, error) {
 	if email == "" || password == "" {
 		return nil, errors.New("email and password are required")
 	}
@@ -127,6 +128,6 @@ func (s *UserService) ValidatePassword(user *User, password string) bool {
 	return auth.ValidatePassword(string(user.Password), password)
 }
 
-func (s *UserService) ValidateAPIToken(token string) (*organization.APIToken, error) {
-	return s.orgSvc.ValidateAPIToken(token)
+func (s *UserService) ValidateAPIToken(ctx context.Context, token string) (*organization.APIToken, error) {
+	return s.orgSvc.ValidateAPIToken(ctx, token)
 }

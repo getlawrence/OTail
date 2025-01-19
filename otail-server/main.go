@@ -17,7 +17,9 @@ import (
 	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
 	"github.com/mottibec/otail-server/pkg/auth"
 	"github.com/mottibec/otail-server/pkg/organization"
+	"github.com/mottibec/otail-server/pkg/telemetry"
 	"github.com/mottibec/otail-server/pkg/user"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 )
 
@@ -25,6 +27,26 @@ func main() {
 	// Initialize logger
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
+
+	// Initialize telemetry
+	ctx := context.Background()
+	telemetryConfig := telemetry.Config{
+		ServiceName:    "otail-server",
+		ServiceVersion: "1.0.0",
+		Environment:    os.Getenv("ENVIRONMENT"),
+		OTLPEndpoint:   os.Getenv("OTLP_ENDPOINT"),
+	}
+	cleanup, err := telemetry.InitTelemetry(ctx, telemetryConfig)
+	if err != nil {
+		logger.Fatal("Failed to initialize telemetry", zap.Error(err))
+	}
+	defer cleanup(ctx)
+
+	// Initialize metrics
+	_, err = telemetry.InitMetrics(ctx)
+	if err != nil {
+		logger.Fatal("Failed to initialize metrics", zap.Error(err))
+	}
 
 	mongoUri, mongoDb := os.Getenv("MONGODB_URI"), os.Getenv("MONGODB_DB")
 	// Initialize user store
@@ -38,13 +60,15 @@ func main() {
 	if err != nil {
 		logger.Fatal("Failed to create org store", zap.Error(err))
 	}
-	defer orgStore.Close()
+	defer orgStore.Close(context.Background())
+
+	// Initialize services
 	orgService := organization.NewOrgService(orgStore)
 	userSvc := user.NewUserService(userStore, orgService)
 
 	// Create token verification function
 	verifyToken := func(token string) (string, error) {
-		apiToken, err := orgService.ValidateAPIToken(token)
+		apiToken, err := orgService.ValidateAPIToken(context.Background(), token)
 		if err != nil {
 			return "", err
 		}
@@ -84,6 +108,11 @@ func main() {
 	}))
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+
+	// Add OpenTelemetry middleware
+	r.Use(func(next http.Handler) http.Handler {
+		return otelhttp.NewHandler(next, "http_server")
+	})
 
 	// Add authentication routes
 	userHandler := user.NewUserHandler(userSvc, logger)
