@@ -33,11 +33,11 @@ service:
     traces/app:
       receivers: [otlp/app]
       processors: [batch]
-      exporters: [otlp/jeager]
+      exporters: [debug, otlp/jeager]
     logs/agent:
       receivers: [otlp/agent]
       processors: [batch]
-      exporters: [clickhouse/agent, debug]
+      exporters: [clickhouse/agent]
     traces/agent:
       receivers: [otlp/agent]
       processors: [batch]

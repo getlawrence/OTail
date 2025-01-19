@@ -45,8 +45,8 @@ services:
       - OPAMP_SERVER_ENDPOINT=ws://backend:4320/v1/opamp
       - API_TOKEN=sf1kgfAHouIOhf9idyMG0nYvx3qH-E3RJB8jrgYIPok=
     ports:
-      - "4317:4317"  # OTLP gRPC
-      - "4318:4318"  # OTLP HTTP
+      - "14317:4317"  # OTLP gRPC
+      - "14318:4318"  # OTLP HTTP
     volumes:
       - ./opampsupervisor/storage:/var/lib/opamp
     networks:
@@ -105,13 +105,12 @@ services:
       - 'grafana_storage:/var/lib/grafana'
 
   jaeger:
-    image: jaegertracing/jaeger:2.0.0
+    image: jaegertracing/all-in-one:latest
     ports:
-      - "16686:16686"
-      - "4317:4317"
-      - "4318:4318"
+      - "4317:4317"   # OTLP gRPC
+      - "16686:16686" # UI
     environment:
-      - LOG_LEVEL=debug
+      - COLLECTOR_OTLP_ENABLED=true
     networks:
       - otail-network
 
