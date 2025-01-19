@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/mottibec/otail-server/pkg/telemetry"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -19,7 +20,11 @@ func NewMongoUserStore(uri string, dbName string) (*MongoUserStore, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+	opts := options.Client()
+	opts.Monitor = telemetry.NewMonitor()
+	opts.ApplyURI(uri)
+
+	client, err := mongo.Connect(opts)
 	if err != nil {
 		return nil, err
 	}

@@ -9,10 +9,12 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+
 processors:
   batch:
     timeout: 5s
     send_batch_size: 1
+
 exporters:
   clickhouse/agent:
     endpoint: tcp://clickhouse:9000?dial_timeout=10s&compress=lz4&async_insert=1
@@ -25,6 +27,8 @@ exporters:
     endpoint: jaeger:4317
     tls:
       insecure: true
+  prometheus:
+    endpoint: "0.0.0.0:8889"
   debug:
     verbosity: detailed
 
@@ -46,3 +50,7 @@ service:
       receivers: [otlp/agent]
       processors: [batch]
       exporters: [clickhouse/agent]
+    metrics/app:
+      receivers: [otlp/app]
+      processors: [batch]
+      exporters: [prometheus, debug]
