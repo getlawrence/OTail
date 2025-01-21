@@ -3,17 +3,16 @@
 OTail is a user-friendly web interface for creating and managing OpenTelemetry tail sampling agents. It provides a visual way to configure complex sampling policies without having to write YAML directly.
 
 ## UI
-<img width="1467" alt="Screenshot 2025-01-08 at 19 20 46" src="https://github.com/user-attachments/assets/40724856-f210-47e7-8e28-f9c35fcfc9c6" />
+<img width="1664" alt="Screenshot 2025-01-21 at 16 46 13" src="https://github.com/user-attachments/assets/f6c2e316-a365-4503-afef-f8298e298d87" />
+
 
 
 ## Features
 
 - **Visual Policy Configuration**: Easily create and manage sampling policies through an intuitive UI
-- **Real-time YAML Preview**: See the generated YAML configuration update in real-time
-- **View Agent Effective Config**: View the effective configuration of the agent, including the generated YAML configuration
-- **Send Updated Config To Agent**: Send the updated YAML configuration to the agent
-- **Dark Mode Toggle**: Switch between light and dark themes
 - **Configuration Validation**: Validate sampling policy configurations before applying
+- **View Agent Effective Config**: View the effective configuration of the agent
+- **Send Updated Config To Agent**: Send the updated YAML configuration to the agent
 
 ## Local Setup
 
