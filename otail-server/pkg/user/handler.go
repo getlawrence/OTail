@@ -26,15 +26,11 @@ func (h *UserHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/login", h.handleLogin)
 }
 
-type OrganizationRequest struct {
-	Name string `json:"name"`
-}
-
 type RegisterRequest struct {
-	Email        string              `json:"email"`
-	Password     string              `json:"password"`
-	Organization OrganizationRequest `json:"organization"`
-	Invite       string              `json:"invite"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	Organization string `json:"organization"`
+	Invite       string `json:"invite"`
 }
 
 type LoginRequest struct {
@@ -59,7 +55,7 @@ func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.userSvc.RegisterUser(r.Context(), req.Email, req.Password, req.Organization.Name, req.Invite)
+	user, err := h.userSvc.RegisterUser(r.Context(), req.Email, req.Password, req.Organization, req.Invite)
 	if err != nil {
 		h.logger.Error("Failed to create user", zap.Error(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)

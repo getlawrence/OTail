@@ -5,9 +5,11 @@ import (
 	"time"
 )
 
+type UserRole string
+
 const (
-	RoleAdmin  = "admin"
-	RoleMember = "member"
+	RoleAdmin  UserRole = "admin"
+	RoleMember UserRole = "member"
 )
 
 type Organization struct {
@@ -26,10 +28,11 @@ type OrganizationInvite struct {
 }
 
 type OrganizationMember struct {
-	UserID   string    `json:"user_id" bson:"user_id"`
-	Email    string    `json:"email" bson:"email"`
-	JoinedAt time.Time `json:"joined_at" bson:"joined_at"`
-	Role     string    `json:"role" bson:"role"`
+	OrganizationID string    `json:"organization_id" bson:"organization_id"`
+	UserID         string    `json:"user_id" bson:"user_id"`
+	Email          string    `json:"email" bson:"email"`
+	JoinedAt       time.Time `json:"joined_at" bson:"joined_at"`
+	Role           UserRole  `json:"role" bson:"role"`
 }
 
 type APIToken struct {
@@ -69,7 +72,7 @@ type OrgStore interface {
 	SaveInvite(ctx context.Context, invite *OrganizationInvite) error
 	GetInvite(ctx context.Context, token string) (*OrganizationInvite, error)
 	MarkInviteAsUsed(ctx context.Context, token string) error
-	AddUserToOrganization(ctx context.Context, organizationId string, userId string, email string, role string) error
+	AddUserToOrganization(ctx context.Context, organizationId string, userId string, email string, role UserRole) error
 	CreateAPIToken(ctx context.Context, token *APIToken) error
 	GetAPITokenByToken(ctx context.Context, token string) (*APIToken, error)
 	GetAPITokens(ctx context.Context, orgId string) ([]APIToken, error)
