@@ -43,7 +43,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - OPAMP_SERVER_ENDPOINT=ws://backend:4320/v1/opamp
-      - API_TOKEN=sf1kgfAHouIOhf9idyMG0nYvx3qH-E3RJB8jrgYIPok=
+      - API_TOKEN=J3BLTewhup46MHHGKdVBmLV1cQJUD77jwfPB6-eoPuo=
     ports:
       - "14317:4317"  # OTLP gRPC
       - "14318:4318"  # OTLP HTTP

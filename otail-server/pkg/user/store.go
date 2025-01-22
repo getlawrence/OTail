@@ -40,10 +40,6 @@ func NewMongoUserStore(uri string, dbName string) (*MongoUserStore, error) {
 			Keys:    bson.D{{Key: "email", Value: 1}},
 			Options: options.Index().SetUnique(true),
 		},
-		{
-			Keys:    bson.D{{Key: "api_token", Value: 1}},
-			Options: options.Index().SetUnique(true),
-		},
 	}
 
 	_, err = collection.Indexes().CreateMany(ctx, indexes)
@@ -77,18 +73,6 @@ func (s *MongoUserStore) GetUserByEmail(email string) (*User, error) {
 	err := s.collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err == mongo.ErrNoDocuments {
 		return nil, ErrUserNotFound
-	} else if err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
-
-func (s *MongoUserStore) GetUserByToken(token string) (*User, error) {
-	ctx := context.Background()
-	var user User
-	err := s.collection.FindOne(ctx, bson.M{"api_token": token}).Decode(&user)
-	if err == mongo.ErrNoDocuments {
-		return nil, ErrInvalidToken
 	} else if err != nil {
 		return nil, err
 	}
