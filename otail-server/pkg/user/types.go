@@ -13,6 +13,5 @@ type User struct {
 type UserStore interface {
 	CreateUser(user *User) (*User, error)
 	GetUserByEmail(email string) (*User, error)
-	GetUserByToken(token string) (*User, error)
 	Close() error
 }

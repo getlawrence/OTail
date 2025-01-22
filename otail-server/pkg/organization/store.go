@@ -153,12 +153,13 @@ func (s *mongoOrgStore) MarkInviteAsUsed(ctx context.Context, token string) erro
 	return nil
 }
 
-func (s *mongoOrgStore) AddUserToOrganization(ctx context.Context, organizationId string, userId string, email string, role string) error {
+func (s *mongoOrgStore) AddUserToOrganization(ctx context.Context, organizationId string, userId string, email string, role UserRole) error {
 	member := OrganizationMember{
-		UserID:   userId,
-		Email:    email,
-		JoinedAt: time.Now(),
-		Role:     role,
+		OrganizationID: organizationId,
+		UserID:         userId,
+		Email:          email,
+		JoinedAt:       time.Now(),
+		Role:           role,
 	}
 	_, err := s.membersColl.InsertOne(ctx, member)
 	return err
