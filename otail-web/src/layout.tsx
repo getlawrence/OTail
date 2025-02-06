@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom"
+import { Outlet, useLocation } from "react-router-dom"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -6,8 +6,16 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { trackNavigation } from './utils/analytics';
+import { useEffect } from 'react';
 
 export default function Layout() {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackNavigation.pageView(location.pathname);
+  }, [location.pathname]);
+
   return (
     <SidebarProvider className="flex h-screen w-screen overflow-hidden">
       <AppSidebar />
