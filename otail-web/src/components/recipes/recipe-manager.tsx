@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Policy, Recipe } from '@/types/policy'
+import { trackRecipe } from '../../utils/analytics';
 
 interface RecipeManagerProps {
   currentPolicies: Policy[]
@@ -27,13 +28,21 @@ export const RecipeManager: FC<RecipeManagerProps> = ({ currentPolicies, onApply
       setRecipes(updatedRecipes)
       localStorage.setItem('recipes', JSON.stringify(updatedRecipes))
       setNewRecipeName('')
+      trackRecipe.create(newRecipeName);
     }
   }
 
   const deleteRecipe = (index: number) => {
+    const recipe = recipes[index];
     const updatedRecipes = recipes.filter((_, i) => i !== index)
     setRecipes(updatedRecipes)
     localStorage.setItem('recipes', JSON.stringify(updatedRecipes))
+    trackRecipe.delete(recipe.name);
+  }
+
+  const handleApplyRecipe = (recipe: Recipe) => {
+    onApplyRecipe(recipe);
+    trackRecipe.apply(recipe.name);
   }
 
   return (
@@ -51,7 +60,7 @@ export const RecipeManager: FC<RecipeManagerProps> = ({ currentPolicies, onApply
           <div key={index} className="flex justify-between items-center p-2 border-b">
             <span>{recipe.name}</span>
             <div>
-              <Button variant="outline" onClick={() => onApplyRecipe(recipe)} className="mr-2">
+              <Button variant="outline" onClick={() => handleApplyRecipe(recipe)} className="mr-2">
                 Apply
               </Button>
               <Button variant="destructive" onClick={() => deleteRecipe(index)}>
@@ -64,4 +73,3 @@ export const RecipeManager: FC<RecipeManagerProps> = ({ currentPolicies, onApply
     </div>
   )
 }
-

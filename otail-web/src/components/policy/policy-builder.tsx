@@ -11,7 +11,7 @@ interface PolicyBuilderProps {
   policies: Policy[]
   addPolicy: (type: PolicyType) => void
   updatePolicy: (index: number, updatedPolicy: Policy) => void
-  removePolicy: (index: number) => void
+  removePolicy: (index: number, policy: Policy) => void
   evaluationResult?: Record<string, Decision>
 }
 
@@ -27,7 +27,7 @@ export const PolicyBuilder: FC<PolicyBuilderProps> = ({ policies, addPolicy, upd
             key={index}
             policy={policy}
             onUpdate={(updatedPolicy) => updatePolicy(index, updatedPolicy)}
-            onRemove={() => removePolicy(index)}
+            onRemove={() => removePolicy(index, policy)}
             samplingDecision={evaluationResult?.[policy.name]}
           />
         ))}

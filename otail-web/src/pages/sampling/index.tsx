@@ -20,8 +20,9 @@ import { ConfigViewer } from '@/components/simulation/config-viewer'
 import { SimulationViewer } from '@/components/simulation/simulation-viewer'
 import { PolicyBuilder } from '@/components/policy/policy-builder'
 import { RecipeManager } from '@/components/recipes/recipe-manager'
-import { Policy } from '@/types/policy'
+import { Policy, PolicyType } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config'
+import { trackSampling } from '@/utils/analytics';
 
 type Mode = 'Edit' | 'Test'
 
@@ -33,6 +34,14 @@ const PolicyActions = ({
   onApplyRecipe: (recipe: any) => void;
 }) => {
   const [recipeDialogOpen, setRecipeDialogOpen] = useState(false);
+
+  const handlePolicyAction = (action: string) => {
+    trackSampling.policyAction(action);
+    if (action === 'import_recipe' || action === 'save_recipe') {
+      setRecipeDialogOpen(true);
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Dialog open={recipeDialogOpen} onOpenChange={setRecipeDialogOpen}>
@@ -45,14 +54,14 @@ const PolicyActions = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DialogTrigger asChild>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handlePolicyAction('import_recipe')}>
                 <span className="mr-2">📥</span>
                 Import Recipe
               </DropdownMenuItem>
             </DialogTrigger>
             <DropdownMenuSeparator />
             <DialogTrigger asChild>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handlePolicyAction('save_recipe')}>
                 <span className="mr-2">💾</span>
                 Save as Recipe
               </DropdownMenuItem>
@@ -67,6 +76,7 @@ const PolicyActions = ({
             currentPolicies={currentPolicies}
             onApplyRecipe={(recipe) => {
               onApplyRecipe(recipe);
+              trackSampling.policyAction('apply_recipe');
               setRecipeDialogOpen(false);
             }}
           />
@@ -76,26 +86,35 @@ const PolicyActions = ({
   );
 };
 
-const ModeToggle = ({ mode, onToggleMode }: { mode: Mode; onToggleMode: () => void }) => (
-  <div className="flex items-center space-x-2">
-    <Button
-      variant={mode === 'Edit' ? 'default' : 'outline'}
-      size="sm"
-      onClick={() => mode === 'Test' && onToggleMode()}
-      className="px-3"
-    >
-      Edit
-    </Button>
-    <Button
-      variant={mode === 'Test' ? 'default' : 'outline'}
-      size="sm"
-      onClick={() => mode === 'Edit' && onToggleMode()}
-      className="px-3"
-    >
-      Test
-    </Button>
-  </div>
-);
+const ModeToggle = ({ mode, onToggleMode }: { mode: Mode; onToggleMode: () => void }) => {
+  const handleModeChange = (newMode: Mode) => {
+    if (mode !== newMode) {
+      trackSampling.modeChange(mode, newMode);
+      onToggleMode();
+    }
+  };
+
+  return (
+    <div className="flex items-center space-x-2">
+      <Button
+        variant={mode === 'Edit' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => mode === 'Test' && handleModeChange('Edit')}
+        className="px-3"
+      >
+        Edit
+      </Button>
+      <Button
+        variant={mode === 'Test' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => mode === 'Edit' && handleModeChange('Test')}
+        className="px-3"
+      >
+        Test
+      </Button>
+    </div>
+  );
+};
 
 const ConfigEditor = () => {
   const {
@@ -107,6 +126,34 @@ const ConfigEditor = () => {
     handleRemovePolicy,
     handleViewerChange,
   } = useConfigState();
+
+  // Enhanced handlers with tracking
+  const handlePolicyAdd = (policy: PolicyType) => {
+    handleAddPolicy(policy);
+    trackSampling.policyBuilderAction('add', policy);
+  };
+
+  const handlePolicyUpdate = (index: number, updatedPolicy: Policy) => {
+    handleUpdatePolicy(index, updatedPolicy);
+    trackSampling.policyBuilderAction('update', updatedPolicy.type);
+  };
+
+  const handlePolicyRemove = (index: number, policy: Policy) => {
+    handleRemovePolicy(index);
+    trackSampling.policyBuilderAction('remove', policy.type);
+  };
+
+  const handleConfigChange = (config: any) => {
+    handleViewerChange(config);
+    if ('simulationData' in config) {
+      trackSampling.simulationRun(
+        config.finalDecision !== undefined,
+        config.simulationData?.length || 0
+      );
+    } else {
+      trackSampling.configChange('config_updated');
+    }
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -128,9 +175,9 @@ const ConfigEditor = () => {
             <div className="p-6 h-full overflow-auto">
               <PolicyBuilder
                 policies={state.config.policies}
-                addPolicy={handleAddPolicy}
-                updatePolicy={handleUpdatePolicy}
-                removePolicy={handleRemovePolicy}
+                addPolicy={handlePolicyAdd}
+                updatePolicy={handlePolicyUpdate}
+                removePolicy={handlePolicyRemove}
                 evaluationResult={state.evaluationResults}
               />
             </div>
@@ -142,12 +189,12 @@ const ConfigEditor = () => {
           {state.mode === 'Edit' ? (
             <ConfigViewer
               config={state.config}
-              onChange={handleViewerChange}
+              onChange={handleConfigChange}
             />
           ) : (
             <SimulationViewer
               value={state.simulationData}
-              onChange={handleViewerChange}
+              onChange={handleConfigChange}
               finalDecision={state.finalDecision || 0}
             />
           )}
