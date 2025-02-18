@@ -1,0 +1,90 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'otail-server/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'otail-server/**'
+      - '.github/workflows/backend.yml'
+
+env:
+  AWS_REGION: us-west-2
+  ECR_REPOSITORY: otail-backend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for changes in backend
+        id: check_changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            backend:
+              - 'otail-server/**'
+
+      - name: Set up Go
+        if: steps.check_changes.outputs.backend == 'true'
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: true
+          cache-dependency-path: otail-server/go.sum
+
+      - name: Run tests
+        if: steps.check_changes.outputs.backend == 'true'
+        working-directory: ./otail-server
+        run: go test -v ./...
+
+      - name: Configure AWS credentials
+        if: steps.check_changes.outputs.backend == 'true' && github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        if: steps.check_changes.outputs.backend == 'true' && github.ref == 'refs/heads/main'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get environment from branch
+        if: steps.check_changes.outputs.backend == 'true' && github.ref == 'refs/heads/main'
+        id: env
+        run: |
+          if [[ $GITHUB_REF == refs/heads/main ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push Docker image
+        if: steps.check_changes.outputs.backend == 'true' && github.ref == 'refs/heads/main'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            ./otail-server
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      - name: Update ECS service
+        if: steps.check_changes.outputs.backend == 'true' && github.ref == 'refs/heads/main'
+        run: |
+          aws ecs update-service \
+            --cluster otail-${{ steps.env.outputs.environment }}-cluster \
+            --service otail-backend \
+            --force-new-deployment

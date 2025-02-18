@@ -1,0 +1,113 @@
+name: Infrastructure CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/infrastructure.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/infrastructure.yml'
+
+env:
+  AWS_REGION: us-west-2
+  TF_VERSION: '1.5.7'
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for infrastructure changes
+        id: check_changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            terraform:
+              - 'terraform/**'
+
+      - name: Setup Terraform
+        if: steps.check_changes.outputs.terraform == 'true'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials
+        if: steps.check_changes.outputs.terraform == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get environment from branch
+        if: steps.check_changes.outputs.terraform == 'true'
+        id: env
+        run: |
+          if [[ $GITHUB_REF == refs/heads/main ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Terraform Init
+        if: steps.check_changes.outputs.terraform == 'true'
+        working-directory: ./terraform
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ steps.env.outputs.environment }}/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}"
+
+      - name: Terraform Format
+        if: steps.check_changes.outputs.terraform == 'true'
+        working-directory: ./terraform
+        run: terraform fmt -check
+
+      - name: Terraform Plan
+        if: steps.check_changes.outputs.terraform == 'true'
+        working-directory: ./terraform
+        id: plan
+        run: |
+          terraform plan \
+            -var="environment=${{ steps.env.outputs.environment }}" \
+            -var="aws_region=${{ env.AWS_REGION }}" \
+            -no-color \
+            -out=tfplan
+
+      - name: Update Pull Request
+        if: github.event_name == 'pull_request' && steps.check_changes.outputs.terraform == 'true'
+        uses: actions/github-script@v6
+        env:
+          PLAN: "${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Plan 📝
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && steps.check_changes.outputs.terraform == 'true'
+        working-directory: ./terraform
+        run: terraform apply -auto-approve tfplan

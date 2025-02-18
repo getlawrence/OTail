@@ -1,0 +1,88 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'otail-web/**'
+      - '.github/workflows/frontend.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'otail-web/**'
+      - '.github/workflows/frontend.yml'
+
+env:
+  AWS_REGION: us-west-2
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for changes in frontend
+        id: check_changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            frontend:
+              - 'otail-web/**'
+
+      - name: Setup Node.js
+        if: steps.check_changes.outputs.frontend == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: otail-web/package-lock.json
+
+      - name: Install dependencies
+        if: steps.check_changes.outputs.frontend == 'true'
+        working-directory: ./otail-web
+        run: npm ci
+
+      - name: Run tests
+        if: steps.check_changes.outputs.frontend == 'true'
+        working-directory: ./otail-web
+        run: npm test
+
+      - name: Build
+        if: steps.check_changes.outputs.frontend == 'true'
+        working-directory: ./otail-web
+        run: npm run build
+
+      - name: Configure AWS credentials
+        if: steps.check_changes.outputs.frontend == 'true' && github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get environment from branch
+        if: steps.check_changes.outputs.frontend == 'true' && github.ref == 'refs/heads/main'
+        id: env
+        run: |
+          if [[ $GITHUB_REF == refs/heads/main ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload to S3
+        if: steps.check_changes.outputs.frontend == 'true' && github.ref == 'refs/heads/main'
+        run: |
+          aws s3 sync ./otail-web/dist s3://otail-${{ steps.env.outputs.environment }}-frontend-${{ secrets.AWS_ACCOUNT_ID }}/ \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: Invalidate CloudFront cache
+        if: steps.check_changes.outputs.frontend == 'true' && github.ref == 'refs/heads/main'
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
