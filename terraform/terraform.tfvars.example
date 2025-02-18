@@ -1,7 +1,0 @@
-aws_region = "us-west-2"
-environment = "dev"
-domain_name = "example.com"
-github_org  = "your-org"
-github_repo = "your-repo"
-terraform_state_bucket = "your-terraform-state-bucket"
-alert_email = "your-email@example.com"
