@@ -20,9 +20,11 @@ import { ConfigViewer } from '@/components/simulation/config-viewer'
 import { SimulationViewer } from '@/components/simulation/simulation-viewer'
 import { PolicyBuilder } from '@/components/policy/policy-builder'
 import { RecipeManager } from '@/components/recipes/recipe-manager'
-import { Policy, PolicyType } from '@/types/policy'
+import { PopularPolicies } from '@/components/policy/popular-policies';
+import { Policy, PolicyType, Recipe } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config'
 import { trackSampling } from '@/utils/analytics';
+import { Pencil, PlayCircle } from "lucide-react";
 
 type Mode = 'Edit' | 'Test'
 
@@ -31,7 +33,7 @@ const PolicyActions = ({
   onApplyRecipe
 }: {
   currentPolicies: Policy[];
-  onApplyRecipe: (recipe: any) => void;
+  onApplyRecipe: (recipe: Recipe) => void;
 }) => {
   const [recipeDialogOpen, setRecipeDialogOpen] = useState(false);
 
@@ -95,24 +97,29 @@ const ModeToggle = ({ mode, onToggleMode }: { mode: Mode; onToggleMode: () => vo
   };
 
   return (
-    <div className="flex items-center space-x-2">
-      <Button
-        variant={mode === 'Edit' ? 'default' : 'outline'}
-        size="sm"
-        onClick={() => mode === 'Test' && handleModeChange('Edit')}
-        className="px-3"
-      >
-        Edit
-      </Button>
-      <Button
-        variant={mode === 'Test' ? 'default' : 'outline'}
-        size="sm"
-        onClick={() => mode === 'Edit' && handleModeChange('Test')}
-        className="px-3"
-      >
-        Test
-      </Button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-2">
+          {mode === 'Edit' ? (
+            <Pencil className="h-4 w-4" />
+          ) : (
+            <PlayCircle className="h-4 w-4" />
+          )}
+          {mode} Mode
+          <span className="opacity-70">↓</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => handleModeChange('Edit')} className="gap-2">
+          <Pencil className="h-4 w-4" />
+          Edit Mode
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleModeChange('Test')} className="gap-2">
+          <PlayCircle className="h-4 w-4" />
+          Test Mode
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
@@ -125,6 +132,7 @@ const ConfigEditor = () => {
     handleUpdatePolicy,
     handleRemovePolicy,
     handleViewerChange,
+    importPolicies,
   } = useConfigState();
 
   // Enhanced handlers with tracking
@@ -143,6 +151,16 @@ const ConfigEditor = () => {
     trackSampling.policyBuilderAction('remove', policy.type);
   };
 
+  const handlePopularPolicySelect = (recipe: Recipe) => {
+    importPolicies(recipe.policies);
+    trackSampling.policyBuilderAction('add_popular_recipe', recipe.name);
+  };
+
+  const handleRecipeSelect = (recipe: Recipe) => {
+    importPolicies(recipe.policies);
+    trackSampling.policyBuilderAction('add_recipe', recipe.name);
+  };
+
   const handleConfigChange = (config: any) => {
     handleViewerChange(config);
     if ('simulationData' in config) {
@@ -158,20 +176,22 @@ const ConfigEditor = () => {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-6 shrink-0">
-        <h1 className="text-3xl font-bold tracking-tight">Policy Builder</h1>
-        <div className="flex items-center gap-4">
-          <PolicyActions
-            currentPolicies={state.config.policies}
-            onApplyRecipe={updatePolicies}
-          />
-          <ModeToggle mode={state.mode} onToggleMode={toggleMode} />
+        <div className="flex-1">
+          <PopularPolicies onSelect={handlePopularPolicySelect} />
         </div>
+        <PolicyActions
+          currentPolicies={state.config.policies}
+          onApplyRecipe={handleRecipeSelect}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 flex-1">
         {/* Left Panel - Policy Editor */}
         <div className="flex flex-col h-full min-h-0">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-medium">Policy Builder</h2>
+            </div>
             <div className="p-6 h-full overflow-auto">
               <PolicyBuilder
                 policies={state.config.policies}
@@ -186,18 +206,28 @@ const ConfigEditor = () => {
 
         {/* Right Panel - Configuration/Simulation */}
         <div className="flex flex-col h-full min-h-0">
-          {state.mode === 'Edit' ? (
-            <ConfigViewer
-              config={state.config}
-              onChange={handleConfigChange}
-            />
-          ) : (
-            <SimulationViewer
-              value={state.simulationData}
-              onChange={handleConfigChange}
-              finalDecision={state.finalDecision || 0}
-            />
-          )}
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-medium">
+                {state.mode === 'Edit' ? 'Policies yaml' : 'Test Sampling Rules'}
+              </h2>
+              <ModeToggle mode={state.mode} onToggleMode={toggleMode} />
+            </div>
+            <div className="p-4 h-full overflow-auto">
+              {state.mode === 'Edit' ? (
+                <ConfigViewer
+                  config={state.config}
+                  onChange={handleConfigChange}
+                />
+              ) : (
+                <SimulationViewer
+                  value={state.simulationData}
+                  onChange={handleConfigChange}
+                  finalDecision={state.finalDecision || 0}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -9,7 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { DecisionBadge } from "@/components/shared/decision-badge"
+import { Button } from "../ui/button"
+import { PlayCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/hooks/use-theme"
 
@@ -33,38 +35,42 @@ export const SimulationViewer: FC<SimulationViewerProps> = ({
     }
   };
 
+  const handleRunSimulation = () => {
+    onChange(value || JSON.stringify(defaultTrace, null, 2));
+  };
+
   return (
     <Card className="h-full shadow-custom">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl">Sampling Decision:</CardTitle>
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "px-4 py-1 text-sm font-medium",
-              finalDecision === Decision.Sampled 
-                ? "border-green-500/50 bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-500" 
-                : "border-destructive/50 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive"
-            )}
+          <DecisionBadge decision={finalDecision} />
+          <Button
+            onClick={handleRunSimulation}
+            size="sm"
+            variant="outline"
+            className="gap-2 h-6"
           >
-            {Decision[finalDecision]}
-          </Badge>
+            <PlayCircle className="h-4 w-4" />
+            Run
+          </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-0 h-[calc(100%-4rem)]">
-        <Editor
-          height="100%"
-          defaultValue={value || JSON.stringify(defaultTrace, null, 2)}
-          defaultLanguage="json"
-          onChange={handleEditorChange}
-          theme={theme === 'dark' ? 'vs-dark' : 'light'}
-          options={{
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            wordWrap: 'on',
-            padding: { top: 16, bottom: 16 },
-          }}
-        />
+      <CardContent className="p-0">
+        <div className="flex flex-col gap-4 h-full">
+          <Editor
+            height="calc(100vh - 300px)"
+            value={value || JSON.stringify(defaultTrace, null, 2)}
+            defaultLanguage="json"
+            onChange={handleEditorChange}
+            theme={theme === 'dark' ? 'vs-dark' : 'light'}
+            options={{
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+              fontSize: 14,
+              lineNumbers: "on",
+            }}
+          />
+        </div>
       </CardContent>
     </Card>
   );

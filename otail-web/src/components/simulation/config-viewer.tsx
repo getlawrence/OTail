@@ -24,11 +24,6 @@ export const ConfigViewer: FC<ConfigViewerProps> = ({ config, onChange }) => {
 
   return (
     <Card className="h-full shadow-custom">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl">Configuration</CardTitle>
-        </div>
-      </CardHeader>
       <CardContent className="p-0 h-[calc(100%-4rem)]">
         <Editor
           height="100%"

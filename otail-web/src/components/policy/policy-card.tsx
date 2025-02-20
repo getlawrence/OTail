@@ -1,28 +1,16 @@
 'use client'
 
 import React from "react"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ChevronDown } from "lucide-react"
-import { AlwaysSamplePolicyEditor } from './policy-editors/always-sample'
-import { Policy } from '@/types/policy'
-import { ProbabilisticPolicyEditor } from './policy-editors/probabilistic'
-import { StatusCodePolicyEditor } from './policy-editors/status-code'
-import { StringAttributePolicyEditor } from './policy-editors/string-attribute'
-import { LatencyPolicyEditor } from './policy-editors/latency'
-import { BooleanTagPolicyEditor } from './policy-editors/bool-attribute'
-import { CompositePolicyEditor } from './policy-editors/composite'
-import { OttlPolicyEditor } from './policy-editors/ottl'
-import { SpanCountPolicyEditor } from './policy-editors/span-count'
-import { NumericTagPolicyEditor } from './policy-editors/numeric-attribute'
-import { TraceStatePolicyEditor } from './policy-editors/trace-state'
-import { RateLimitingPolicyEditor } from './policy-editors/rate-limiting'
-import { AndPolicyEditor } from './policy-editors/and'
-import { Decision } from "@/types/trace"
-import { Badge } from "@/components/ui/badge";
+import { ChevronDown, MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { AlwaysSamplePolicyEditor, AndPolicyEditor, BooleanTagPolicyEditor, CompositePolicyEditor, LatencyPolicyEditor, NumericTagPolicyEditor, OttlPolicyEditor, ProbabilisticPolicyEditor, RateLimitingPolicyEditor, SpanCountPolicyEditor, StringAttributePolicyEditor, TraceStatePolicyEditor } from "./policy-editors";
+import { StatusCodePolicyEditor } from "./policy-editors/status-code";
+import { Policy } from "@/types/policy";
+import { Decision } from "@/types/trace";
+import { cn } from "@/lib/utils"
 import { EditableText } from "@/components/ui/editable-text"
-import { cn } from "@/lib/utils";
+import { DecisionBadge } from "@/components/shared/decision-badge"
 
 interface PolicyCardProps {
   policy: Policy;
@@ -67,49 +55,46 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemo
     }
   };
 
-  const samplingDecisionClass = samplingDecision === undefined 
-    ? ''
-    : samplingDecision === Decision.Sampled 
-      ? 'border-green-500	' 
-      : 'border-destructive';
-
-  const WrapperType = nested ? React.Fragment : Card;  
-
   return (
-    <WrapperType {...(!nested ? { className: cn("transition-colors", samplingDecisionClass) } : {})}>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="w-fit">{policy.type}</Badge>
-            <EditableText
-              value={policy.name}
-              onChange={(value) => onUpdate({ ...policy, name: value })}
-            />
-          </div>
-          <CollapsibleTrigger asChild>
-            <Button variant="outline" size="sm" className="w-9 p-0 hover:bg-transparent">
-              <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform duration-200 text-foreground", {
-                "-rotate-180": isOpen
-              })}/>
-              <span className="sr-only">Toggle</span>
-            </Button>
-          </CollapsibleTrigger>
+    <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+      <div className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-2 p-4">
+        <ChevronDown
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn("h-3.5 w-3.5 transition-transform duration-200 hover:bg-foreground/10 rounded", {
+            "transform rotate-180": !isOpen
+          })}
+          strokeWidth={1.5}
+        />
+        <EditableText
+          value={policy.name}
+          onChange={(value) => onUpdate({ ...policy, name: value })}
+          className="font-medium"
+          inputClassName="px-0 py-0"
+        />
+        {samplingDecision !== undefined ? (
+          <DecisionBadge
+            decision={samplingDecision}
+            className="text-xs justify-self-end"
+          />
+        ) : (
+          <div />
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <MoreVertical className="h-3.5 w-3.5 hover:bg-foreground/10 rounded" strokeWidth={1.5} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-32">
+            <DropdownMenuItem onClick={onRemove} className="text-destructive text-xs">
+              Remove Policy
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      {isOpen && (
+        <div className="px-4 pb-4">
+          {renderPolicyEditor()}
         </div>
-        <CollapsibleContent>
-          <CardContent className="space-y-4 pt-0">
-            {renderPolicyEditor()}
-          </CardContent>
-          <CardFooter>
-            <Button 
-              variant="destructive"
-              className="hover:bg-destructive/90 transition-colors"
-              onClick={onRemove}
-            >
-              Remove
-            </Button>
-          </CardFooter>
-        </CollapsibleContent>
-      </Collapsible>
-    </WrapperType>
-  )
-}
+      )}
+    </div>
+  );
+};

@@ -28,12 +28,24 @@ export const usePolicyConfig = (initialPolicies?: Policy[]) => {
         }));
     }, []);
 
-    const handleAddPolicy = useCallback((type: PolicyType) => {
+    const handleAddPolicy = useCallback((typeOrPolicies: PolicyType | Policy[]) => {
         setState(prev => ({
             ...prev,
             config: {
                 ...prev.config,
-                policies: [...prev.config.policies, createNewPolicy(type)],
+                policies: Array.isArray(typeOrPolicies)
+                    ? [...prev.config.policies, ...typeOrPolicies]
+                    : [...prev.config.policies, createNewPolicy(typeOrPolicies)],
+            },
+        }));
+    }, []);
+
+    const importPolicies = useCallback((policies: Policy[]) => {
+        setState(prev => ({
+            ...prev,
+            config: {
+                ...prev.config,
+                policies: [...prev.config.policies, ...policies],
             },
         }));
     }, []);
@@ -75,6 +87,7 @@ export const usePolicyConfig = (initialPolicies?: Policy[]) => {
         handleUpdatePolicy,
         handleRemovePolicy,
         updateEvaluationResults,
+        importPolicies,
     };
 };
 
@@ -134,5 +147,6 @@ export const useConfigState = (policies?: Policy[]) => {
         handleUpdatePolicy: policyConfig.handleUpdatePolicy,
         handleRemovePolicy: policyConfig.handleRemovePolicy,
         handleViewerChange,
+        importPolicies: policyConfig.importPolicies,
     };
 };
