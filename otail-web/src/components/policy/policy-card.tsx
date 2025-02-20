@@ -1,7 +1,6 @@
 'use client'
 
 import React from "react"
-import { Button } from "@/components/ui/button"
 import { ChevronDown, MoreVertical } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AlwaysSamplePolicyEditor, AndPolicyEditor, BooleanTagPolicyEditor, CompositePolicyEditor, LatencyPolicyEditor, NumericTagPolicyEditor, OttlPolicyEditor, ProbabilisticPolicyEditor, RateLimitingPolicyEditor, SpanCountPolicyEditor, StringAttributePolicyEditor, TraceStatePolicyEditor } from "./policy-editors";
@@ -20,7 +19,7 @@ interface PolicyCardProps {
   samplingDecision?: Decision;
 }
 
-export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemove, samplingDecision, nested }) => {
+export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemove, samplingDecision }) => {
   const [isOpen, setIsOpen] = React.useState(true);
   const renderPolicyEditor = () => {
     switch (policy.type) {

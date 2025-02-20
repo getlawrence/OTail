@@ -127,7 +127,6 @@ const ConfigEditor = () => {
   const {
     state,
     toggleMode,
-    updatePolicies,
     handleAddPolicy,
     handleUpdatePolicy,
     handleRemovePolicy,

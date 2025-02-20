@@ -1,6 +1,5 @@
 'use client'
 
-import { FC } from 'react';
 import { PolicyCard } from './policy-card';
 import { Policy, PolicyType } from '@/types/policy';
 import { Decision } from '@/types/trace';

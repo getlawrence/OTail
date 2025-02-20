@@ -4,7 +4,7 @@ import { FC } from 'react'
 import { Editor } from '@monaco-editor/react';
 import { TailSamplingConfig } from '@/types/tailsampling';
 import { generateYamlConfig } from '@/lib/config/generator';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useTheme } from '@/hooks/use-theme';
 
 interface ConfigViewerProps {

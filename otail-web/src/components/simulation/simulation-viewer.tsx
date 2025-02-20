@@ -7,12 +7,10 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import { DecisionBadge } from "@/components/shared/decision-badge"
 import { Button } from "../ui/button"
 import { PlayCircle } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { useTheme } from "@/hooks/use-theme"
 
 
