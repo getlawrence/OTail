@@ -13,6 +13,7 @@ interface EditableTextProps {
 const EditableText = React.forwardRef<HTMLSpanElement, EditableTextProps>(
   ({ className, value, onChange, inputClassName, ...props }, ref) => {
     const [isEditing, setIsEditing] = React.useState(false)
+    const [isHovered, setIsHovered] = React.useState(false)
     const [localValue, setLocalValue] = React.useState(value)
     const inputRef = React.useRef<HTMLInputElement>(null)
 
@@ -22,15 +23,15 @@ const EditableText = React.forwardRef<HTMLSpanElement, EditableTextProps>(
 
     const handleClick = () => {
       setIsEditing(true)
-      setTimeout(() => {
-        inputRef.current?.focus()
-        inputRef.current?.select()
-      }, 0)
+      // Focus the input on next tick after it's rendered
+      setTimeout(() => inputRef.current?.focus(), 0)
     }
 
     const handleBlur = () => {
       setIsEditing(false)
-      onChange(localValue)
+      if (localValue !== value) {
+        onChange(localValue)
+      }
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -45,7 +46,12 @@ const EditableText = React.forwardRef<HTMLSpanElement, EditableTextProps>(
     }
 
     return (
-      <div className={cn("relative inline-block", className)} {...props}>
+      <div 
+        className={cn("relative inline-block group", className)} 
+        {...props}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         {isEditing ? (
           <input
             ref={inputRef}
@@ -63,7 +69,12 @@ const EditableText = React.forwardRef<HTMLSpanElement, EditableTextProps>(
           <span
             ref={ref}
             onClick={handleClick}
-            className={cn("cursor-pointer inline-block px-3 py-1", inputClassName)}
+            className={cn(
+              "cursor-pointer inline-block px-3 py-1 rounded relative",
+              isHovered && "bg-accent/50",
+              "after:content-['✎'] after:ml-2 after:opacity-0 group-hover:after:opacity-50",
+              inputClassName
+            )}
           >
             {value}
           </span>

@@ -1,6 +1,21 @@
 import { StatusCode } from "./trace";
 
-export const POLICY_TYPES = ['numeric_attribute', 'probabilistic', 'rate_limiting', 'status_code', 'string_attribute', 'latency', 'always_sample', 'boolean_attribute', 'composite', 'ottl_condition', 'span_count', 'trace_state', 'and'] as const;
+export const POLICY_TYPES = [
+  'always_sample',
+  'and',
+  'boolean_attribute',
+  'composite',
+  'latency',
+  'numeric_attribute',
+  'ottl_condition',
+  'probabilistic',
+  'rate_limiting',
+  'span_count',
+  'status_code',
+  'string_attribute',
+  'trace_state',
+] as const;
+
 export type PolicyType = typeof POLICY_TYPES[number];
 
 export interface BasePolicy {

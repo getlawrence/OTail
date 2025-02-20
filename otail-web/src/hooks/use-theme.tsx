@@ -18,7 +18,10 @@ export function ThemeProvider({
   children,
   defaultTheme = "system",
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme)
+  const [theme, setTheme] = useState<Theme>(() => {
+    const savedTheme = localStorage.getItem('theme') as Theme
+    return savedTheme || defaultTheme
+  })
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -34,6 +37,7 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme)
+    localStorage.setItem('theme', theme)
   }, [theme])
 
   return (

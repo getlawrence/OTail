@@ -38,7 +38,7 @@ const SubPolicyItem: React.FC<SubPolicyItemProps> = ({
                     </span>
                     <div className="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={() => onMove('up')}
                             disabled={index === 0}
@@ -47,7 +47,7 @@ const SubPolicyItem: React.FC<SubPolicyItemProps> = ({
                             <ChevronUp className="h-3 w-3" />
                         </Button>
                         <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={() => onMove('down')}
                             disabled={index === total - 1}

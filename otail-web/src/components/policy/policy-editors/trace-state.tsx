@@ -66,7 +66,7 @@ export const TraceStatePolicyEditor: React.FC<TraceStatePolicyEditorProps> = ({
                 placeholder="Enter trace state value"
               />
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
                 onClick={() => handleRemoveValue(index)}
                 className="h-9 w-9"
