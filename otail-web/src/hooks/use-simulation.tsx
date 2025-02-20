@@ -1,9 +1,5 @@
 import { useCallback, useState } from 'react';
 
-interface SimulationState {
-    simulationData: string;
-}
-
 export const useSimulation = () => {
     const [simulationData, setSimulationData] = useState('');
 

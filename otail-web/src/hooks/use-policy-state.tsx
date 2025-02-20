@@ -2,10 +2,6 @@ import { useCallback, useState } from 'react';
 import { Policy, PolicyType } from '@/types/policy';
 import { createNewPolicy } from '@/lib/policy/utils';
 
-interface PolicyState {
-    policies: Policy[];
-}
-
 export const usePolicyState = (initialPolicies?: Policy[]) => {
     const [policies, setPolicies] = useState<Policy[]>(initialPolicies || []);
 
