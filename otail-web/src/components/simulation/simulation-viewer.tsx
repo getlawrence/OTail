@@ -12,6 +12,7 @@ import { DecisionBadge } from "@/components/shared/decision-badge"
 import { Button } from "../ui/button"
 import { PlayCircle } from "lucide-react"
 import { useTheme } from "@/hooks/use-theme"
+import { trackSampling } from '@/utils/analytics';
 
 
 
@@ -30,18 +31,15 @@ export const SimulationViewer: FC<SimulationViewerProps> = ({
 
   const handleEditorChange = (value: string | undefined) => {
     if (value) {
+      trackSampling.simulationRun();
       setEditorContent(value);
       onChange(value);
     }
   };
 
   const handleRunSimulation = () => {
-    try {
-      onChange(editorContent);
-    } catch (error) {
-      console.error('Invalid JSON in simulation data:', error);
-      // You might want to show a toast/notification here
-    }
+    trackSampling.simulationRun();
+    onChange(editorContent);
   };
 
   return (

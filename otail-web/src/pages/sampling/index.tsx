@@ -164,21 +164,6 @@ const ConfigEditor = () => {
     trackSampling.policyBuilderAction('add_recipe', recipe.name);
   };
 
-  const handleConfigChange = (config: any) => {
-    try {
-      handleViewerChange(config);
-      
-      // Only track simulation runs when we have simulation data
-      if (mode === 'Test') {
-        trackSampling.simulationRun(true, 1);
-      }
-    } catch (error) {
-      console.error('Error in config change:', error);
-      if (mode === 'Test') {
-        trackSampling.simulationRun(false, 0);
-      }
-    }
-  };
 
   return (
     <RecipesProvider>
@@ -223,14 +208,14 @@ const ConfigEditor = () => {
               </div>
               <div className="p-4 h-full overflow-auto">
                 {mode === 'Edit' ? (
-                  <ConfigViewer 
+                  <ConfigViewer
                     policies={policies}
-                    onChange={handleConfigChange}
+                    onChange={handleViewerChange}
                   />
                 ) : (
                   <SimulationViewer
-                    onChange={handleConfigChange}
                     finalDecision={finalDecision}
+                    onChange={handleViewerChange}
                   />
                 )}
               </div>

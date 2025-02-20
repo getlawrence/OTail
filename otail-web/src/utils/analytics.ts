@@ -21,7 +21,7 @@ export const trackPolicy = {
   create: (policyType: string) => trackEvent('policy_created', { type: policyType }),
   update: (policyType: string) => trackEvent('policy_updated', { type: policyType }),
   delete: (policyType: string) => trackEvent('policy_deleted', { type: policyType }),
-  evaluation: (policyType: string, decision: string) => 
+  evaluation: (policyType: string, decision: string) =>
     trackEvent('policy_evaluated', { type: policyType, decision })
 }
 
@@ -47,14 +47,13 @@ export const trackNavigation = {
 
 // Sampling Page Events
 export const trackSampling = {
-  modeChange: (from: string, to: string) => 
+  modeChange: (from: string, to: string) =>
     trackEvent('sampling_mode_changed', { from, to }),
-  policyAction: (action: string) => 
+  policyAction: (action: string) =>
     trackEvent('sampling_policy_action', { action }),
-  configChange: (changeType: string) => 
+  configChange: (changeType: string) =>
     trackEvent('sampling_config_changed', { type: changeType }),
-  simulationRun: (success: boolean, dataLength: number) => 
-    trackEvent('sampling_simulation_run', { success, dataLength }),
-  policyBuilderAction: (action: 'add' | 'update' | 'remove' | 'add_popular_recipe' | 'add_recipe', policyType: string) => 
+  simulationRun: () => trackEvent('sampling_simulation_run'),
+  policyBuilderAction: (action: 'add' | 'update' | 'remove' | 'add_popular_recipe' | 'add_recipe', policyType: string) =>
     trackEvent('sampling_policy_builder_action', { action, policyType })
 }
