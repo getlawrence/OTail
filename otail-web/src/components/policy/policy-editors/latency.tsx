@@ -53,8 +53,10 @@ export const LatencyPolicyEditor: React.FC<LatencyPolicyEditorProps> = ({
         <div className="flex items-center gap-2">
           <Label htmlFor="upperThreshold">Maximum Latency Threshold</Label>
           <Tooltip>
-            <TooltipTrigger>
-              <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+                <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+              </Button>
             </TooltipTrigger>
             <TooltipContent>
               <p>Optional: Spans with latency above this threshold will not be sampled</p>

@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
 import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
 
 interface ProbabilisticPolicyEditorProps {
   policy: ProbabilisticPolicy;
@@ -28,9 +29,11 @@ export const ProbabilisticPolicyEditor: React.FC<ProbabilisticPolicyEditorProps>
         <div className="flex items-center gap-2">
           <Label htmlFor="samplingRate">Sampling Rate</Label>
           <Tooltip>
-            <TooltipTrigger>
-              <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+                <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </TooltipTrigger>
             <TooltipContent>
               <p>Percentage of spans that will be sampled (0-100)</p>
             </TooltipContent>

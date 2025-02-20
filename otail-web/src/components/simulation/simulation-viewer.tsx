@@ -1,6 +1,6 @@
 'use client'
 
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { Editor } from '@monaco-editor/react';
 import { Decision, defaultTrace } from '@/types/trace';
 import {
@@ -12,29 +12,34 @@ import { DecisionBadge } from "@/components/shared/decision-badge"
 import { Button } from "../ui/button"
 import { PlayCircle } from "lucide-react"
 import { useTheme } from "@/hooks/use-theme"
+import { trackSampling } from '@/utils/analytics';
 
 
 
 interface SimulationViewerProps {
-  value: string;
   onChange: (value: string) => void;
   finalDecision: Decision;
 }
 
 export const SimulationViewer: FC<SimulationViewerProps> = ({
-  value,
   onChange,
   finalDecision
 }) => {
+
   const { theme } = useTheme();
+  const [editorContent, setEditorContent] = useState(JSON.stringify(defaultTrace, null, 2));
+
   const handleEditorChange = (value: string | undefined) => {
     if (value) {
+      trackSampling.simulationRun();
+      setEditorContent(value);
       onChange(value);
     }
   };
 
   const handleRunSimulation = () => {
-    onChange(value || JSON.stringify(defaultTrace, null, 2));
+    trackSampling.simulationRun();
+    onChange(editorContent);
   };
 
   return (
@@ -57,7 +62,7 @@ export const SimulationViewer: FC<SimulationViewerProps> = ({
         <div className="flex flex-col gap-4 h-full">
           <Editor
             height="calc(100vh - 300px)"
-            value={value || JSON.stringify(defaultTrace, null, 2)}
+            value={editorContent}
             defaultLanguage="json"
             onChange={handleEditorChange}
             theme={theme === 'dark' ? 'vs-dark' : 'light'}
