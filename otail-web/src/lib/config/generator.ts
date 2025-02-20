@@ -1,5 +1,4 @@
 import { dump } from 'js-yaml';
-import { TailSamplingConfig } from '@/types/tailsampling';
 import { CompositePolicy, Policy, StringAttributePolicy } from '@/types/policy';
 
 const generatePolicyConfig = (policy: Policy): Record<string, any> => {
@@ -152,10 +151,10 @@ const generateCompositeConfig = (policy: CompositePolicy): any => {
   return config;
 };
 
-export const generateYamlConfig = (config: TailSamplingConfig): string => {
+export const generateYamlConfig = (policies: Policy[]): string => {
   const processorConfig = {
     tail_sampling: {
-      policies: config.policies.map(generatePolicyConfig).filter(Boolean),
+      policies: policies.map(generatePolicyConfig).filter(Boolean),
     },
   };
 

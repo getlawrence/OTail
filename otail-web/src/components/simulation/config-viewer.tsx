@@ -2,20 +2,20 @@
 
 import { FC } from 'react'
 import { Editor } from '@monaco-editor/react';
-import { TailSamplingConfig } from '@/types/tailsampling';
 import { generateYamlConfig } from '@/lib/config/generator';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTheme } from '@/hooks/use-theme';
+import { Policy } from '@/types/policy';
 
 interface ConfigViewerProps {
-  config: TailSamplingConfig;
+  policies: Policy[];
   onChange: (value: string) => void;
 }
 
-export const ConfigViewer: FC<ConfigViewerProps> = ({ config, onChange }) => {
+export const ConfigViewer: FC<ConfigViewerProps> = ({ policies, onChange }) => {
   const { theme } = useTheme();
 
-  const editorValue = generateYamlConfig(config);
+  const editorValue = generateYamlConfig(policies);
 
   const handleEditorChange = (value: string | undefined) => {
     if (!value) return;

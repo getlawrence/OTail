@@ -26,11 +26,11 @@ export const PREDEFINED_RECIPES: Recipe[] = [
   },
   {
     id: 'low-sampling',
-    name: 'Noisy endpoint',
+    name: 'Noisy Endpoint',
     createdAt: '2025-02-20T00:00:00.000Z',
     policies: [
       {
-        name: 'staging env',
+        name: 'noisy url',
         type: 'and',
         subPolicies: [
           {

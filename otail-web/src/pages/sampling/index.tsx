@@ -22,7 +22,7 @@ import { PolicyBuilder } from '@/components/policy/policy-builder'
 import { RecipeManager } from '@/components/recipes/recipe-manager'
 import { PinnedRecipes } from '@/components/policy/popular-policies';
 import { Policy, PolicyType, Recipe } from '@/types/policy'
-import { useConfigState } from '@/hooks/use-config'
+import { useConfigState } from '@/hooks/use-config-state';
 import { trackSampling } from '@/utils/analytics';
 import { Pencil, PlayCircle } from "lucide-react";
 import { RecipesProvider } from '@/contexts/recipes-context';
@@ -126,7 +126,10 @@ const ModeToggle = ({ mode, onToggleMode }: { mode: Mode; onToggleMode: () => vo
 
 const ConfigEditor = () => {
   const {
-    state,
+    policies,
+    mode,
+    evaluationResults,
+    finalDecision,
     toggleMode,
     handleAddPolicy,
     handleUpdatePolicy,
@@ -162,9 +165,18 @@ const ConfigEditor = () => {
   };
 
   const handleConfigChange = (config: any) => {
-    handleViewerChange(config);
-    if ('simulationData' in config) {
-      trackSampling.simulationRun(true, config.simulationData.length);
+    try {
+      handleViewerChange(config);
+      
+      // Only track simulation runs when we have simulation data
+      if (mode === 'Test') {
+        trackSampling.simulationRun(true, 1);
+      }
+    } catch (error) {
+      console.error('Error in config change:', error);
+      if (mode === 'Test') {
+        trackSampling.simulationRun(false, 0);
+      }
     }
   };
 
@@ -176,7 +188,7 @@ const ConfigEditor = () => {
             <PinnedRecipes onSelect={handlePopularPolicySelect} />
           </div>
           <PolicyActions
-            currentPolicies={state.config.policies}
+            currentPolicies={policies}
             onApplyRecipe={handleRecipeSelect}
           />
         </div>
@@ -190,11 +202,11 @@ const ConfigEditor = () => {
               </div>
               <div className="p-6 h-full overflow-auto">
                 <PolicyBuilder
-                  policies={state.config.policies}
+                  policies={policies}
                   addPolicy={handlePolicyAdd}
                   updatePolicy={handlePolicyUpdate}
                   removePolicy={handlePolicyRemove}
-                  evaluationResult={state.evaluationResults}
+                  evaluationResult={evaluationResults}
                 />
               </div>
             </div>
@@ -205,21 +217,20 @@ const ConfigEditor = () => {
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
               <div className="flex items-center justify-between p-4 border-b">
                 <h2 className="text-lg font-medium">
-                  {state.mode === 'Edit' ? 'Policies yaml' : 'Test Sampling Rules'}
+                  {mode === 'Edit' ? 'Yaml Editor' : 'Test Sampling Rules'}
                 </h2>
-                <ModeToggle mode={state.mode} onToggleMode={toggleMode} />
+                <ModeToggle mode={mode} onToggleMode={toggleMode} />
               </div>
               <div className="p-4 h-full overflow-auto">
-                {state.mode === 'Edit' ? (
-                  <ConfigViewer
-                    config={state.config}
+                {mode === 'Edit' ? (
+                  <ConfigViewer 
+                    policies={policies}
                     onChange={handleConfigChange}
                   />
                 ) : (
                   <SimulationViewer
-                    value={state.simulationData}
                     onChange={handleConfigChange}
-                    finalDecision={state.finalDecision || 0}
+                    finalDecision={finalDecision}
                   />
                 )}
               </div>
