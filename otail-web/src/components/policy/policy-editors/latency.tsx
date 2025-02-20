@@ -29,7 +29,7 @@ export const LatencyPolicyEditor: React.FC<LatencyPolicyEditorProps> = ({
           <Label htmlFor="threshold">Minimum Latency Threshold</Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+              <Button variant="outline" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
                 <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
               </Button>
             </TooltipTrigger>

@@ -20,11 +20,12 @@ import { ConfigViewer } from '@/components/simulation/config-viewer'
 import { SimulationViewer } from '@/components/simulation/simulation-viewer'
 import { PolicyBuilder } from '@/components/policy/policy-builder'
 import { RecipeManager } from '@/components/recipes/recipe-manager'
-import { PopularPolicies } from '@/components/policy/popular-policies';
+import { PinnedRecipes } from '@/components/policy/popular-policies';
 import { Policy, PolicyType, Recipe } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config'
 import { trackSampling } from '@/utils/analytics';
 import { Pencil, PlayCircle } from "lucide-react";
+import { RecipesProvider } from '@/contexts/recipes-context';
 
 type Mode = 'Edit' | 'Test'
 
@@ -131,7 +132,7 @@ const ConfigEditor = () => {
     handleUpdatePolicy,
     handleRemovePolicy,
     handleViewerChange,
-    importPolicies,
+    importPolicies
   } = useConfigState();
 
   // Enhanced handlers with tracking
@@ -163,73 +164,70 @@ const ConfigEditor = () => {
   const handleConfigChange = (config: any) => {
     handleViewerChange(config);
     if ('simulationData' in config) {
-      trackSampling.simulationRun(
-        config.finalDecision !== undefined,
-        config.simulationData?.length || 0
-      );
-    } else {
-      trackSampling.configChange('config_updated');
+      trackSampling.simulationRun(true, config.simulationData.length);
     }
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6 shrink-0">
-        <div className="flex-1">
-          <PopularPolicies onSelect={handlePopularPolicySelect} />
+    <RecipesProvider>
+      <div className="h-full flex flex-col">
+        <div className="flex items-center justify-between mb-6 shrink-0">
+          <div className="flex-1">
+            <PinnedRecipes onSelect={handlePopularPolicySelect} />
+          </div>
+          <PolicyActions
+            currentPolicies={state.config.policies}
+            onApplyRecipe={handleRecipeSelect}
+          />
         </div>
-        <PolicyActions
-          currentPolicies={state.config.policies}
-          onApplyRecipe={handleRecipeSelect}
-        />
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 flex-1">
-        {/* Left Panel - Policy Editor */}
-        <div className="flex flex-col h-full min-h-0">
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-medium">Policy Builder</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 flex-1">
+          {/* Left Panel - Policy Editor */}
+          <div className="flex flex-col h-full min-h-0">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h2 className="text-lg font-medium">Policy Builder</h2>
+              </div>
+              <div className="p-6 h-full overflow-auto">
+                <PolicyBuilder
+                  policies={state.config.policies}
+                  addPolicy={handlePolicyAdd}
+                  updatePolicy={handlePolicyUpdate}
+                  removePolicy={handlePolicyRemove}
+                  evaluationResult={state.evaluationResults}
+                />
+              </div>
             </div>
-            <div className="p-6 h-full overflow-auto">
-              <PolicyBuilder
-                policies={state.config.policies}
-                addPolicy={handlePolicyAdd}
-                updatePolicy={handlePolicyUpdate}
-                removePolicy={handlePolicyRemove}
-                evaluationResult={state.evaluationResults}
-              />
+          </div>
+
+          {/* Right Panel - Configuration/Simulation */}
+          <div className="flex flex-col h-full min-h-0">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h2 className="text-lg font-medium">
+                  {state.mode === 'Edit' ? 'Policies yaml' : 'Test Sampling Rules'}
+                </h2>
+                <ModeToggle mode={state.mode} onToggleMode={toggleMode} />
+              </div>
+              <div className="p-4 h-full overflow-auto">
+                {state.mode === 'Edit' ? (
+                  <ConfigViewer
+                    config={state.config}
+                    onChange={handleConfigChange}
+                  />
+                ) : (
+                  <SimulationViewer
+                    value={state.simulationData}
+                    onChange={handleConfigChange}
+                    finalDecision={state.finalDecision || 0}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Right Panel - Configuration/Simulation */}
-        <div className="flex flex-col h-full min-h-0">
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-medium">
-                {state.mode === 'Edit' ? 'Policies yaml' : 'Test Sampling Rules'}
-              </h2>
-              <ModeToggle mode={state.mode} onToggleMode={toggleMode} />
-            </div>
-            <div className="p-4 h-full overflow-auto">
-              {state.mode === 'Edit' ? (
-                <ConfigViewer
-                  config={state.config}
-                  onChange={handleConfigChange}
-                />
-              ) : (
-                <SimulationViewer
-                  value={state.simulationData}
-                  onChange={handleConfigChange}
-                  finalDecision={state.finalDecision || 0}
-                />
-              )}
-            </div>
-          </div>
-        </div>
       </div>
-    </div>
+    </RecipesProvider>
   );
 };
 

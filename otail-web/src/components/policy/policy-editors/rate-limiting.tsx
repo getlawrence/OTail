@@ -23,7 +23,7 @@ export const RateLimitingPolicyEditor: React.FC<RateLimitingPolicyEditorProps> =
           <Label htmlFor="spansPerSecond">Spans per second</Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+              <Button variant="outline" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
                 <Info className="h-4 w-4 text-muted-foreground" />
               </Button>
             </TooltipTrigger>

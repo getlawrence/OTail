@@ -1,49 +1,50 @@
 'use client'
 
-import { useState, useEffect, FC } from 'react'
+import { FC, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Pin } from 'lucide-react';
 import { Policy, Recipe } from '@/types/policy'
+import { useRecipes } from '@/contexts/recipes-context';
 import { trackRecipe } from '../../utils/analytics';
 
 interface RecipeManagerProps {
   currentPolicies: Policy[]
-  onApplyRecipe: (recipe: any) => void
+  onApplyRecipe: (recipe: Recipe) => void
 }
 
 export const RecipeManager: FC<RecipeManagerProps> = ({ currentPolicies, onApplyRecipe }) => {
-  const [recipes, setRecipes] = useState<Recipe[]>([])
   const [newRecipeName, setNewRecipeName] = useState('')
+  const { recipes, saveRecipe, deleteRecipe, pinRecipe, pinnedRecipes } = useRecipes();
 
-  useEffect(() => {
-    const savedRecipes = JSON.parse(localStorage.getItem('recipes') || '[]')
-    setRecipes(savedRecipes)
-  }, [])
-
-  const saveRecipe = () => {
+  const handleSaveRecipe = () => {
     if (newRecipeName) {
-      const newRecipe: Recipe = { id: Date.now().toString(), createdAt: new Date().toISOString(), name: newRecipeName, policies: currentPolicies }
-      const updatedRecipes = [...recipes, newRecipe]
-      setRecipes(updatedRecipes)
-      localStorage.setItem('recipes', JSON.stringify(updatedRecipes))
-      setNewRecipeName('')
+      const newRecipe: Recipe = { 
+        id: Date.now().toString(), 
+        createdAt: new Date().toISOString(), 
+        name: newRecipeName, 
+        policies: currentPolicies 
+      }
+      saveRecipe(newRecipe);
+      setNewRecipeName('');
       trackRecipe.create(newRecipeName);
     }
-  }
-
-  const deleteRecipe = (index: number) => {
-    const recipe = recipes[index];
-    const updatedRecipes = recipes.filter((_, i) => i !== index)
-    setRecipes(updatedRecipes)
-    localStorage.setItem('recipes', JSON.stringify(updatedRecipes))
-    trackRecipe.delete(recipe.name);
   }
 
   const handleApplyRecipe = (recipe: Recipe) => {
     onApplyRecipe(recipe);
     trackRecipe.apply(recipe.name);
   }
+
+  const isPinned = (recipe: Recipe) => {
+    return pinnedRecipes.some(r => r.id === recipe.id);
+  };
+
+  const handlePinRecipe = (recipe: Recipe) => {
+    pinRecipe(recipe);
+    trackRecipe.pin(recipe.name);
+  };
 
   return (
     <div className="space-y-4">
@@ -53,17 +54,27 @@ export const RecipeManager: FC<RecipeManagerProps> = ({ currentPolicies, onApply
           onChange={(e) => setNewRecipeName(e.target.value)}
           placeholder="New recipe name"
         />
-        <Button onClick={saveRecipe}>Save Current</Button>
+        <Button onClick={handleSaveRecipe}>Save Current</Button>
       </div>
       <ScrollArea className="h-[300px]">
-        {recipes.map((recipe, index) => (
-          <div key={index} className="flex justify-between items-center p-2 border-b">
+        {recipes.map((recipe) => (
+          <div key={recipe.id} className="flex justify-between items-center p-2 border-b">
             <span>{recipe.name}</span>
             <div>
+              {!isPinned(recipe) && (
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="mr-2"
+                  onClick={() => handlePinRecipe(recipe)}
+                >
+                  <Pin className="h-4 w-4" />
+                </Button>
+              )}
               <Button variant="outline" onClick={() => handleApplyRecipe(recipe)} className="mr-2">
                 Apply
               </Button>
-              <Button variant="destructive" onClick={() => deleteRecipe(index)}>
+              <Button variant="destructive" onClick={() => deleteRecipe(recipe.id)}>
                 Delete
               </Button>
             </div>

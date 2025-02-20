@@ -3,35 +3,66 @@
 import { FC } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Pin, PinOff, Plus } from 'lucide-react';
 import { Recipe } from '@/types/policy';
-import { PREDEFINED_RECIPES } from '@/data/predefined-recipes';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useRecipes } from '@/contexts/recipes-context';
 
-interface PopularPoliciesProps {
+interface PinnedRecipesProps {
   onSelect: (recipe: Recipe) => void;
 }
 
-export const PopularPolicies: FC<PopularPoliciesProps> = ({ onSelect }) => {
+export const PinnedRecipes: FC<PinnedRecipesProps> = ({ onSelect }) => {
+  const { pinnedRecipes, unpinRecipe, isPredefinedRecipe } = useRecipes();
+
+  const handleUnpin = (recipe: Recipe, e: React.MouseEvent) => {
+    e.stopPropagation();
+    unpinRecipe(recipe.id);
+  };
+
   return (
     <div className="mb-6">
-      <h3 className="text-sm font-medium mb-3">Popular Recipes</h3>
+      <h3 className="text-sm font-medium mb-3">Pinned Recipes</h3>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {PREDEFINED_RECIPES.map((recipe) => (
+        {pinnedRecipes.map((recipe) => (
           <Card 
             key={recipe.id}
-            className="p-4 hover:bg-accent cursor-pointer transition-colors"
-            onClick={() => onSelect(recipe)}
+            className="p-4 hover:bg-accent/50 transition-colors"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">{recipe.name}</h4>
-                <p className="text-sm text-muted-foreground">
-                  {recipe.policies.length} {recipe.policies.length === 1 ? 'policy' : 'policies'}
-                </p>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-medium truncate">{recipe.name}</h4>
+              <div className="flex gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={(e) => handleUnpin(recipe, e)}
+                    >
+                      <PinOff className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Unpin Recipe</TooltipContent>
+                </Tooltip>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-8 w-8"
+                  onClick={() => onSelect(recipe)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Plus className="h-4 w-4" />
-              </Button>
+            </div>
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>{recipe.policies.length} {recipe.policies.length === 1 ? 'policy' : 'policies'}</span>
+              {isPredefinedRecipe(recipe.id) && (
+                <span className="flex items-center gap-1">
+                  <Pin className="h-3 w-3" />
+                  Predefined
+                </span>
+              )}
             </div>
           </Card>
         ))}

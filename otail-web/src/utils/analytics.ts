@@ -9,9 +9,11 @@ export const trackAuth = {
 
 // Recipe Events
 export const trackRecipe = {
-  create: (recipeName: string) => trackEvent('recipe_created', { name: recipeName }),
-  apply: (recipeName: string) => trackEvent('recipe_applied', { name: recipeName }),
-  delete: (recipeName: string) => trackEvent('recipe_deleted', { name: recipeName })
+  create: (name: string) => trackEvent('recipe_created', { name }),
+  delete: (name: string) => trackEvent('recipe_deleted', { name }),
+  apply: (name: string) => trackEvent('recipe_applied', { name }),
+  pin: (name: string) => trackEvent('recipe_pinned', { name }),
+  unpin: (name: string) => trackEvent('recipe_unpinned', { name })
 }
 
 // Policy Events

@@ -34,7 +34,7 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
           <Label htmlFor="attributeKey">Attribute Key</Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+              <Button variant="outline" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
                 <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
               </Button>
             </TooltipTrigger>
@@ -58,7 +58,7 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
           <Label htmlFor="attributeValue">Attribute Value</Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+              <Button variant="outline" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
                 <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
               </Button>
             </TooltipTrigger>
@@ -81,7 +81,7 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
             <Label htmlFor="regexToggle">Regular Expression Matching</Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+                <Button variant="outline" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
                   <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </TooltipTrigger>
@@ -113,7 +113,7 @@ export const StringAttributePolicyEditor: React.FC<StringAttributePolicyEditorPr
               <Label htmlFor="cacheSize">Cache Size</Label>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
+                  <Button variant="outline" size="icon" className="h-4 w-4 p-0 hover:bg-transparent">
                     <InfoCircledIcon className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </TooltipTrigger>
