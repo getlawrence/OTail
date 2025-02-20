@@ -63,7 +63,7 @@ export const RecipeManager: FC<RecipeManagerProps> = ({ currentPolicies, onApply
             <div>
               {!isPinned(recipe) && (
                 <Button 
-                  variant="ghost" 
+                  variant="outline" 
                   size="icon"
                   className="mr-2"
                   onClick={() => handlePinRecipe(recipe)}

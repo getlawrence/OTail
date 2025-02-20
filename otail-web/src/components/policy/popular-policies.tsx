@@ -35,7 +35,7 @@ export const PinnedRecipes: FC<PinnedRecipesProps> = ({ onSelect }) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
-                      variant="ghost" 
+                      variant="outline" 
                       size="icon" 
                       className="h-8 w-8"
                       onClick={(e) => handleUnpin(recipe, e)}
