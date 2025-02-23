@@ -2,29 +2,22 @@
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog"
+import { Card } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ConfigViewer } from '@/components/simulation/config-viewer'
 import { SimulationViewer } from '@/components/simulation/simulation-viewer'
 import { PolicyBuilder } from '@/components/policy/policy-builder'
-import { RecipeManager } from '@/components/recipes/recipe-manager'
+import { RecipeDialog } from '@/components/recipes/recipe-dialog'
 import { PinnedRecipes } from '@/components/policy/popular-policies';
 import { Policy, PolicyType, Recipe } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config-state';
 import { trackSampling } from '@/utils/analytics';
-import { Pencil, PlayCircle } from "lucide-react";
+import { Pencil, PlayCircle, MoreHorizontal, Download, Save, Plus } from "lucide-react";
 import { RecipesProvider } from '@/contexts/recipes-context';
 
 type Mode = 'Edit' | 'Test'
@@ -36,56 +29,39 @@ const PolicyActions = ({
   currentPolicies: Policy[];
   onApplyRecipe: (recipe: Recipe) => void;
 }) => {
-  const [recipeDialogOpen, setRecipeDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  const handlePolicyAction = (action: string) => {
-    trackSampling.policyAction(action);
-    if (action === 'import_recipe' || action === 'save_recipe') {
-      setRecipeDialogOpen(true);
-    }
+  const handlePolicyAction = () => {
+    setDialogOpen(true);
+    trackSampling.policyAction('manage_recipes');
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Dialog open={recipeDialogOpen} onOpenChange={setRecipeDialogOpen}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
-              <span>Actions</span>
-              <span className="opacity-70">↓</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DialogTrigger asChild>
-              <DropdownMenuItem onClick={() => handlePolicyAction('import_recipe')}>
-                <span className="mr-2">📥</span>
-                Import Recipe
-              </DropdownMenuItem>
-            </DialogTrigger>
-            <DropdownMenuSeparator />
-            <DialogTrigger asChild>
-              <DropdownMenuItem onClick={() => handlePolicyAction('save_recipe')}>
-                <span className="mr-2">💾</span>
-                Save as Recipe
-              </DropdownMenuItem>
-            </DialogTrigger>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Recipe Manager</DialogTitle>
-          </DialogHeader>
-          <RecipeManager
-            currentPolicies={currentPolicies}
-            onApplyRecipe={(recipe) => {
-              onApplyRecipe(recipe);
-              trackSampling.policyAction('apply_recipe');
-              setRecipeDialogOpen(false);
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-    </div>
+    <>
+      <Card
+        onClick={handlePolicyAction}
+        className="p-4 hover:bg-accent/50 transition-colors border-dashed cursor-pointer"
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add New
+        </Button>
+      </Card>
+      <RecipeDialog
+        isOpen={dialogOpen}
+        onOpenChange={setDialogOpen}
+        currentPolicies={currentPolicies}
+        onApplyRecipe={(recipe) => {
+          onApplyRecipe(recipe);
+          trackSampling.policyAction('apply_recipe');
+          setDialogOpen(false);
+        }}
+      />
+    </>
   );
 };
 
@@ -164,26 +140,33 @@ const ConfigEditor = () => {
     trackSampling.policyBuilderAction('add_recipe', recipe.name);
   };
 
-
   return (
     <RecipesProvider>
       <div className="h-full flex flex-col">
-        <div className="flex items-center justify-between mb-6 shrink-0">
-          <div className="flex-1">
-            <PinnedRecipes onSelect={handlePopularPolicySelect} />
+        <div className="mb-6 shrink-0">
+          <h3 className="text-sm font-medium mb-3">Pinned Recipes</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-3">
+              <PinnedRecipes onSelect={handlePopularPolicySelect} />
+            </div>
+            <div className="md:col-span-1">
+              <PolicyActions
+                currentPolicies={policies}
+                onApplyRecipe={handleRecipeSelect}
+              />
+            </div>
           </div>
-          <PolicyActions
-            currentPolicies={policies}
-            onApplyRecipe={handleRecipeSelect}
-          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 flex-1">
           {/* Left Panel - Policy Editor */}
           <div className="flex flex-col h-full min-h-0">
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
-              <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="text-lg font-medium">Policy Builder</h2>
+              <div className="flex items-center justify-between p-4 border-b bg-muted/5">
+                <div>
+                  <h2 className="text-lg font-medium">Policy Builder</h2>
+                  <p className="text-sm text-muted-foreground">Configure your sampling policies</p>
+                </div>
               </div>
               <div className="p-6 h-full overflow-auto">
                 <PolicyBuilder
@@ -200,10 +183,18 @@ const ConfigEditor = () => {
           {/* Right Panel - Configuration/Simulation */}
           <div className="flex flex-col h-full min-h-0">
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
-              <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="text-lg font-medium">
-                  {mode === 'Edit' ? 'Yaml Editor' : 'Test Sampling Rules'}
-                </h2>
+              <div className="flex items-center justify-between p-4 border-b bg-muted/5">
+                <div>
+                  <h2 className="text-lg font-medium">
+                    {mode === 'Edit' ? 'YAML Configuration' : 'Validate Sampling Rules with OTEL Data'}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {mode === 'Edit'
+                      ? 'Edit your configuration in YAML format'
+                      : 'Test and validate your sampling rules'
+                    }
+                  </p>
+                </div>
                 <ModeToggle mode={mode} onToggleMode={toggleMode} />
               </div>
               <div className="p-4 h-full overflow-auto">
