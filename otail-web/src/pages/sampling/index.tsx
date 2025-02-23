@@ -17,7 +17,7 @@ import { PinnedRecipes } from '@/components/policy/popular-policies';
 import { Policy, PolicyType, Recipe } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config-state';
 import { trackSampling } from '@/utils/analytics';
-import { Pencil, PlayCircle, MoreHorizontal, Download, Save, Plus } from "lucide-react";
+import { Pencil, PlayCircle, Plus } from "lucide-react";
 import { RecipesProvider } from '@/contexts/recipes-context';
 
 type Mode = 'Edit' | 'Test'
@@ -38,19 +38,14 @@ const PolicyActions = ({
 
   return (
     <>
-      <Card
-        onClick={handlePolicyAction}
-        className="p-4 hover:bg-accent/50 transition-colors border-dashed cursor-pointer"
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full"
+      <div className="h-full">
+        <Card
+          onClick={handlePolicyAction}
+          className="h-full rounded-xl border-dashed bg-card text-card-foreground shadow p-4 hover:bg-accent/50 transition-colors flex items-center justify-center"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add New
-        </Button>
-      </Card>
+        </Card>
+      </div>
       <RecipeDialog
         isOpen={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -146,14 +141,18 @@ const ConfigEditor = () => {
         <div className="mb-6 shrink-0">
           <h3 className="text-sm font-medium mb-3">Pinned Recipes</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-3">
-              <PinnedRecipes onSelect={handlePopularPolicySelect} />
+            <div className="md:col-span-3 h-full">
+              <div className="h-full">
+                <PinnedRecipes onSelect={handlePopularPolicySelect} />
+              </div>
             </div>
-            <div className="md:col-span-1">
-              <PolicyActions
-                currentPolicies={policies}
-                onApplyRecipe={handleRecipeSelect}
-              />
+            <div className="md:col-span-1 h-full">
+              <div className="h-full">
+                <PolicyActions
+                  currentPolicies={policies}
+                  onApplyRecipe={handleRecipeSelect}
+                />
+              </div>
             </div>
           </div>
         </div>
