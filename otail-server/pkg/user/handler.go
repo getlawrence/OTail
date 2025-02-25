@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mottibec/otail-server/pkg/auth"
+	"github.com/mottibec/otail-server/pkg/organization"
 	"go.uber.org/zap"
 )
 
@@ -39,8 +40,9 @@ type LoginRequest struct {
 }
 
 type AuthResponse struct {
-	User  *User  `json:"user"`
-	Token string `json:"token"`
+	User         *User                           `json:"user"`
+	Token        string                          `json:"token"`
+	Organization *organization.OrganizationDetails `json:"organization"`
 }
 
 func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +64,13 @@ func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get organization details
+	org, err := h.userSvc.orgSvc.GetOrganization(r.Context(), user.OrganizationID)
+	if err != nil {
+		http.Error(w, "Failed to get organization details", http.StatusInternalServerError)
+		return
+	}
+
 	// Generate JWT token
 	token, err := auth.GenerateJWT(user.ID, user.Email, user.OrganizationID)
 	if err != nil {
@@ -70,8 +79,9 @@ func (h *UserHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := AuthResponse{
-		User:  user,
-		Token: token,
+		User:         user,
+		Token:        token,
+		Organization: org,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -96,6 +106,13 @@ func (h *UserHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get organization details
+	org, err := h.userSvc.orgSvc.GetOrganization(r.Context(), user.OrganizationID)
+	if err != nil {
+		http.Error(w, "Failed to get organization details", http.StatusInternalServerError)
+		return
+	}
+
 	// Generate JWT token
 	token, err := auth.GenerateJWT(user.ID, user.Email, user.OrganizationID)
 	if err != nil {
@@ -104,8 +121,9 @@ func (h *UserHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := AuthResponse{
-		User:  user,
-		Token: token,
+		User:         user,
+		Token:        token,
+		Organization: org,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

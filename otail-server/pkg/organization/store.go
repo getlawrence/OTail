@@ -267,6 +267,22 @@ func (s *mongoOrgStore) DeleteAPIToken(ctx context.Context, orgId string, tokenI
 	return err
 }
 
+func (s *mongoOrgStore) MarkAgentConnected(ctx context.Context, orgId string) error {
+	filter := bson.M{"_id": orgId}
+	update := bson.M{"$set": bson.M{"has_connected_agent": true}}
+	
+	result, err := s.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to mark agent as connected: %w", err)
+	}
+	
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("organization not found: %s", orgId)
+	}
+	
+	return nil
+}
+
 func (s *mongoOrgStore) Close(ctx context.Context) error {
 	return s.client.Disconnect(ctx)
 }
