@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { LoginResponse, RegisterParams, User } from './types';
+import { LoginResponse, RegisterParams, RegisterResponse, User } from './types';
 
 export const authApi = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
@@ -9,8 +9,8 @@ export const authApi = {
     });
   },
 
-  register: async (params: RegisterParams): Promise<LoginResponse> => {
-    return await apiClient.post<LoginResponse>('/api/v1/auth/register', params);
+  register: async (params: RegisterParams): Promise<RegisterResponse> => {
+    return await apiClient.post<RegisterResponse>('/api/v1/auth/register', params);
   },
 
   me: async (): Promise<User> => {

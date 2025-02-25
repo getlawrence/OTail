@@ -17,6 +17,7 @@ export type Agents = {
 export interface Organization {
     id: string;
     name: string;
+    has_connected_agent: boolean;
     members: OrganizationMember[];
     invites: OrganizationInvite[];
     tokens: OrganizationToken[];
@@ -75,6 +76,7 @@ export interface CreateInviteResponse {
 export interface LoginResponse {
     token: string;
     user: User;
+    organization: Organization;
 }
 
 export interface RegisterParams {
@@ -82,4 +84,10 @@ export interface RegisterParams {
     password: string;
     organization?: string;
     invite?: string;
+}
+
+export interface RegisterResponse {
+    token: string;
+    user: User;
+    organization: Organization;
 }

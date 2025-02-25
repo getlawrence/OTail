@@ -13,9 +13,10 @@ const (
 )
 
 type Organization struct {
-	ID        string    `json:"id" bson:"_id"`
-	Name      string    `json:"name" bson:"name"`
-	CreatedAt time.Time `json:"created_at" bson:"created_at"`
+	ID                   string    `json:"id" bson:"_id"`
+	Name                 string    `json:"name" bson:"name"`
+	CreatedAt            time.Time `json:"created_at" bson:"created_at"`
+	HasConnectedAgent    bool      `json:"has_connected_agent" bson:"has_connected_agent"`
 }
 
 type OrganizationInvite struct {
@@ -77,5 +78,6 @@ type OrgStore interface {
 	GetAPITokenByToken(ctx context.Context, token string) (*APIToken, error)
 	GetAPITokens(ctx context.Context, orgId string) ([]APIToken, error)
 	DeleteAPIToken(ctx context.Context, orgId string, tokenId string) error
+	MarkAgentConnected(ctx context.Context, orgId string) error
 	Close(ctx context.Context) error
 }

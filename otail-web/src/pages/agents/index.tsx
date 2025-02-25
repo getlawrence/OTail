@@ -5,8 +5,10 @@ import { getAgents, fetchAgentLogs, updateConfig } from "@/api/agent"
 import { Agent, Log } from "@/api/types"
 import { LogsDialog } from "@/components/agents/LogsDialog"
 import { ConfigDialog } from "@/components/agents/ConfigDialog"
+import { OnboardingState } from "@/components/agents/OnboardingState"
 import { load } from 'js-yaml'
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/use-auth"
 
 const AgentsPage = () => {
     const [agents, setAgents] = useState<Agent[]>([])
@@ -16,21 +18,23 @@ const AgentsPage = () => {
     const [logs, setLogs] = useState<Log[]>([])
     const [loading, setLoading] = useState(false)
     const { toast } = useToast()
+    const { organization } = useAuth()
+
+    const fetchAgents = async () => {
+        try {
+            const data = await getAgents()
+            setAgents(Object.values(data))
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to fetch agents",
+            })
+            console.error(error)
+        }
+    }
 
     useEffect(() => {
-        const fetchAgents = async () => {
-            try {
-                const data = await getAgents()
-                setAgents(Object.values(data))
-            } catch (error) {
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Failed to fetch agents",
-                })
-                console.error(error)
-            }
-        }
         fetchAgents()
     }, [])
 
@@ -77,6 +81,18 @@ const AgentsPage = () => {
     }
 
     const tableColumns = columns({ onViewConfig: handleViewConfig, onViewLogs: handleViewLogs })
+
+    // Show onboarding state if no agents are connected and org has never connected an agent
+    if (agents.length === 0 && organization && !organization.has_connected_agent) {
+        return (
+            <div className="container mx-auto py-10">
+                <OnboardingState 
+                    onRefresh={fetchAgents} 
+                    apiToken={organization.tokens[0]?.token || ''} 
+                />
+            </div>
+        )
+    }
 
     return (
         <div className="container mx-auto py-10">

@@ -347,7 +347,21 @@ func (o *orgService) ValidateAPIToken(ctx context.Context, token string) (*APITo
 	defer span.End()
 	span.SetAttributes(attribute.String("token", token))
 
-	return o.store.GetAPITokenByToken(ctx, token)
+	apiToken, err := o.store.GetAPITokenByToken(ctx, token)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "failed to validate token")
+		return nil, err
+	}
+
+	// Mark that the organization has connected an agent
+	err = o.store.MarkAgentConnected(ctx, apiToken.OrganizationID)
+	if err != nil {
+		// Log the error but don't fail the token validation
+		span.RecordError(err)
+	}
+
+	return apiToken, nil
 }
 
 func (o *orgService) DeleteAPIToken(ctx context.Context, orgId string, tokenId string) error {
