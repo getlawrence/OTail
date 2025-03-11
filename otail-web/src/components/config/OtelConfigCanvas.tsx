@@ -24,7 +24,7 @@ import { usePipelineManager } from './hooks/usePipelineManager';
 import { styles, VALID_CONNECTIONS } from './constants';
 import type { OtelConfigBuilderProps, PipelineType } from './types';
 
-const OtelConfigCanvasInner: React.FC<OtelConfigBuilderProps> = ({ onChange, initialYaml }) => {
+const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => void }, OtelConfigBuilderProps>(({ onChange, initialYaml }, ref) => {
   // Define state for selected node
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
@@ -150,6 +150,13 @@ const OtelConfigCanvasInner: React.FC<OtelConfigBuilderProps> = ({ onChange, ini
     generateConfig();
   }, [nodes, edges, generateConfig]);
 
+  // Expose parseYaml method through ref
+  React.useImperativeHandle(ref, () => ({
+    parseYaml: (yaml: string) => {
+      parseInitialYaml(yaml);
+    }
+  }));
+
   return (
     <div className="h-full relative">
       <div className="absolute inset-0" onDragOver={onDragOver} onDrop={onDrop}>
@@ -205,14 +212,14 @@ const OtelConfigCanvasInner: React.FC<OtelConfigBuilderProps> = ({ onChange, ini
       )}
     </div>
   );
-};
+});
 
-const OtelConfigCanvas: React.FC<OtelConfigBuilderProps> = (props) => {
+const OtelConfigCanvas = React.forwardRef<{ parseYaml: (yaml: string) => void }, OtelConfigBuilderProps>((props, ref) => {
   return (
     <ReactFlowProvider>
-      <OtelConfigCanvasInner {...props} />
+      <OtelConfigCanvasInner {...props} ref={ref} />
     </ReactFlowProvider>
   );
-};
+});
 
 export default OtelConfigCanvas;
