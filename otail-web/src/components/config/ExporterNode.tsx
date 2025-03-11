@@ -1,6 +1,6 @@
 import { Handle, Position } from 'reactflow';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowUp, MoreHorizontal, Grip } from 'lucide-react';
+import { ArrowUp, Grip } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ExporterNodeProps {

@@ -1,6 +1,6 @@
 import { Handle, Position } from 'reactflow';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowDown, MoreHorizontal, Grip } from 'lucide-react';
+import { ArrowDown, Grip } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ReceiverNodeProps {

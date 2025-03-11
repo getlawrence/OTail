@@ -1,6 +1,6 @@
 import { Handle, Position } from 'reactflow';
 import { Card, CardContent } from '@/components/ui/card';
-import { Bolt, MoreHorizontal, Grip } from 'lucide-react';
+import { Bolt, Grip } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ProcessorNodeProps {
