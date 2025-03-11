@@ -39,7 +39,7 @@ const items = !noAuthRequired
     },
     {
       title: "Configuration",
-      url: "/otel-config",
+      url: "/canvas",
       icon: Settings,
     },
   ]

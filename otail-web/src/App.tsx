@@ -51,7 +51,7 @@ function App() {
             ) : (
               <Route element={<RequireAuth><Layout /></RequireAuth>}>
                 <Route path="/sampling" element={<Sampling />} />
-                <Route path="/otel-config" element={<OtelConfig />} />
+                <Route path="/canvas" element={<OtelConfig />} />
                 <Route path="/agents" element={<Agents />} />
                 <Route path="/organization" element={<Organization />} />
                 <Route path="/" element={<Navigate to="/sampling" replace />} />

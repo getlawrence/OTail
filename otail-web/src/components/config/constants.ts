@@ -5,8 +5,10 @@ export const LAYOUT_CONFIG = {
   SECTION_PADDING: 40,
   NODE_WIDTH: 180,
   NODE_HEIGHT: 40,
-  NODE_SPACING: 100,
+  NODE_SPACING: 150, // Increased spacing between nodes for better connections
   MINIMAP_HEIGHT: 120,
+  NODE_Z_INDEX: 20, // Z-index for component nodes (higher than edges)
+  SECTION_Z_INDEX: 0, // Z-index for section containers (lower than edges)
 };
 
 export const VALID_CONNECTIONS: Record<string, string[]> = {
@@ -39,14 +41,15 @@ export const PIPELINE_SECTIONS: Record<PipelineType, {
 
 export const styles = {
   handleStyle: {
-    width: '12px',
-    height: '12px',
+    width: '14px',
+    height: '14px',
     background: '#555',
     border: '2px solid #fff',
-    borderRadius: '6px',
+    borderRadius: '7px',
+    zIndex: 20, // Higher z-index for handles to ensure they're clickable
     ':hover': {
-      width: '14px',
-      height: '14px',
+      width: '16px',
+      height: '16px',
       background: '#777'
     }
   },
@@ -54,6 +57,8 @@ export const styles = {
   validConnectionStyle: {
     stroke: '#222',
     strokeWidth: 2,
+    animated: true,
+    zIndex: 15, // Z-index for connections (between sections and nodes)
   },
 
   sectionStyles: {

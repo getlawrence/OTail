@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import OtelConfigBuilder from '@/components/config/OtelConfigBuilder';
+import OtelConfigCanvas from '@/components/config/OtelConfigCanvas';
 import Editor, { OnChange } from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { createDebounce } from '@/lib/utils'; 
@@ -74,7 +74,7 @@ export default function ConfigPage({ config, onUpdate }: ConfigPageProps) {
         </div>
       </div>
       <div className={`grid ${viewYaml ? 'grid-cols-1' : 'grid-cols-2'} gap-4 flex-grow`}>
-        <OtelConfigBuilder
+        <OtelConfigCanvas
           onChange={handleBuilderChange}
           initialYaml={initialYamlRef.current}
         />

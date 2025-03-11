@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { ReceiverConfig, ProcessorConfig } from './types';
 import { componentSchemas, ComponentType } from './componentSchemas';
 import { DynamicForm } from '@/components/shared/DynamicForm';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface ComponentConfigDialogProps {
   node: Node;
@@ -24,7 +26,7 @@ export const ComponentConfigDialog = ({
     addPolicy: handleAddPolicy,
     updatePolicy: handleUpdatePolicy,
     removePolicy: handleRemovePolicy,
-  } = usePolicyState(node.data.config.policies);
+  } = usePolicyState(node.data.config?.policies || []);
 
   const [config, setConfig] = useState<Record<string, any>>(node.data.config || {});
   const [pipelineName, setPipelineName] = useState(node.data.pipelineName || 'default');
@@ -124,10 +126,10 @@ export const ComponentConfigDialog = ({
         </DialogHeader>
         <div className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium">
+            <Label className="text-sm font-medium">
               Pipeline Name <span className="text-red-500">*</span>
-            </label>
-            <input
+            </Label>
+            <Input
               type="text"
               value={pipelineName}
               onChange={(e) => setPipelineName(e.target.value)}

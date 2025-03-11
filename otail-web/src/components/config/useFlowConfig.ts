@@ -72,36 +72,45 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       });
     };
 
-    // Group nodes by pipeline
-    const pipelineGroups = new Map<string, Set<Node>>();
+    // Find connected components (pipelines) within each section
+    const pipelines: Array<{ sectionType: string, nodes: Set<Node>, id: number }> = [];
+    let pipelineIdCounter = 1;
 
+    // Process each node that hasn't been processed yet
     nodes.forEach(node => {
-      if (processedNodes.has(node.id)) return;
+      // Skip if already processed, not a component node, or a section node
+      if (processedNodes.has(node.id) || !node.data?.pipelineType || node.type === 'section') return;
 
-      const pipelineKey = `${node.data.pipelineType}/${node.data.pipelineName}`;
-      const component = new Set<Node>();
+      const sectionType = node.data.pipelineType; // traces, metrics, logs
+      const connectedNodes = new Set<Node>();
 
-      findConnectedComponents(node.id, pipelineKey, component);
+      // Find all nodes connected to this one
+      findConnectedComponents(node.id, sectionType, connectedNodes);
 
-      if (component.size > 0) {
-        // Merge with existing pipeline if it exists
-        const existingComponent = pipelineGroups.get(pipelineKey);
-        if (existingComponent) {
-          component.forEach(n => existingComponent.add(n));
-        } else {
-          pipelineGroups.set(pipelineKey, component);
-        }
+      if (connectedNodes.size > 0) {
+        // Create a new pipeline with these connected nodes
+        pipelines.push({
+          sectionType,
+          nodes: connectedNodes,
+          id: pipelineIdCounter++
+        });
       }
     });
 
-    // Process each pipeline group
-    pipelineGroups.forEach((pipelineNodes, pipelineKey) => {
-      const [pipelineType, pipelineName] = pipelineKey.split('/');
-      const fullPipelineKey = `${pipelineType}/${pipelineName}`;
-
+    // Process each pipeline to create YAML configuration
+    pipelines.forEach(pipeline => {
+      const { sectionType, nodes: pipelineNodes, id } = pipeline;
+      
+      // Skip empty pipelines
+      if (pipelineNodes.size === 0) return;
+      
+      // Create a pipeline key using section type and pipeline ID
+      // For example: 'traces/pipeline1', 'metrics/pipeline2'
+      const pipelineKey = `${sectionType}/pipeline${id}`;
+      
       // Initialize pipeline if it doesn't exist
-      if (!config.service.pipelines[fullPipelineKey]) {
-        config.service.pipelines[fullPipelineKey] = {
+      if (!config.service.pipelines[pipelineKey]) {
+        config.service.pipelines[pipelineKey] = {
           receivers: [],
           processors: [],
           exporters: []
@@ -114,7 +123,7 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
 
         const componentType = `${node.type}s` as 'receivers' | 'processors' | 'exporters';
         const pipelineArrayKey = componentType;
-        const pipelineArray = config.service.pipelines[fullPipelineKey][pipelineArrayKey];
+        const pipelineArray = config.service.pipelines[pipelineKey][pipelineArrayKey];
 
         // Add component config if it doesn't exist
         if (componentType in config) {
@@ -124,12 +133,25 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
         }
 
         // Add component to pipeline if it's not already there
-        if (!pipelineArray.includes(node.data.label)) {
+        if (pipelineArray && !pipelineArray.includes(node.data.label)) {
           pipelineArray.push(node.data.label);
         }
       });
     });
 
+    // Remove empty pipelines
+    Object.keys(config.service.pipelines).forEach(pipelineKey => {
+      const pipeline = config.service.pipelines[pipelineKey];
+      const hasComponents = 
+        pipeline.receivers.length > 0 || 
+        pipeline.processors.length > 0 || 
+        pipeline.exporters.length > 0;
+      
+      if (!hasComponents) {
+        delete config.service.pipelines[pipelineKey];
+      }
+    });
+    
     // Generate YAML
     const yaml = dump(config, {
       noRefs: true,
