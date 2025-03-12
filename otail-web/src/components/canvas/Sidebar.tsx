@@ -226,14 +226,58 @@ export const Sidebar = () => {
       const scheme = COLOR_SCHEME[schemeKey];
       const baseColor = scheme.color;
       
-      // Generate all styles from the base color
-      return {
-        bg: `bg-${baseColor}-500 hover:bg-${baseColor}-600 dark:bg-${baseColor}-600 dark:hover:bg-${baseColor}-700`,
-        text: 'text-white',
-        border: `border-${baseColor}-200 dark:border-${baseColor}-800`,
-        item: `bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-${baseColor}-700 dark:text-${baseColor}-300`,
-        icon: `bg-${baseColor}-100 text-${baseColor}-600`
-      };
+      // Use explicit Tailwind classes based on the color
+      switch (baseColor) {
+        case 'blue':
+          return {
+            bg: 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700',
+            text: 'text-white',
+            border: 'border-blue-200 dark:border-blue-800',
+            item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-300',
+            icon: 'bg-blue-100 text-blue-600'
+          };
+        case 'green':
+          return {
+            bg: 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700',
+            text: 'text-white',
+            border: 'border-green-200 dark:border-green-800',
+            item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-green-700 dark:text-green-300',
+            icon: 'bg-green-100 text-green-600'
+          };
+        case 'purple':
+          return {
+            bg: 'bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700',
+            text: 'text-white',
+            border: 'border-purple-200 dark:border-purple-800',
+            item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-purple-700 dark:text-purple-300',
+            icon: 'bg-purple-100 text-purple-600'
+          };
+        case 'pink':
+          return {
+            bg: 'bg-pink-500 hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-700',
+            text: 'text-white',
+            border: 'border-pink-200 dark:border-pink-800',
+            item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-pink-700 dark:text-pink-300',
+            icon: 'bg-pink-100 text-pink-600'
+          };
+        case 'amber':
+          return {
+            bg: 'bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700',
+            text: 'text-white',
+            border: 'border-amber-200 dark:border-amber-800',
+            item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300',
+            icon: 'bg-amber-100 text-amber-600'
+          };
+        default:
+          // Fallback for unknown colors
+          return {
+            bg: 'bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700',
+            text: 'text-white',
+            border: 'border-gray-200 dark:border-gray-800',
+            item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300',
+            icon: 'bg-gray-100 text-gray-600'
+          };
+      }
     }
     
     // Fallback for unknown types
