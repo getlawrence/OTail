@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
+import { trackCanvas } from './analytics';
 import ReactFlow, {
   Background,
   useNodesState,
@@ -122,6 +123,14 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     const isConnector = sourceNode.type === 'connector' || targetNode.type === 'connector';
     if (!isConnector && sourceNode.data.pipelineType !== targetNode.data.pipelineType) return;
 
+    // Track connection creation
+    trackCanvas.connection.create(
+      sourceNode.type,
+      sourceNode.data.name || 'unknown',
+      targetNode.type,
+      targetNode.data.name || 'unknown'
+    );
+
     setEdges(eds => {
       const newEdges = eds.filter(edge => edge.target !== connection.target);
       return addEdge({
@@ -164,6 +173,9 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     // Get position adjusted to the section
     const adjustedPosition = getPositionInSection(position, section);
     
+    // Track component addition
+    trackCanvas.component.add(type, name, section);
+    
     // Create the component node using the pipeline manager
     createComponentNode(type, name, section, adjustedPosition);
   }, [determineSection, getPositionInSection, createComponentNode, project]);
@@ -171,6 +183,13 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   // Add effect to generate YAML when nodes or edges change
   useEffect(() => {
     generateConfig();
+    
+    // Track configuration generation
+    if (nodes.length > 0 || edges.length > 0) {
+      // Filter out section nodes to only count actual components
+      const componentNodes = nodes.filter(node => node.type !== 'section');
+      trackCanvas.config.generate(componentNodes.length, edges.length);
+    }
   }, [nodes, edges, generateConfig]);
 
   // Expose parseYaml method through ref

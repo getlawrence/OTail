@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { trackCanvas } from './analytics';
 import { PIPELINE_SECTIONS } from './constants';
 import type { PipelineType } from './types';
 import { Badge } from '@/components/ui/badge';
@@ -149,6 +150,10 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
       // If not in full-screen, enter full-screen
       const isCurrentlyFullScreen = data.isFullScreen === true;
       console.log('Calling onToggleExpand with:', data.type, !isCurrentlyFullScreen);
+      
+      // Track the full-screen toggle event
+      trackCanvas.section.toggleFullScreen(data.type, !isCurrentlyFullScreen);
+      
       data.onToggleExpand(data.type, !isCurrentlyFullScreen);
     }
   };
@@ -161,6 +166,10 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
     if (data.onToggleCollapse) {
       const isCurrentlyCollapsed = data.isCollapsed === true;
       console.log('Calling onToggleCollapse with:', data.type, !isCurrentlyCollapsed);
+      
+      // Track the collapse toggle event
+      trackCanvas.section.toggleCollapse(data.type, !isCurrentlyCollapsed);
+      
       data.onToggleCollapse(data.type, !isCurrentlyCollapsed);
     }
   };

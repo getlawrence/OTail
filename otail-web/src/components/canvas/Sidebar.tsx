@@ -1,4 +1,5 @@
 import { DragEvent, useState, useRef, useEffect } from 'react';
+import { trackCanvas } from './analytics';
 import { ArrowDown, Bolt, ArrowUp, ArrowLeftRight, X, ChevronRight, Search, Info } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -99,6 +100,9 @@ export const Sidebar = () => {
     setIsDragging(true);
     setDraggedItem({type: nodeType, name});
     
+    // Track component drag start
+    trackCanvas.component.drag(nodeType, name);
+    
     // Create a custom drag image
     const dragPreview = document.createElement('div');
     dragPreview.className = `p-3 rounded-lg shadow-xl border-2 ${
@@ -153,15 +157,29 @@ export const Sidebar = () => {
 
   const toggleType = (type: string) => {
     if (isExpanded) {
-      setActiveType(activeType === type ? null : type);
+      const newActiveType = activeType === type ? null : type;
+      setActiveType(newActiveType);
+      
+      // Track component type selection
+      if (newActiveType) {
+        trackCanvas.sidebar.selectComponentType(newActiveType);
+      }
     } else {
       setIsExpanded(true);
       setActiveType(type);
+      
+      // Track component type selection
+      trackCanvas.sidebar.selectComponentType(type);
     }
   };
 
   const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
+    const newExpandedState = !isExpanded;
+    setIsExpanded(newExpandedState);
+    
+    // Track sidebar expansion toggle
+    trackCanvas.sidebar.toggleExpand(newExpandedState);
+    
     if (!isExpanded) {
       setActiveType(null);
     }
