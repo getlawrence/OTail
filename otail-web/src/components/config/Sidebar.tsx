@@ -1,5 +1,5 @@
 import { DragEvent, useState, useRef, useEffect } from 'react';
-import { ArrowDown, Bolt, ArrowUp, X, ChevronRight, Search, Info } from 'lucide-react';
+import { ArrowDown, Bolt, ArrowUp, ArrowLeftRight, X, ChevronRight, Search, Info } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
@@ -8,25 +8,29 @@ import { Badge } from "@/components/ui/badge";
 const componentTypes = {
   receiver: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'kafka', 'opencensus', 'fluentforward', 'hostmetrics'],
   processor: ['batch', 'memory_limiter', 'tail_sampling', 'probabilistic_sampling', 'span', 'filter', 'resource', 'transform', 'k8s_attributes'],
-  exporter: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'logging', 'file', 'kafka', 'elasticsearch', 'awsxray']
+  exporter: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'logging', 'file', 'kafka', 'elasticsearch', 'awsxray'],
+  connector: ['count', 'span_metrics']
 };
 
 const componentIcons = {
   receiver: <ArrowDown size={20} />,
   processor: <Bolt size={20} />,
-  exporter: <ArrowUp size={20} />
+  exporter: <ArrowUp size={20} />,
+  connector: <ArrowLeftRight size={20} />
 };
 
 const typeLabels = {
   receiver: 'Receivers',
   processor: 'Processors',
-  exporter: 'Exporters'
+  exporter: 'Exporters',
+  connector: 'Connectors'
 };
 
 const typeDescriptions = {
   receiver: 'Components that receive data from external sources',
   processor: 'Components that process and transform data',
-  exporter: 'Components that send data to external destinations'
+  exporter: 'Components that send data to external destinations',
+  connector: 'Components that connect pipelines and convert data types'
 };
 
 const componentDescriptions: Record<string, Record<string, string>> = {
@@ -61,6 +65,10 @@ const componentDescriptions: Record<string, Record<string, string>> = {
     kafka: 'Exports data to Kafka topics',
     elasticsearch: 'Exports data to Elasticsearch',
     awsxray: 'Exports traces to AWS X-Ray'
+  },
+  connector: {
+    count: 'Counts traces and exports as metrics',
+    span_metrics: 'Converts span data to metrics'
   }
 };
 
@@ -187,6 +195,13 @@ export const Sidebar = () => {
         border: 'border-purple-400 dark:border-purple-500',
         item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-purple-700 dark:text-purple-300',
         icon: 'bg-purple-100 text-purple-600'
+      },
+      'connector': {
+        bg: 'bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700',
+        text: 'text-white',
+        border: 'border-amber-400 dark:border-amber-500',
+        item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300',
+        icon: 'bg-amber-100 text-amber-600'
       }
     }[type] || {
       bg: 'bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700',

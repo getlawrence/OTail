@@ -121,6 +121,45 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       pipelineNodes.forEach(node => {
         if (!node.type) return;
 
+        // Special handling for connector nodes
+        if (node.type === 'connector') {
+          // Add connector config if it doesn't exist
+          if (!config.connectors[node.data.label]) {
+            config.connectors[node.data.label] = node.data.config || {};
+          }
+
+          // For connectors, we need to handle both source and target pipelines
+          // The connector config should specify which pipelines it connects
+          const connectorConfig = config.connectors[node.data.label];
+          
+          // If the connector has source and target pipeline types specified
+          if (connectorConfig.source_pipeline && connectorConfig.target_pipeline) {
+            // Find source and target pipeline keys based on pipeline types
+            const sourcePipelineKeys = Object.keys(config.service.pipelines)
+              .filter(key => key.startsWith(`${connectorConfig.source_pipeline}/`));
+            
+            const targetPipelineKeys = Object.keys(config.service.pipelines)
+              .filter(key => key.startsWith(`${connectorConfig.target_pipeline}/`));
+            
+            // Add connector to the exporters of source pipeline
+            if (sourcePipelineKeys.length > 0) {
+              const sourcePipelineKey = sourcePipelineKeys[0];
+              if (!config.service.pipelines[sourcePipelineKey].exporters.includes(node.data.label)) {
+                config.service.pipelines[sourcePipelineKey].exporters.push(node.data.label);
+              }
+            }
+            
+            // Add connector to the receivers of target pipeline
+            if (targetPipelineKeys.length > 0) {
+              const targetPipelineKey = targetPipelineKeys[0];
+              if (!config.service.pipelines[targetPipelineKey].receivers.includes(node.data.label)) {
+                config.service.pipelines[targetPipelineKey].receivers.push(node.data.label);
+              }
+            }
+          }
+          return;
+        }
+
         const componentType = `${node.type}s` as 'receivers' | 'processors' | 'exporters';
         const pipelineArrayKey = componentType;
         const pipelineArray = config.service.pipelines[pipelineKey][pipelineArrayKey];

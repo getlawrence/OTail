@@ -17,6 +17,7 @@ import { ComponentConfigDialog } from './ComponentConfigDialog';
 import ReceiverNode from './ReceiverNode';
 import ProcessorNode from './ProcessorNode';
 import ExporterNode from './ExporterNode';
+import ConnectorNode from './ConnectorNode';
 import { FlowSectionComponent } from './FlowSection';
 import { useFlowConfig } from './useFlowConfig';
 import { useSectionManager } from './hooks/useSectionManager';
@@ -71,6 +72,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     receiver: ReceiverNode as any,
     processor: ProcessorNode as any,
     exporter: ExporterNode as any,
+    connector: ConnectorNode as any,
     section: FlowSectionComponent as any, // Add FlowSection as a custom node type
   }), []);
   
@@ -97,7 +99,11 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
 
     if (!sourceNode?.type || !targetNode?.type) return;
     if (!VALID_CONNECTIONS[sourceNode.type]?.includes(targetNode.type)) return;
-    if (sourceNode.data.pipelineType !== targetNode.data.pipelineType) return;
+    
+    // Allow connectors to connect between different pipeline types
+    // For non-connector nodes, ensure they're in the same pipeline
+    const isConnector = sourceNode.type === 'connector' || targetNode.type === 'connector';
+    if (!isConnector && sourceNode.data.pipelineType !== targetNode.data.pipelineType) return;
 
     setEdges(eds => {
       const newEdges = eds.filter(edge => edge.target !== connection.target);

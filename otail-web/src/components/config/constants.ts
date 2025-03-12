@@ -12,9 +12,10 @@ export const LAYOUT_CONFIG = {
 };
 
 export const VALID_CONNECTIONS: Record<string, string[]> = {
-  'receiver': ['processor', 'exporter'],
-  'processor': ['processor', 'exporter'],
-  'exporter': []
+  'receiver': ['processor', 'exporter', 'connector'],
+  'processor': ['processor', 'exporter', 'connector'],
+  'exporter': [],
+  'connector': ['processor', 'exporter']
 };
 
 export const PIPELINE_SECTIONS: Record<PipelineType, {

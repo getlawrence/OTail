@@ -567,6 +567,94 @@ export const componentSchemas: Record<string, ComponentSchema> = {
       },
     },
   },
+
+  // Connectors
+  count: {
+    fields: {
+      source_pipeline: {
+        type: 'enum',
+        label: 'Source Pipeline',
+        options: ['traces'],
+        default: 'traces',
+        required: true,
+      },
+      target_pipeline: {
+        type: 'enum',
+        label: 'Target Pipeline',
+        options: ['metrics'],
+        default: 'metrics',
+        required: true,
+      },
+      metric_name: {
+        type: 'string',
+        label: 'Metric Name',
+        default: 'trace_count',
+        required: true,
+      },
+      dimensions: {
+        type: 'array',
+        label: 'Dimensions',
+        itemType: 'string',
+        placeholder: 'Enter attribute to use as dimension',
+      },
+      description: {
+        type: 'string',
+        label: 'Description',
+        default: 'Count of traces',
+      },
+    },
+  },
+  span_metrics: {
+    fields: {
+      source_pipeline: {
+        type: 'enum',
+        label: 'Source Pipeline',
+        options: ['traces'],
+        default: 'traces',
+        required: true,
+      },
+      target_pipeline: {
+        type: 'enum',
+        label: 'Target Pipeline',
+        options: ['metrics'],
+        default: 'metrics',
+        required: true,
+      },
+      metrics: {
+        type: 'array',
+        label: 'Metrics',
+        itemType: 'object',
+        fields: {
+          name: {
+            type: 'string',
+            label: 'Metric Name',
+            required: true,
+          },
+          description: {
+            type: 'string',
+            label: 'Description',
+          },
+          unit: {
+            type: 'string',
+            label: 'Unit',
+            default: 'ms',
+          },
+          mode: {
+            type: 'enum',
+            label: 'Mode',
+            options: ['delta', 'cumulative'],
+            default: 'cumulative',
+          },
+        },
+      },
+      dimensions: {
+        type: 'array',
+        label: 'Dimensions',
+        itemType: 'string',
+        placeholder: 'Enter attribute to use as dimension',
+      },
+    },
+  },
 };
 
 export type ComponentType = keyof typeof componentSchemas;
