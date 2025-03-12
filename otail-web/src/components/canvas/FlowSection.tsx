@@ -47,12 +47,47 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
   const colorScheme = COLOR_SCHEME[data.type] || COLOR_SCHEME.traces;
   const baseColor = colorScheme.color;
   
-  // Generate all styles from the base color
-  const colors = {
-    bg: `bg-${baseColor}-50/50 dark:bg-${baseColor}-950/20`,
-    border: `border-${baseColor}-200 dark:border-${baseColor}-800`,
-    badge: `bg-${baseColor}-100 dark:bg-${baseColor}-900/30 text-${baseColor}-700 dark:text-${baseColor}-300 border-${baseColor}-300 dark:border-${baseColor}-700`
-  };
+  // Use explicit Tailwind classes based on the color
+  const colors = (() => {
+    switch (baseColor) {
+      case 'blue':
+        return {
+          bg: 'bg-blue-50/50 dark:bg-blue-950/20',
+          border: 'border-blue-200 dark:border-blue-800',
+          badge: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700'
+        };
+      case 'green':
+        return {
+          bg: 'bg-green-50/50 dark:bg-green-950/20',
+          border: 'border-green-200 dark:border-green-800',
+          badge: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700'
+        };
+      case 'purple':
+        return {
+          bg: 'bg-purple-50/50 dark:bg-purple-950/20',
+          border: 'border-purple-200 dark:border-purple-800',
+          badge: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700'
+        };
+      case 'pink':
+        return {
+          bg: 'bg-pink-50/50 dark:bg-pink-950/20',
+          border: 'border-pink-200 dark:border-pink-800',
+          badge: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-300 dark:border-pink-700'
+        };
+      case 'amber':
+        return {
+          bg: 'bg-amber-50/50 dark:bg-amber-950/20',
+          border: 'border-amber-200 dark:border-amber-800',
+          badge: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700'
+        };
+      default:
+        return {
+          bg: 'bg-gray-50/50 dark:bg-gray-950/20',
+          border: 'border-gray-200 dark:border-gray-800',
+          badge: 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700'
+        };
+    }
+  })();
   
   const sectionConfig = PIPELINE_SECTIONS[data.type] || { label: colorScheme.label };
 
