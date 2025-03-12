@@ -243,7 +243,7 @@ export function useSectionManager({
     // Always force an update when this function is called
     // This ensures the UI reflects the current state
     setNodes(() => [...nonSectionNodes, ...updatedSectionNodes]);
-  }, [fullScreenSection, collapsedSections, createSectionNodes, setNodes, nodes]);
+  }, [fullScreenSection, collapsedSections, setNodes]);
 
   // Calculate position relative to a section
   const getPositionInSection = useCallback((absolutePosition: { x: number, y: number }, sectionType: SectionType) => {
