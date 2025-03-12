@@ -46,12 +46,13 @@ function App() {
             {noAuthRequired ? (
               <Route element={<Layout />}>
                 <Route path="/sampling" element={<Sampling />} />
+                <Route path="/canvas" element={<OtelConfig />} />
                 <Route path="/" element={<Navigate to="/sampling" replace />} />
               </Route>
             ) : (
               <Route element={<RequireAuth><Layout /></RequireAuth>}>
                 <Route path="/sampling" element={<Sampling />} />
-                <Route path="/otel-config" element={<OtelConfig />} />
+                <Route path="/canvas" element={<OtelConfig />} />
                 <Route path="/agents" element={<Agents />} />
                 <Route path="/organization" element={<Organization />} />
                 <Route path="/" element={<Navigate to="/sampling" replace />} />

@@ -1,24 +1,30 @@
-import { PipelineType } from './types';
+import { SectionType } from './types';
 
 export const LAYOUT_CONFIG = {
   SECTION_HEIGHT: 600,
   SECTION_PADDING: 40,
   NODE_WIDTH: 180,
   NODE_HEIGHT: 40,
-  NODE_SPACING: 100,
+  NODE_SPACING: 150, // Increased spacing between nodes for better connections
   MINIMAP_HEIGHT: 120,
+  NODE_Z_INDEX: 20, // Z-index for component nodes (higher than edges)
+  SECTION_Z_INDEX: 0, // Z-index for section containers (lower than edges)
 };
 
 export const VALID_CONNECTIONS: Record<string, string[]> = {
-  'receiver': ['processor', 'exporter'],
-  'processor': ['processor', 'exporter'],
-  'exporter': []
+  'receiver': ['processor', 'exporter', 'connector'],
+  'processor': ['processor', 'exporter', 'connector'],
+  'exporter': [],
+  'connector': ['processor', 'exporter'],
+  'extension': []
 };
 
-export const PIPELINE_SECTIONS: Record<PipelineType, {
+export const PIPELINE_SECTIONS: Record<SectionType, {
   label: string;
   background: string;
   labelBackground: string;
+  isHorizontal?: boolean;
+  isSideSection?: boolean;
 }> = {
   traces: {
     label: 'Traces',
@@ -34,26 +40,46 @@ export const PIPELINE_SECTIONS: Record<PipelineType, {
     label: 'Logs',
     background: 'rgba(155, 89, 182, 0.05)',  // Light purple tint
     labelBackground: 'rgba(155, 89, 182, 0.1)'
+  },
+  extensions: {
+    label: 'Extensions',
+    background: 'rgba(241, 196, 15, 0.05)',  // Light yellow tint
+    labelBackground: 'rgba(241, 196, 15, 0.1)',
+    isSideSection: true  // Special flag to indicate this section should be positioned to the side
   }
 };
 
 export const styles = {
   handleStyle: {
-    width: '12px',
-    height: '12px',
+    width: '14px',
+    height: '14px',
     background: '#555',
     border: '2px solid #fff',
-    borderRadius: '6px',
+    borderRadius: '7px',
+    zIndex: 20, // Higher z-index for handles to ensure they're clickable
     ':hover': {
-      width: '14px',
-      height: '14px',
+      width: '16px',
+      height: '16px',
       background: '#777'
     }
   },
 
+  // Unified edge style for all connections
   validConnectionStyle: {
-    stroke: '#222',
-    strokeWidth: 2,
+    stroke: '#ff9800', // Orange color for better visibility
+    strokeWidth: 3,
+    animated: true,
+    zIndex: 1000, // Very high z-index to ensure edges are always visible
+    type: 'smoothstep', // Consistent curved edge type
+  },
+  
+  // Use the same style for connector edges to maintain consistency
+  connectorEdgeStyle: {
+    stroke: '#ff9800', // Orange color for better visibility
+    strokeWidth: 3,
+    animated: true,
+    zIndex: 1000, // Very high z-index to ensure edges are always visible
+    type: 'smoothstep', // Consistent curved edge type
   },
 
   sectionStyles: {

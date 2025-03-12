@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  /* Hide scrollbar but maintain scroll functionality */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -157,5 +169,17 @@ button:focus-visible {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .bg-grid-pattern {
+    background-image: radial-gradient(#e6e6e6 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  .dark .bg-grid-pattern-dark {
+    background-image: radial-gradient(rgba(100, 116, 139, 0.3) 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 }
