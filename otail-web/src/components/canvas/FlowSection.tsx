@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { trackCanvas } from './analytics';
-import { PIPELINE_SECTIONS } from './constants';
+import { PIPELINE_SECTIONS, COLOR_SCHEME } from './constants';
 import type { PipelineType } from './types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -43,32 +43,18 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
   // Check if the section is collapsed
   const isCollapsed = data.isCollapsed === true;
   
-  // Define colors based on section type
-  const sectionColors = {
-    traces: {
-      border: 'border-blue-200 dark:border-blue-800',
-      bg: 'bg-blue-50/50 dark:bg-blue-950/20',
-      badge: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800'
-    },
-    metrics: {
-      border: 'border-green-200 dark:border-green-800',
-      bg: 'bg-green-50/50 dark:bg-green-950/20',
-      badge: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800'
-    },
-    logs: {
-      border: 'border-purple-200 dark:border-purple-800',
-      bg: 'bg-purple-50/50 dark:bg-purple-950/20',
-      badge: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800'
-    },
-    extensions: {
-      border: 'border-yellow-200 dark:border-yellow-800',
-      bg: 'bg-yellow-50/50 dark:bg-yellow-950/20',
-      badge: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800'
-    }
+  // Get colors from the unified color scheme
+  const colorScheme = COLOR_SCHEME[data.type] || COLOR_SCHEME.traces;
+  const baseColor = colorScheme.color;
+  
+  // Generate all styles from the base color
+  const colors = {
+    bg: `bg-${baseColor}-50/50 dark:bg-${baseColor}-950/20`,
+    border: `border-${baseColor}-200 dark:border-${baseColor}-800`,
+    badge: `bg-${baseColor}-100 dark:bg-${baseColor}-900/30 text-${baseColor}-700 dark:text-${baseColor}-300 border-${baseColor}-300 dark:border-${baseColor}-700`
   };
   
-  const colors = sectionColors[data.type as keyof typeof sectionColors] || sectionColors.traces;
-  const sectionConfig = PIPELINE_SECTIONS[data.type] || { label: data.type };
+  const sectionConfig = PIPELINE_SECTIONS[data.type] || { label: colorScheme.label };
 
   // Effect to handle section as a container for nodes
   useEffect(() => {

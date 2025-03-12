@@ -1,5 +1,6 @@
 import { DragEvent, useState, useRef, useEffect } from 'react';
 import { trackCanvas } from './analytics';
+import { COLOR_SCHEME } from './constants';
 import { ArrowDown, Bolt, ArrowUp, ArrowLeftRight, X, ChevronRight, Search, Info } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -105,21 +106,24 @@ export const Sidebar = () => {
     
     // Create a custom drag image
     const dragPreview = document.createElement('div');
-    dragPreview.className = `p-3 rounded-lg shadow-xl border-2 ${
-      nodeType === 'receiver' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' :
-      nodeType === 'processor' ? 'border-green-500 bg-green-50 dark:bg-green-900/30' :
-      'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-    }`;
+    const colorMap: Record<string, keyof typeof COLOR_SCHEME> = {
+      'receiver': 'receivers',
+      'processor': 'processors',
+      'exporter': 'exporters',
+      'connector': 'connectors',
+      'extension': 'extensions'
+    };
+    const schemeKey = colorMap[nodeType] || 'receivers';
+    const scheme = COLOR_SCHEME[schemeKey];
+    const baseColor = scheme.color;
+    
+    dragPreview.className = `p-3 rounded-lg shadow-xl border-2 border-${baseColor}-500 bg-${baseColor}-50 dark:bg-${baseColor}-900/30`;
     
     const content = document.createElement('div');
     content.className = 'flex items-center gap-2';
     
     const iconContainer = document.createElement('div');
-    iconContainer.className = `flex items-center justify-center h-8 w-8 rounded-full ${
-      nodeType === 'receiver' ? 'bg-blue-500 text-white' :
-      nodeType === 'processor' ? 'bg-green-500 text-white' :
-      'bg-purple-500 text-white'
-    }`;
+    iconContainer.className = `flex items-center justify-center h-8 w-8 rounded-full bg-${baseColor}-500 text-white`;
     iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-${nodeType === 'receiver' ? 'arrow-down' : nodeType === 'processor' ? 'bolt' : 'arrow-up'}"><path d="${nodeType === 'receiver' ? 'M12 5v14M19 12l-7 7-7-7' : nodeType === 'processor' ? 'M13 3v18M7 16l6-6 6 6' : 'M12 19V5M5 12l7-7 7 7'}"></path></svg>`;
     
     const label = document.createElement('span');
@@ -206,43 +210,34 @@ export const Sidebar = () => {
   };
 
   const typeColor = (type: string) => {
+    // Map component types to their corresponding color scheme keys
+    const colorMap: Record<string, keyof typeof COLOR_SCHEME> = {
+      'receiver': 'receivers',
+      'processor': 'processors',
+      'exporter': 'exporters',
+      'connector': 'connectors',
+      'extension': 'extensions'
+    };
+    
+    // Get the color scheme for this component type
+    const schemeKey = colorMap[type] as keyof typeof COLOR_SCHEME;
+    
+    if (schemeKey && COLOR_SCHEME[schemeKey]) {
+      const scheme = COLOR_SCHEME[schemeKey];
+      const baseColor = scheme.color;
+      
+      // Generate all styles from the base color
+      return {
+        bg: `bg-${baseColor}-500 hover:bg-${baseColor}-600 dark:bg-${baseColor}-600 dark:hover:bg-${baseColor}-700`,
+        text: 'text-white',
+        border: `border-${baseColor}-200 dark:border-${baseColor}-800`,
+        item: `bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-${baseColor}-700 dark:text-${baseColor}-300`,
+        icon: `bg-${baseColor}-100 text-${baseColor}-600`
+      };
+    }
+    
+    // Fallback for unknown types
     return {
-      'receiver': {
-        bg: 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700',
-        text: 'text-white',
-        border: 'border-blue-400 dark:border-blue-500',
-        item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-300',
-        icon: 'bg-blue-100 text-blue-600'
-      },
-      'processor': {
-        bg: 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700',
-        text: 'text-white',
-        border: 'border-green-400 dark:border-green-500',
-        item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-green-700 dark:text-green-300',
-        icon: 'bg-green-100 text-green-600'
-      },
-      'exporter': {
-        bg: 'bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700',
-        text: 'text-white',
-        border: 'border-purple-400 dark:border-purple-500',
-        item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-purple-700 dark:text-purple-300',
-        icon: 'bg-purple-100 text-purple-600'
-      },
-      'connector': {
-        bg: 'bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700',
-        text: 'text-white',
-        border: 'border-amber-400 dark:border-amber-500',
-        item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300',
-        icon: 'bg-amber-100 text-amber-600'
-      },
-      'extension': {
-        bg: 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700',
-        text: 'text-white',
-        border: 'border-yellow-400 dark:border-yellow-500',
-        item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-yellow-700 dark:text-yellow-300',
-        icon: 'bg-yellow-100 text-yellow-600'
-      }
-    }[type] || {
       bg: 'bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700',
       text: 'text-white',
       border: 'border-gray-400 dark:border-gray-500',
