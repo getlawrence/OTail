@@ -104,8 +104,12 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
 
   // Update sections when fullScreenSection or collapsedSections changes
   useEffect(() => {
-    updateSections();
-  }, [fullScreenSection, collapsedSections, updateSections]);
+    // Using a ref to avoid the circular dependency
+    const timeoutId = setTimeout(() => {
+      updateSections();
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, [fullScreenSection, collapsedSections]);
 
   useEffect(() => {
     if (initialYaml && !hasParsedYaml.current) {

@@ -19,34 +19,70 @@ export const VALID_CONNECTIONS: Record<string, string[]> = {
   'extension': []
 };
 
+
+// Unified color scheme for all components
+export const COLOR_SCHEME = {
+  traces: {
+    color: 'blue',
+    label: 'Traces',
+    background: 'rgba(59, 130, 246, 0.05)', // Blue-500 background
+    isSideSection: false
+  },
+  metrics: {
+    color: 'green',
+    label: 'Metrics',
+    background: 'rgba(34, 197, 94, 0.05)', // Green-500 background
+    isSideSection: false
+  },
+  logs: {
+    color: 'purple',
+    label: 'Logs',
+    background: 'rgba(168, 85, 247, 0.05)', // Purple-500 background
+    isSideSection: false
+  },
+  extensions: {
+    color: 'pink',
+    label: 'Extensions',
+    background: 'rgba(236, 72, 153, 0.05)', // Pink-500 background
+    isSideSection: true  // Special flag to indicate this section should be positioned to the side
+  },
+  connectors: {
+    color: 'amber',
+    label: 'Connectors',
+    background: 'rgba(217, 119, 6, 0.05)', // Amber-600 background
+    isSideSection: false
+  },
+  exporters: {
+    color: 'purple',
+    label: 'Exporters',
+    background: 'rgba(168, 85, 247, 0.05)', // Purple-500 background
+    isSideSection: false
+  },
+  processors: {
+    color: 'green',
+    label: 'Processors',
+    background: 'rgba(34, 197, 94, 0.05)', // Green-500 background
+    isSideSection: false
+  },
+  receivers: {
+    color: 'blue',
+    label: 'Receivers',
+    background: 'rgba(59, 130, 246, 0.05)', // Blue-500 background
+    isSideSection: false
+  }
+};
+
+// For backward compatibility, maintain PIPELINE_SECTIONS as a reference to COLOR_SCHEME
 export const PIPELINE_SECTIONS: Record<SectionType, {
   label: string;
   background: string;
-  labelBackground: string;
   isHorizontal?: boolean;
   isSideSection?: boolean;
 }> = {
-  traces: {
-    label: 'Traces',
-    background: 'rgba(52, 152, 219, 0.05)',  // Light blue tint
-    labelBackground: 'rgba(52, 152, 219, 0.1)'
-  },
-  metrics: {
-    label: 'Metrics',
-    background: 'rgba(46, 204, 113, 0.05)',  // Light green tint
-    labelBackground: 'rgba(46, 204, 113, 0.1)'
-  },
-  logs: {
-    label: 'Logs',
-    background: 'rgba(155, 89, 182, 0.05)',  // Light purple tint
-    labelBackground: 'rgba(155, 89, 182, 0.1)'
-  },
-  extensions: {
-    label: 'Extensions',
-    background: 'rgba(241, 196, 15, 0.05)',  // Light yellow tint
-    labelBackground: 'rgba(241, 196, 15, 0.1)',
-    isSideSection: true  // Special flag to indicate this section should be positioned to the side
-  }
+  traces: COLOR_SCHEME.traces,
+  metrics: COLOR_SCHEME.metrics,
+  logs: COLOR_SCHEME.logs,
+  extensions: COLOR_SCHEME.extensions
 };
 
 export const styles = {
