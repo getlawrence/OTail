@@ -41,6 +41,7 @@ const items = !noAuthRequired
       title: "Configuration",
       url: "/canvas",
       icon: Palette,
+      badge: "New"
     },
   ]
   : [
@@ -53,6 +54,7 @@ const items = !noAuthRequired
       title: "Canvas",
       url: "/canvas",
       icon: Palette,
+      badge: "New"
     },
   ];
 
