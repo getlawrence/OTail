@@ -118,8 +118,8 @@ export function useSectionManager({
               : window.innerHeight / 4, // Regular sections use 1/4 height
           isFullScreen: fullScreenSection === sectionType,
           isCollapsed: isCollapsed,
-          onToggleExpand,
-          onToggleCollapse
+          onToggleExpand: onToggleExpand,
+          onToggleCollapse: onToggleCollapse
         },
         selectable: false,
         draggable: false, // Explicitly set to false to prevent dragging
@@ -132,7 +132,7 @@ export function useSectionManager({
     });
 
     return sectionNodes;
-  }, [fullScreenSection, onToggleExpand]);
+  }, [fullScreenSection, collapsedSections, onToggleExpand, onToggleCollapse]);
 
   // Function to determine which section a position belongs to
   const determineSection = useCallback((x: number, y: number): SectionType => {
@@ -233,32 +233,16 @@ export function useSectionManager({
 
   // Update section nodes when relevant state changes
   const updateSections = useCallback(() => {
+    
     // Get current non-section nodes
     const nonSectionNodes = nodes.filter(node => node.type !== 'section');
+    
     // Create new section nodes with updated properties
     const updatedSectionNodes = createSectionNodes();
-    // Merge non-section nodes with updated section nodes
-    setNodes(currentNodes => {
-      // Only update if there are no section nodes or if properties have changed
-      const hasSectionNodes = currentNodes.some(node => node.type === 'section');
-      if (!hasSectionNodes) {
-        return [...nonSectionNodes, ...updatedSectionNodes];
-      }
-
-      // Check if section properties have changed
-      const needsUpdate = updatedSectionNodes.some(newNode => {
-        const existingNode = currentNodes.find(node => node.id === newNode.id);
-        if (!existingNode) return true;
-
-        // Compare relevant properties
-        return (
-          existingNode.data.isFullScreen !== newNode.data.isFullScreen ||
-          existingNode.data.isCollapsed !== newNode.data.isCollapsed
-        );
-      });
-
-      return needsUpdate ? [...nonSectionNodes, ...updatedSectionNodes] : currentNodes;
-    });
+    
+    // Always force an update when this function is called
+    // This ensures the UI reflects the current state
+    setNodes(() => [...nonSectionNodes, ...updatedSectionNodes]);
   }, [fullScreenSection, collapsedSections, createSectionNodes, setNodes, nodes]);
 
   // Calculate position relative to a section

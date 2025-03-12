@@ -149,11 +149,11 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
       // If the section is already in full-screen, exit full-screen
       // If not in full-screen, enter full-screen
       const isCurrentlyFullScreen = data.isFullScreen === true;
-      console.log('Calling onToggleExpand with:', data.type, !isCurrentlyFullScreen);
       
       // Track the full-screen toggle event
       trackCanvas.section.toggleFullScreen(data.type, !isCurrentlyFullScreen);
       
+      // Call the callback with the opposite of the current state
       data.onToggleExpand(data.type, !isCurrentlyFullScreen);
     }
   };
@@ -163,14 +163,26 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
     e.stopPropagation();
     e.preventDefault();
 
-    if (data.onToggleCollapse) {
+    if (typeof data.onToggleCollapse === 'function') {
       const isCurrentlyCollapsed = data.isCollapsed === true;
-      console.log('Calling onToggleCollapse with:', data.type, !isCurrentlyCollapsed);
       
       // Track the collapse toggle event
       trackCanvas.section.toggleCollapse(data.type, !isCurrentlyCollapsed);
       
-      data.onToggleCollapse(data.type, !isCurrentlyCollapsed);
+      try {
+        data.onToggleCollapse(data.type, !isCurrentlyCollapsed);
+      } catch (error) {
+        console.error('Error calling onToggleCollapse:', error);
+      }
+    }
+  };
+  
+  // Handle section header click for extensions section - also toggles collapse state
+  const handleHeaderClick = (e: React.MouseEvent) => {
+    
+    // Only handle header clicks for side sections (extensions)
+    if (isSideSection && typeof data.onToggleCollapse === 'function') {
+      handleToggleCollapse(e);
     }
   };
   
@@ -189,7 +201,7 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
       style={{
         width: isSideSection ? '200px' : 'calc(100vw - 320px)',
         height: isSideSection 
-          ? (data.isFullScreen ? '85vh' : 'calc(75vh + 40px)') // Side section is as tall as all regular sections combined
+          ? (data.isFullScreen ? '85vh' : isCollapsed ? '56px' : 'calc(75vh + 40px)') // Collapsed height is just the header height
           : (data.isFullScreen ? '85vh' : `${100/4}vh`), // Regular vertical sections
         overflow: 'visible', // Allow nodes to be visible outside the section boundaries
         position: 'relative',
@@ -198,7 +210,7 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
           ? '200px' 
           : (data.isFullScreen ? '95vw' : 'calc(100vw - 320px)'), // Regular sections account for side section width
         maxHeight: isSideSection
-          ? (data.isFullScreen ? '85vh' : 'calc(75vh + 40px)') // Side section is as tall as all regular sections combined
+          ? (data.isFullScreen ? '85vh' : isCollapsed ? '56px' : 'calc(75vh + 40px)') // Collapsed height is just the header height
           : (data.isFullScreen ? '85vh' : `${100/4}vh`), // Regular vertical sections
         // These properties make the section act as a container for nodes
         display: 'flex',
@@ -207,7 +219,10 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
       }}
     >
       {/* Section header - always visible */}
-      <div className="h-14 px-4 py-3 flex items-center justify-between border-b border-border/30">
+      <div 
+        className="h-14 px-4 py-3 flex items-center justify-between border-b border-border/30 cursor-pointer" 
+        onClick={handleHeaderClick}
+      >
         <div className="flex items-center gap-2">
           <Badge variant="outline" className={`${colors.badge} shadow-sm`}>
             {sectionConfig.label}
@@ -220,6 +235,8 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
               className="h-6 w-6 rounded-full hover:bg-muted cursor-pointer"
               onClick={handleToggleCollapse}
               title={isCollapsed ? "Expand section" : "Collapse section"}
+              aria-expanded={!isCollapsed}
+              aria-label={isCollapsed ? "Expand section" : "Collapse section"}
             >
               {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
             </Button>
@@ -242,11 +259,13 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
         style={{
           height: isExpanded ? 'calc(100% - 56px)' : (isSideSection ? 'calc(75vh - 16px)' : 'calc(33vh - 56px)'), // Take remaining height after header
           opacity: isExpanded ? 1 : 0.9, // More visible when expanded
-          pointerEvents: 'auto' as const, // Always allow interaction
+          pointerEvents: isCollapsed && isSideSection ? 'none' : 'auto' as const, // Disable interaction when collapsed
           display: isCollapsed && isSideSection ? 'none' : 'block', // Hide content when collapsed (only for side sections)
           position: 'relative', // Needed for absolute positioning of child nodes
-          transition: 'height 0.5s ease, opacity 0.5s ease' // Smooth transition
+          transition: 'all 0.5s ease' // Smooth transition for all properties
         }}
+        data-collapsed={isCollapsed}
+        data-section-type={data.type}
       >
         {/* Pipeline content area - serves as a container for nodes */}
         <div className="h-full w-full rounded-md border border-dashed border-border/50 bg-transparent relative">

@@ -32,9 +32,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   
   // Track which sections are collapsed
   const [collapsedSections, setCollapsedSections] = useState<SectionType[]>(['extensions']); // Extensions section is collapsed by default
-
-  // Create refs for callbacks to avoid circular dependencies
-  const handleToggleExpandRef = useRef<((type: SectionType, expanded: boolean) => void) | null>(null);
+  
 
   // Handle section full-screen toggle
   const handleToggleFullScreen = useCallback((type: SectionType, enterFullScreen: boolean) => {
@@ -46,20 +44,25 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     }
   }, []);
 
-
   // Handle section collapse/expand toggle
   const handleToggleCollapse = useCallback((type: SectionType, collapsed: boolean) => {
-    setCollapsedSections(prev => 
-      collapsed 
-        ? [...prev, type] 
-        : prev.filter(section => section !== type)
-    );
+    setCollapsedSections(prev => {
+      let newState;
+      
+      // If we're collapsing and it's not already in the array, add it
+      if (collapsed && !prev.includes(type)) {
+        newState = [...prev, type];
+        return newState;
+      }
+      // If we're expanding and it's in the array, remove it
+      if (!collapsed && prev.includes(type)) {
+        newState = prev.filter(section => section !== type);
+        return newState;
+      }
+      // Otherwise return the current state unchanged
+      return prev;
+    });
   }, []);
-
-  // Assign callbacks to refs
-  useEffect(() => {
-    handleToggleExpandRef.current = handleToggleFullScreen; // Repurpose the expand ref for full-screen
-  }, [handleToggleFullScreen]);
 
 
   // Initialize nodes and edges state
@@ -71,7 +74,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   const { updateSections, determineSection, getPositionInSection } = useSectionManager({
     fullScreenSection,
     collapsedSections,
-    onToggleExpand: handleToggleExpandRef.current,
+    onToggleExpand: handleToggleFullScreen,
     onToggleCollapse: handleToggleCollapse,
     setNodes,
     nodes
@@ -99,10 +102,10 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
 
   const hasParsedYaml = useRef(false); // Keeps track of whether the YAML has been parsed.
 
-  // Update sections when fullScreenSection changes
+  // Update sections when fullScreenSection or collapsedSections changes
   useEffect(() => {
     updateSections();
-  }, [fullScreenSection, updateSections]);
+  }, [fullScreenSection, collapsedSections, updateSections]);
 
   useEffect(() => {
     if (initialYaml && !hasParsedYaml.current) {

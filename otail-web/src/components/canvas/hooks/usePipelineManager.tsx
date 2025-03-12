@@ -131,7 +131,6 @@ export function usePipelineManager({
         Object.entries(config.connectors).forEach(([connectorName, connectorConfig]) => {
           const connectorInfo = connectorMap.get(connectorName);
           if (!connectorInfo || connectorInfo.sourcePipelines.length === 0 || connectorInfo.targetPipelines.length === 0) {
-            console.log(`No valid pipeline connections found for connector: ${connectorName}`);
             return;
           }
           
@@ -141,8 +140,6 @@ export function usePipelineManager({
           
           const [sourceType] = sourcePipeline.split('/');
           const [targetType] = targetPipeline.split('/');
-          
-          console.log(`Connector ${connectorName} connects from ${sourcePipeline} to ${targetPipeline}`);
           
           // Create connector node in the source pipeline section
           const connectorNode: Node = {
@@ -176,8 +173,6 @@ export function usePipelineManager({
           };
           
           connectorNodes.push(connectorNode);
-          
-          console.log('All nodes in newNodes:', newNodes.map(n => ({ id: n.id, type: n.type, pipeline: n.data.pipelineType })));
 
           // Create direct edges between exporters and receivers through the connector
           // This is a simpler approach that should work regardless of pipeline structure
@@ -186,15 +181,12 @@ export function usePipelineManager({
           const allSourceExporters: Node[] = [];
           connectorInfo.sourcePipelines.forEach(sourcePipeline => {
             const [pipelineType] = sourcePipeline.split('/');
-            console.log(`Looking for exporters in source pipeline type: ${pipelineType}`);
             
             const exporters = newNodes.filter(node => {
               const match = node.data.pipelineType === pipelineType && node.type === 'exporter';
-              console.log(`Node ${node.id}: pipelineType=${node.data.pipelineType}, nodeType=${node.type}, isMatch=${match}`);
               return match;
             });
             
-            console.log(`Found ${exporters.length} exporters in ${pipelineType}:`, exporters.map(e => e.id));
             allSourceExporters.push(...exporters);
           });
           
@@ -202,23 +194,17 @@ export function usePipelineManager({
           const allTargetReceivers: Node[] = [];
           connectorInfo.targetPipelines.forEach(targetPipeline => {
             const [pipelineType] = targetPipeline.split('/');
-            console.log(`Looking for receivers in target pipeline type: ${pipelineType}`);
             
             const receivers = newNodes.filter(node => {
-              const match = node.data.pipelineType === pipelineType && node.type === 'receiver';
-              console.log(`Node ${node.id}: pipelineType=${node.data.pipelineType}, nodeType=${node.type}, isMatch=${match}`);
+              const match = node.data.pipelineType === pipelineType && node.type === 'receiver';sourcePipeline
               return match;
             });
             
-            console.log(`Found ${receivers.length} receivers in ${pipelineType}:`, receivers.map(r => r.id));
             allTargetReceivers.push(...receivers);
           });
           
-          console.log(`Total source exporters: ${allSourceExporters.length}, Total target receivers: ${allTargetReceivers.length}`);
-          
           // If we don't have specific exporters/receivers, create direct edges between the connector and all nodes
           if (allSourceExporters.length === 0 || allTargetReceivers.length === 0) {
-            console.log('No specific exporters/receivers found, creating direct edges between all nodes');
             
             // Get all nodes from source pipeline types
             const allSourceNodes = newNodes.filter(node => {
@@ -236,15 +222,11 @@ export function usePipelineManager({
               });
             });
             
-            console.log(`Creating edges between ${allSourceNodes.length} source nodes and ${allTargetNodes.length} target nodes`);
-            
             // Create edges from all source nodes to connector
             allSourceNodes.forEach(sourceNode => {
               if (sourceNode.id === connectorNode.id) return; // Skip self-connections
               
               const edgeId = `edge-${sourceNode.id}-${connectorNode.id}`;
-              console.log(`Creating edge from ${sourceNode.id} to connector ${connectorNode.id}`);
-              
               newEdges.push({
                 id: edgeId,
                 source: sourceNode.id,
@@ -258,7 +240,6 @@ export function usePipelineManager({
               if (targetNode.id === connectorNode.id) return; // Skip self-connections
               
               const edgeId = `edge-${connectorNode.id}-${targetNode.id}`;
-              console.log(`Creating edge from connector ${connectorNode.id} to ${targetNode.id}`);
               
               newEdges.push({
                 id: edgeId,
@@ -271,7 +252,6 @@ export function usePipelineManager({
             // Create edges from source exporters to connector
             allSourceExporters.forEach(exporter => {
               const edgeId = `edge-${exporter.id}-${connectorNode.id}`;
-              console.log(`Creating edge from exporter ${exporter.id} to connector ${connectorNode.id}`);
               
               newEdges.push({
                 id: edgeId,
@@ -284,7 +264,6 @@ export function usePipelineManager({
             // Create edges from connector to target receivers
             allTargetReceivers.forEach(receiver => {
               const edgeId = `edge-${connectorNode.id}-${receiver.id}`;
-              console.log(`Creating edge from connector ${connectorNode.id} to receiver ${receiver.id}`);
               
               newEdges.push({
                 id: edgeId,
