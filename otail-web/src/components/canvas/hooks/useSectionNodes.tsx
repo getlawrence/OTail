@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
 import { PIPELINE_SECTIONS } from '../constants';
-import type { PipelineType } from '../types';
+import type { SectionType } from '../types';
 
 interface UseSectionNodesProps {
-  fullScreenSection: PipelineType | null;
-  onToggleExpand: ((type: PipelineType, expanded: boolean) => void) | null;
+  fullScreenSection: SectionType | null;
+  onToggleExpand: ((type: SectionType, expanded: boolean) => void) | null;
 }
 
 export function useSectionNodes({ fullScreenSection, onToggleExpand }: UseSectionNodesProps) {
@@ -12,7 +12,7 @@ export function useSectionNodes({ fullScreenSection, onToggleExpand }: UseSectio
   // Create section nodes - always create all sections
   const createSectionNodes = useCallback(() => {
     let currentY = 20; // Starting Y position - reduced from 60 to 20
-    const positions: Record<PipelineType, number> = {
+    const positions: Record<SectionType, number> = {
       traces: 0,
       metrics: 0,
       logs: 0,
@@ -28,7 +28,7 @@ export function useSectionNodes({ fullScreenSection, onToggleExpand }: UseSectio
 
     // First pass: calculate positions
     Object.keys(PIPELINE_SECTIONS).forEach((type) => {
-      const sectionType = type as PipelineType;
+      const sectionType = type as SectionType;
       positions[sectionType] = currentY;
 
       // Update Y position for next section
@@ -41,7 +41,7 @@ export function useSectionNodes({ fullScreenSection, onToggleExpand }: UseSectio
 
     // Second pass: create nodes
     const sectionNodes = Object.keys(PIPELINE_SECTIONS).map((type, index) => {
-      const sectionType = type as PipelineType;
+      const sectionType = type as SectionType;
       // If we're in full-screen mode and this is not the full-screen section, hide it
       const isHidden = fullScreenSection !== null && fullScreenSection !== sectionType;
       

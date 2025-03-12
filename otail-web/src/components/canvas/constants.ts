@@ -1,4 +1,4 @@
-import { PipelineType } from './types';
+import { SectionType } from './types';
 
 export const LAYOUT_CONFIG = {
   SECTION_HEIGHT: 600,
@@ -19,7 +19,7 @@ export const VALID_CONNECTIONS: Record<string, string[]> = {
   'extension': []
 };
 
-export const PIPELINE_SECTIONS: Record<PipelineType, {
+export const PIPELINE_SECTIONS: Record<SectionType, {
   label: string;
   background: string;
   labelBackground: string;
@@ -64,11 +64,22 @@ export const styles = {
     }
   },
 
+  // Unified edge style for all connections
   validConnectionStyle: {
-    stroke: '#222',
-    strokeWidth: 2,
+    stroke: '#ff9800', // Orange color for better visibility
+    strokeWidth: 3,
     animated: true,
-    zIndex: 15, // Z-index for connections (between sections and nodes)
+    zIndex: 1000, // Very high z-index to ensure edges are always visible
+    type: 'smoothstep', // Consistent curved edge type
+  },
+  
+  // Use the same style for connector edges to maintain consistency
+  connectorEdgeStyle: {
+    stroke: '#ff9800', // Orange color for better visibility
+    strokeWidth: 3,
+    animated: true,
+    zIndex: 1000, // Very high z-index to ensure edges are always visible
+    type: 'smoothstep', // Consistent curved edge type
   },
 
   sectionStyles: {

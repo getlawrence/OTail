@@ -1,4 +1,5 @@
-export type PipelineType = 'traces' | 'metrics' | 'logs' | 'extensions';
+export type PipelineType = 'traces' | 'metrics' | 'logs';
+export type SectionType = PipelineType | 'extensions';
 
 export interface PipelineConfig {
   receivers: string[];

@@ -1,13 +1,13 @@
 import { useCallback } from 'react';
 import { Node, useReactFlow } from 'reactflow';
 import { PIPELINE_SECTIONS } from '../constants';
-import type { PipelineType } from '../types';
+import type { PipelineType, SectionType } from '../types';
 
 interface UseSectionManagerProps {
-  fullScreenSection: PipelineType | null;
-  collapsedSections?: PipelineType[];
-  onToggleExpand: ((type: PipelineType, expanded: boolean) => void) | null;
-  onToggleCollapse?: (type: PipelineType, collapsed: boolean) => void;
+  fullScreenSection: SectionType | null;
+  collapsedSections?: SectionType[];
+  onToggleExpand: ((type: SectionType, expanded: boolean) => void) | null;
+  onToggleCollapse?: (type: SectionType, collapsed: boolean) => void;
   setNodes: (updater: (nodes: Node[]) => Node[]) => void;
   nodes: Node[];
 }
@@ -25,7 +25,7 @@ export function useSectionManager({
   // Create section nodes - always create all sections
   const createSectionNodes = useCallback(() => {
     let currentY = 20; // Starting Y position - reduced from 60 to 20
-    const positions: Record<PipelineType, number> = {
+    const positions: Record<SectionType, number> = {
       traces: 0,
       metrics: 0,
       logs: 0,
@@ -45,7 +45,7 @@ export function useSectionManager({
     
     // First count how many regular sections we have and calculate total height
     Object.keys(PIPELINE_SECTIONS).forEach((type) => {
-      const sectionType = type as PipelineType;
+      const sectionType = type as SectionType;
       const sectionConfig = PIPELINE_SECTIONS[sectionType];
       const isSideSection = sectionConfig.isSideSection === true;
       
@@ -61,7 +61,7 @@ export function useSectionManager({
     
     // Now calculate positions
     Object.keys(PIPELINE_SECTIONS).forEach((type) => {
-      const sectionType = type as PipelineType;
+      const sectionType = type as SectionType;
       const sectionConfig = PIPELINE_SECTIONS[sectionType];
       const isSideSection = sectionConfig.isSideSection === true;
       
@@ -135,9 +135,9 @@ export function useSectionManager({
   }, [fullScreenSection, onToggleExpand]);
 
   // Function to determine which section a position belongs to
-  const determineSection = useCallback((x: number, y: number): PipelineType => {
+  const determineSection = useCallback((x: number, y: number): SectionType => {
     // Check if the position is within any section card
-    const sectionTypes = Object.keys(PIPELINE_SECTIONS) as PipelineType[];
+    const sectionTypes = Object.keys(PIPELINE_SECTIONS) as SectionType[];
 
     // Section dimensions
     const sectionWidth = 800;
@@ -211,7 +211,7 @@ export function useSectionManager({
     }
 
     // Default to the closest section if not within any section
-    let closestSection = null as { type: PipelineType, distance: number } | null;
+    let closestSection = null as { type: SectionType, distance: number } | null;
     currentTop = 60;
 
     for (let i = 0; i < sectionTypes.length; i++) {
@@ -262,7 +262,7 @@ export function useSectionManager({
   }, [fullScreenSection, collapsedSections, createSectionNodes, setNodes, nodes]);
 
   // Calculate position relative to a section
-  const getPositionInSection = useCallback((absolutePosition: { x: number, y: number }, sectionType: PipelineType) => {
+  const getPositionInSection = useCallback((absolutePosition: { x: number, y: number }, sectionType: SectionType) => {
     const sectionNode = nodes.find(node => node.id === `section-${sectionType}`);
     let adjustedPosition = { ...absolutePosition };
     

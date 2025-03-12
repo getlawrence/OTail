@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { Node, Edge, Position } from 'reactflow';
 import { load } from 'js-yaml';
 import { styles, LAYOUT_CONFIG } from '../constants';
-import type { OtelConfig, PipelineType } from '../types';
+import type { OtelConfig, SectionType } from '../types';
 
 interface UsePipelineManagerProps {
   setNodes: (updater: (nodes: Node[]) => Node[]) => void;
@@ -24,6 +24,17 @@ export function usePipelineManager({
       const config: OtelConfig = load(yamlString) as OtelConfig;
       const newNodes: Node[] = [];
       const newEdges: Edge[] = [];
+      const connectorNodes: Node[] = [];
+      const connectorMap = new Map<string, { sourcePipelines: string[], targetPipelines: string[] }>();
+      const connectorNames = new Set<string>();
+
+      // Identify all connectors first to avoid creating duplicate nodes
+      if (config.connectors) {
+        Object.keys(config.connectors).forEach(connectorName => {
+          connectorNames.add(connectorName);
+          connectorMap.set(connectorName, { sourcePipelines: [], targetPipelines: [] });
+        });
+      }
 
       // Process each pipeline in the config
       Object.entries(config.service?.pipelines || {}).forEach(([pipelineKey, pipeline]) => {
@@ -35,28 +46,30 @@ export function usePipelineManager({
           startX: number,
           y: number
         ) => {
-          return components.map((label, index) => ({
-            id: `${type}-${label}-${pipelineType}-${index}`,
-            type,
-            position: {
-              x: startX + (index * LAYOUT_CONFIG.NODE_SPACING),
-              y
-            },
-            data: {
-              label,
-              config: config[`${type}s`][label] || {},
-              pipelineType,
-            },
-            sourcePosition: Position.Right,
-            targetPosition: Position.Left,
-            parentNode: `section-${pipelineType}`,
-            extent: 'parent' as const,
-            style: {
-              width: LAYOUT_CONFIG.NODE_WIDTH,
-              height: LAYOUT_CONFIG.NODE_HEIGHT,
-              zIndex: 10
-            },
-          }));
+          return components
+            .filter(label => !connectorNames.has(label)) // Skip connectors, we'll create them separately
+            .map((label, index) => ({
+              id: `${type}-${label}-${pipelineType}-${index}`,
+              type,
+              position: {
+                x: startX + (index * LAYOUT_CONFIG.NODE_SPACING),
+                y
+              },
+              data: {
+                label,
+                config: config[`${type}s`][label] || {},
+                pipelineType,
+              },
+              sourcePosition: Position.Right,
+              targetPosition: Position.Left,
+              parentNode: `section-${pipelineType}`,
+              extent: 'parent' as const,
+              style: {
+                width: LAYOUT_CONFIG.NODE_WIDTH,
+                height: LAYOUT_CONFIG.NODE_HEIGHT,
+                zIndex: 10
+              },
+            }));
         };
 
         // Create nodes for each component type
@@ -85,10 +98,207 @@ export function usePipelineManager({
         if (processorNodes.length && exporterNodes.length) {
           newEdges.push(...createEdges(processorNodes, exporterNodes));
         }
-        if (receiverNodes.length && exporterNodes.length) {
+        if (receiverNodes.length && exporterNodes.length && processorNodes.length === 0) {
           newEdges.push(...createEdges(receiverNodes, exporterNodes));
         }
+        
+        // Track connectors used in this pipeline
+        pipeline.receivers.forEach(receiver => {
+          if (connectorNames.has(receiver)) {
+            // This receiver is a connector
+            const connectorInfo = connectorMap.get(receiver);
+            if (connectorInfo) {
+              connectorInfo.targetPipelines.push(pipelineKey);
+              connectorMap.set(receiver, connectorInfo);
+            }
+          }
+        });
+
+        pipeline.exporters.forEach(exporter => {
+          if (connectorNames.has(exporter)) {
+            // This exporter is a connector
+            const connectorInfo = connectorMap.get(exporter);
+            if (connectorInfo) {
+              connectorInfo.sourcePipelines.push(pipelineKey);
+              connectorMap.set(exporter, connectorInfo);
+            }
+          }
+        });
       });
+      
+      // Process connectors after all pipeline nodes are created
+      if (config.connectors) {
+        Object.entries(config.connectors).forEach(([connectorName, connectorConfig]) => {
+          const connectorInfo = connectorMap.get(connectorName);
+          if (!connectorInfo || connectorInfo.sourcePipelines.length === 0 || connectorInfo.targetPipelines.length === 0) {
+            console.log(`No valid pipeline connections found for connector: ${connectorName}`);
+            return;
+          }
+          
+          // Get the first source and target pipeline for placement
+          const sourcePipeline = connectorInfo.sourcePipelines[0];
+          const targetPipeline = connectorInfo.targetPipelines[0];
+          
+          const [sourceType] = sourcePipeline.split('/');
+          const [targetType] = targetPipeline.split('/');
+          
+          console.log(`Connector ${connectorName} connects from ${sourcePipeline} to ${targetPipeline}`);
+          
+          // Create connector node in the source pipeline section
+          const connectorNode: Node = {
+            id: `connector-${connectorName}`,
+            type: 'connector',
+            position: {
+              x: 425, // Position between processors and exporters
+              y: 50
+            },
+            data: {
+              label: connectorName,
+              config: connectorConfig,
+              pipelineType: sourceType,
+              sourcePipelineType: sourceType,
+              targetPipelineType: targetType,
+              isConnector: true,
+              sourcePipelines: connectorInfo.sourcePipelines,
+              targetPipelines: connectorInfo.targetPipelines
+            },
+            sourcePosition: Position.Right,
+            targetPosition: Position.Left,
+            parentNode: `section-${sourceType}`,
+            extent: 'parent' as const,
+            style: {
+              width: LAYOUT_CONFIG.NODE_WIDTH,
+              height: LAYOUT_CONFIG.NODE_HEIGHT,
+              background: '#fff8e1', // Light amber color for connectors
+              borderColor: '#ffca28',
+              zIndex: 20 // Higher z-index to ensure visibility
+            },
+          };
+          
+          connectorNodes.push(connectorNode);
+          
+          console.log('All nodes in newNodes:', newNodes.map(n => ({ id: n.id, type: n.type, pipeline: n.data.pipelineType })));
+
+          // Create direct edges between exporters and receivers through the connector
+          // This is a simpler approach that should work regardless of pipeline structure
+          
+          // Find all exporters in source pipelines
+          const allSourceExporters: Node[] = [];
+          connectorInfo.sourcePipelines.forEach(sourcePipeline => {
+            const [pipelineType] = sourcePipeline.split('/');
+            console.log(`Looking for exporters in source pipeline type: ${pipelineType}`);
+            
+            const exporters = newNodes.filter(node => {
+              const match = node.data.pipelineType === pipelineType && node.type === 'exporter';
+              console.log(`Node ${node.id}: pipelineType=${node.data.pipelineType}, nodeType=${node.type}, isMatch=${match}`);
+              return match;
+            });
+            
+            console.log(`Found ${exporters.length} exporters in ${pipelineType}:`, exporters.map(e => e.id));
+            allSourceExporters.push(...exporters);
+          });
+          
+          // Find all receivers in target pipelines
+          const allTargetReceivers: Node[] = [];
+          connectorInfo.targetPipelines.forEach(targetPipeline => {
+            const [pipelineType] = targetPipeline.split('/');
+            console.log(`Looking for receivers in target pipeline type: ${pipelineType}`);
+            
+            const receivers = newNodes.filter(node => {
+              const match = node.data.pipelineType === pipelineType && node.type === 'receiver';
+              console.log(`Node ${node.id}: pipelineType=${node.data.pipelineType}, nodeType=${node.type}, isMatch=${match}`);
+              return match;
+            });
+            
+            console.log(`Found ${receivers.length} receivers in ${pipelineType}:`, receivers.map(r => r.id));
+            allTargetReceivers.push(...receivers);
+          });
+          
+          console.log(`Total source exporters: ${allSourceExporters.length}, Total target receivers: ${allTargetReceivers.length}`);
+          
+          // If we don't have specific exporters/receivers, create direct edges between the connector and all nodes
+          if (allSourceExporters.length === 0 || allTargetReceivers.length === 0) {
+            console.log('No specific exporters/receivers found, creating direct edges between all nodes');
+            
+            // Get all nodes from source pipeline types
+            const allSourceNodes = newNodes.filter(node => {
+              return connectorInfo.sourcePipelines.some(pipeline => {
+                const [pipelineType] = pipeline.split('/');
+                return node.data.pipelineType === pipelineType;
+              });
+            });
+            
+            // Get all nodes from target pipeline types
+            const allTargetNodes = newNodes.filter(node => {
+              return connectorInfo.targetPipelines.some(pipeline => {
+                const [pipelineType] = pipeline.split('/');
+                return node.data.pipelineType === pipelineType;
+              });
+            });
+            
+            console.log(`Creating edges between ${allSourceNodes.length} source nodes and ${allTargetNodes.length} target nodes`);
+            
+            // Create edges from all source nodes to connector
+            allSourceNodes.forEach(sourceNode => {
+              if (sourceNode.id === connectorNode.id) return; // Skip self-connections
+              
+              const edgeId = `edge-${sourceNode.id}-${connectorNode.id}`;
+              console.log(`Creating edge from ${sourceNode.id} to connector ${connectorNode.id}`);
+              
+              newEdges.push({
+                id: edgeId,
+                source: sourceNode.id,
+                target: connectorNode.id,
+                ...styles.connectorEdgeStyle
+              });
+            });
+            
+            // Create edges from connector to all target nodes
+            allTargetNodes.forEach(targetNode => {
+              if (targetNode.id === connectorNode.id) return; // Skip self-connections
+              
+              const edgeId = `edge-${connectorNode.id}-${targetNode.id}`;
+              console.log(`Creating edge from connector ${connectorNode.id} to ${targetNode.id}`);
+              
+              newEdges.push({
+                id: edgeId,
+                source: connectorNode.id,
+                target: targetNode.id,
+                ...styles.connectorEdgeStyle
+              });
+            });
+          } else {
+            // Create edges from source exporters to connector
+            allSourceExporters.forEach(exporter => {
+              const edgeId = `edge-${exporter.id}-${connectorNode.id}`;
+              console.log(`Creating edge from exporter ${exporter.id} to connector ${connectorNode.id}`);
+              
+              newEdges.push({
+                id: edgeId,
+                source: exporter.id,
+                target: connectorNode.id,
+                ...styles.connectorEdgeStyle
+              });
+            });
+            
+            // Create edges from connector to target receivers
+            allTargetReceivers.forEach(receiver => {
+              const edgeId = `edge-${connectorNode.id}-${receiver.id}`;
+              console.log(`Creating edge from connector ${connectorNode.id} to receiver ${receiver.id}`);
+              
+              newEdges.push({
+                id: edgeId,
+                source: connectorNode.id,
+                target: receiver.id,
+                ...styles.connectorEdgeStyle
+              });
+            });
+          }
+        });
+      }
+      
+      // Add connector nodes to the final nodes array
+      newNodes.push(...connectorNodes);
       
       // Preserve section nodes when setting new nodes from YAML
       setNodes(currentNodes => {
@@ -108,7 +318,7 @@ export function usePipelineManager({
   const createComponentNode = useCallback((
     type: string, 
     name: string, 
-    section: PipelineType, 
+    section: SectionType, 
     position: { x: number, y: number }
   ) => {
     // We're simplifying by removing pipeline names from UI components
@@ -159,8 +369,7 @@ export function usePipelineManager({
       id: `edge-${sourceNode.id}-${targetNode.id}`,
       source: sourceNode.id,
       target: targetNode.id,
-      style: styles.validConnectionStyle,
-      animated: true,
+      ...styles.validConnectionStyle, // Use all properties from the style definition
     };
 
     setEdges(edges => [...edges, newEdge]);

@@ -21,23 +21,23 @@ import { useFlowConfig } from './hooks/useFlowConfig';
 import { useSectionManager } from './hooks/useSectionManager';
 import { usePipelineManager } from './hooks/usePipelineManager';
 import { styles, VALID_CONNECTIONS } from './constants';
-import type { OtelConfigBuilderProps, PipelineType } from './types';
+import type { OtelConfigBuilderProps, SectionType } from './types';
 
 const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => void }, OtelConfigBuilderProps>(({ onChange, initialYaml }, ref) => {
   // Define state for selected node
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
   // Track which section is in full-screen mode (if any)
-  const [fullScreenSection, setFullScreenSection] = useState<PipelineType | null>(null); // No section is in full-screen by default
+  const [fullScreenSection, setFullScreenSection] = useState<SectionType | null>(null); // No section is in full-screen by default
   
   // Track which sections are collapsed
-  const [collapsedSections, setCollapsedSections] = useState<PipelineType[]>(['extensions']); // Extensions section is collapsed by default
+  const [collapsedSections, setCollapsedSections] = useState<SectionType[]>(['extensions']); // Extensions section is collapsed by default
 
   // Create refs for callbacks to avoid circular dependencies
-  const handleToggleExpandRef = useRef<((type: PipelineType, expanded: boolean) => void) | null>(null);
+  const handleToggleExpandRef = useRef<((type: SectionType, expanded: boolean) => void) | null>(null);
 
   // Handle section full-screen toggle
-  const handleToggleFullScreen = useCallback((type: PipelineType, enterFullScreen: boolean) => {
+  const handleToggleFullScreen = useCallback((type: SectionType, enterFullScreen: boolean) => {
     setFullScreenSection(enterFullScreen ? type : null);
     
     // If entering full-screen, ensure the section is not collapsed
@@ -48,7 +48,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
 
 
   // Handle section collapse/expand toggle
-  const handleToggleCollapse = useCallback((type: PipelineType, collapsed: boolean) => {
+  const handleToggleCollapse = useCallback((type: SectionType, collapsed: boolean) => {
     setCollapsedSections(prev => 
       collapsed 
         ? [...prev, type] 
