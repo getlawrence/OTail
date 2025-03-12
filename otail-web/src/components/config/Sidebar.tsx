@@ -280,9 +280,6 @@ export const Sidebar = () => {
                         {typeDescriptions[activeType as keyof typeof typeDescriptions]}
                       </TooltipContent>
                     </Tooltip>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
-                      <X size={14} className="text-slate-500" onClick={toggleExpanded} />
-                    </Button>
                   </div>
                 </div>
                 
@@ -296,7 +293,7 @@ export const Sidebar = () => {
                   />
                 </div>
                 
-                <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto pr-1 custom-scrollbar">
+                <div className="space-y-2 max-h-[calc(100vh-320px)] overflow-y-auto pr-1" style={{ overflowY: 'auto' }}>
                   {filteredComponents(activeType).length > 0 ? (
                     filteredComponents(activeType).map((name) => (
                       <div
