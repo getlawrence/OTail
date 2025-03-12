@@ -1,4 +1,4 @@
-import { Settings, Telescope, LogOut, Users, Wrench } from "lucide-react"
+import { Telescope, LogOut, Users, Wrench, Palette } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import {
   Sidebar,
@@ -40,7 +40,7 @@ const items = !noAuthRequired
     {
       title: "Configuration",
       url: "/canvas",
-      icon: Settings,
+      icon: Palette,
     },
   ]
   : [
@@ -48,6 +48,11 @@ const items = !noAuthRequired
       title: "Policy Builder",
       url: "/sampling",
       icon: Wrench,
+    },
+    {
+      title: "Canvas",
+      url: "/canvas",
+      icon: Palette,
     },
   ];
 

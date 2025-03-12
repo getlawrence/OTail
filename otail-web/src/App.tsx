@@ -46,6 +46,7 @@ function App() {
             {noAuthRequired ? (
               <Route element={<Layout />}>
                 <Route path="/sampling" element={<Sampling />} />
+                <Route path="/canvas" element={<OtelConfig />} />
                 <Route path="/" element={<Navigate to="/sampling" replace />} />
               </Route>
             ) : (
