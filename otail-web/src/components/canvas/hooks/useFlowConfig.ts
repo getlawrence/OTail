@@ -186,10 +186,7 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       if (!config.connectors[node.data.label]) {
         config.connectors[node.data.label] = node.data.config || {};
       }
-
-      // Get the connector's configuration
-      const connectorConfig = config.connectors[node.data.label];
-      
+            
       // Find incoming edges to this connector
       const incomingEdges = edges.filter(edge => edge.target === node.id);
       
