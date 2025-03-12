@@ -15,7 +15,8 @@ export function useSectionNodes({ fullScreenSection, onToggleExpand }: UseSectio
     const positions: Record<PipelineType, number> = {
       traces: 0,
       metrics: 0,
-      logs: 0
+      logs: 0,
+      extensions: 0
     };
 
     // Get the viewport height for calculating section heights
