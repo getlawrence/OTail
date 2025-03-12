@@ -3,7 +3,7 @@ import { PIPELINE_SECTIONS } from './constants';
 import type { PipelineType } from './types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Maximize2, Minimize2 } from 'lucide-react';
+import { Maximize2, Minimize2, ChevronDown, ChevronRight } from 'lucide-react';
 import { NodeProps, useReactFlow } from 'reactflow';
 
 // Data interface for the section node
@@ -14,7 +14,9 @@ interface FlowSectionData {
   height?: number; // Make height optional since we'll use 100% by default
   expanded?: boolean;
   isFullScreen?: boolean;
+  isCollapsed?: boolean; // Whether the section is collapsed
   onToggleExpand?: (type: PipelineType, expanded: boolean) => void;
+  onToggleCollapse?: (type: PipelineType, collapsed: boolean) => void; // Callback to toggle collapse state
   pipelines?: { id: string; name: string }[];
   activePipeline?: string;
   onAddPipeline?: (type: PipelineType) => void;
@@ -24,7 +26,6 @@ interface FlowSectionData {
 
 // ReactFlow node implementation
 const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
-  console.log('Rendering FlowSectionComponent with data:', data, 'id:', id, 'isFullScreen:', data.isFullScreen);
   
   const reactFlowInstance = useReactFlow();
   
@@ -37,6 +38,9 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
   // We're now using isFullScreen instead of isExpanded
   // This is kept for backward compatibility with some parts of the code
   const isExpanded = data.isFullScreen === true;
+  
+  // Check if the section is collapsed
+  const isCollapsed = data.isCollapsed === true;
   
   // Define colors based on section type
   const sectionColors = {
@@ -54,6 +58,11 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
       border: 'border-purple-200 dark:border-purple-800',
       bg: 'bg-purple-50/50 dark:bg-purple-950/20',
       badge: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+    },
+    extensions: {
+      border: 'border-yellow-200 dark:border-yellow-800',
+      bg: 'bg-yellow-50/50 dark:bg-yellow-950/20',
+      badge: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800'
     }
   };
   
@@ -144,23 +153,44 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
     }
   };
   
+  // Handle collapse toggle
+  const handleToggleCollapse = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (data.onToggleCollapse) {
+      const isCurrentlyCollapsed = data.isCollapsed === true;
+      console.log('Calling onToggleCollapse with:', data.type, !isCurrentlyCollapsed);
+      data.onToggleCollapse(data.type, !isCurrentlyCollapsed);
+    }
+  };
+  
   // Prevent click events on the section from propagating
   const handleSectionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
 
+  // Check if this section should be positioned to the side (for extensions)
+  const isSideSection = sectionConfig.isSideSection === true;
+  
   return (
     <div 
       className={`section-node ${colors.bg} rounded-lg border-2 ${colors.border} shadow-sm backdrop-blur-sm transition-all duration-500`}
       onClick={handleSectionClick}
       style={{
-        width: '70vw',
-        height: data.isFullScreen ? '85vh' : `${100/4}vh`, // Take 1/4 of viewport height in regular mode
+        width: isSideSection ? '200px' : 'calc(100vw - 320px)',
+        height: isSideSection 
+          ? (data.isFullScreen ? '85vh' : 'calc(75vh + 40px)') // Side section is as tall as all regular sections combined
+          : (data.isFullScreen ? '85vh' : `${100/4}vh`), // Regular vertical sections
         overflow: 'visible', // Allow nodes to be visible outside the section boundaries
         position: 'relative',
         pointerEvents: 'all', // Ensure the component can receive mouse events
-        maxWidth: data.isFullScreen ? '95vw' : 'calc(100vw - 100px)', // Viewport width minus 100px in regular mode
-        maxHeight: data.isFullScreen ? '85vh' : `${100/4}vh`, // 1/4 of viewport height in regular mode
+        maxWidth: isSideSection 
+          ? '200px' 
+          : (data.isFullScreen ? '95vw' : 'calc(100vw - 320px)'), // Regular sections account for side section width
+        maxHeight: isSideSection
+          ? (data.isFullScreen ? '85vh' : 'calc(75vh + 40px)') // Side section is as tall as all regular sections combined
+          : (data.isFullScreen ? '85vh' : `${100/4}vh`), // Regular vertical sections
         // These properties make the section act as a container for nodes
         display: 'flex',
         flexDirection: 'column',
@@ -173,6 +203,18 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
           <Badge variant="outline" className={`${colors.badge} shadow-sm`}>
             {sectionConfig.label}
           </Badge>
+          {/* Collapse/Expand button - only show for side sections (extensions) */}
+          {isSideSection && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 rounded-full hover:bg-muted cursor-pointer"
+              onClick={handleToggleCollapse}
+              title={isCollapsed ? "Expand section" : "Collapse section"}
+            >
+              {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            </Button>
+          )}
           <Button 
             variant="default" 
             size="icon" 
@@ -185,14 +227,14 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
         </div>
       </div>
       
-      {/* Section content - always visible but with different styling based on expanded state */}
+      {/* Section content - visible based on expanded and collapsed state */}
       <div 
-        className="p-3 pt-2 flex-1 overflow-visible transition-all duration-500" 
+        className={`p-3 pt-2 flex-1 overflow-visible transition-all duration-500 ${isSideSection ? 'flex flex-col items-center justify-start' : ''}`} 
         style={{
-          height: isExpanded ? 'calc(100% - 56px)' : 'calc(33vh - 56px)', // Take remaining height after header
+          height: isExpanded ? 'calc(100% - 56px)' : (isSideSection ? 'calc(75vh - 16px)' : 'calc(33vh - 56px)'), // Take remaining height after header
           opacity: isExpanded ? 1 : 0.9, // More visible when expanded
           pointerEvents: 'auto' as const, // Always allow interaction
-          display: 'block', // Always visible
+          display: isCollapsed && isSideSection ? 'none' : 'block', // Hide content when collapsed (only for side sections)
           position: 'relative', // Needed for absolute positioning of child nodes
           transition: 'height 0.5s ease, opacity 0.5s ease' // Smooth transition
         }}

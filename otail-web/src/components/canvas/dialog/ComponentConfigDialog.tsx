@@ -4,11 +4,9 @@ import { Button } from '@/components/ui/button';
 import { PolicyBuilder } from '@/components/policy/policy-builder';
 import { usePolicyState } from '@/hooks/use-policy-state';
 import { useState } from 'react';
-import { ReceiverConfig, ProcessorConfig } from './types';
+import { ReceiverConfig, ProcessorConfig } from '../types';
 import { componentSchemas, ComponentType } from './componentSchemas';
 import { DynamicForm } from '@/components/shared/DynamicForm';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 interface ComponentConfigDialogProps {
   node: Node;
@@ -29,7 +27,6 @@ export const ComponentConfigDialog = ({
   } = usePolicyState(node.data.config?.policies || []);
 
   const [config, setConfig] = useState<Record<string, any>>(node.data.config || {});
-  const [pipelineName, setPipelineName] = useState(node.data.pipelineName || 'default');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const componentType = node.data.label.toLowerCase() as ComponentType;
@@ -85,11 +82,6 @@ export const ComponentConfigDialog = ({
     const newErrors: Record<string, string> = {};
     let isValid = true;
 
-    if (!pipelineName.trim()) {
-      newErrors['pipelineName'] = 'Pipeline name is required';
-      isValid = false;
-    }
-
     if (schema) {
       for (const [fieldName, field] of Object.entries(schema.fields)) {
         const error = validateField(field, config[fieldName], [fieldName]);
@@ -125,21 +117,6 @@ export const ComponentConfigDialog = ({
           <DialogTitle>Configure {node.data.label}</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">
-              Pipeline Name <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              type="text"
-              value={pipelineName}
-              onChange={(e) => setPipelineName(e.target.value)}
-              className={errors['pipelineName'] ? 'border-red-500' : ''}
-            />
-            {errors['pipelineName'] && (
-              <p className="text-sm text-red-500">{errors['pipelineName']}</p>
-            )}
-          </div>
-
           {schema && (
             <DynamicForm
               schema={{ ...schema.fields }}

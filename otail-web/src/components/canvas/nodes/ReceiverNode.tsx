@@ -8,7 +8,7 @@ interface ReceiverNodeProps {
   handleStyle?: React.CSSProperties;
 }
 
-const ReceiverNode = ({ data, handleStyle }: ReceiverNodeProps) => {
+export const ReceiverNode = ({ data, handleStyle }: ReceiverNodeProps) => {
   // Ensure the node has a high z-index to prevent it from being hidden behind sections
   const nodeStyle = {
     zIndex: 10,

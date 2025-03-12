@@ -9,28 +9,32 @@ const componentTypes = {
   receiver: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'kafka', 'opencensus', 'fluentforward', 'hostmetrics'],
   processor: ['batch', 'memory_limiter', 'tail_sampling', 'probabilistic_sampling', 'span', 'filter', 'resource', 'transform', 'k8s_attributes'],
   exporter: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'logging', 'file', 'kafka', 'elasticsearch', 'awsxray'],
-  connector: ['count', 'span_metrics']
+  connector: ['count', 'span_metrics'],
+  extension: ['health_check', 'pprof', 'zpages', 'memory_ballast', 'bearer_token', 'basicauth', 'oauth2client', 'sigv4auth']
 };
 
 const componentIcons = {
   receiver: <ArrowDown size={20} />,
   processor: <Bolt size={20} />,
   exporter: <ArrowUp size={20} />,
-  connector: <ArrowLeftRight size={20} />
+  connector: <ArrowLeftRight size={20} />,
+  extension: <Info size={20} />
 };
 
 const typeLabels = {
   receiver: 'Receivers',
   processor: 'Processors',
   exporter: 'Exporters',
-  connector: 'Connectors'
+  connector: 'Connectors',
+  extension: 'Extensions'
 };
 
 const typeDescriptions = {
   receiver: 'Components that receive data from external sources',
   processor: 'Components that process and transform data',
   exporter: 'Components that send data to external destinations',
-  connector: 'Components that connect pipelines and convert data types'
+  connector: 'Components that connect pipelines and convert data types',
+  extension: 'Components that provide capabilities on top of the primary functionality of the collector'
 };
 
 const componentDescriptions: Record<string, Record<string, string>> = {
@@ -67,8 +71,18 @@ const componentDescriptions: Record<string, Record<string, string>> = {
     awsxray: 'Exports traces to AWS X-Ray'
   },
   connector: {
-    count: 'Counts traces and exports as metrics',
-    span_metrics: 'Converts span data to metrics'
+    count: 'Counts spans, span events, metrics, data points, and log records.',
+    span_metrics: 'Aggregates Request, Error and Duration (R.E.D) OpenTelemetry metrics from span data.'
+  },
+  extension: {
+    health_check: 'Responds to health check requests',
+    pprof: 'Allows fetching performance profiles',
+    zpages: 'Provides in-process diagnostics pages',
+    memory_ballast: 'Improves memory management',
+    bearer_token: 'Provides bearer token authentication',
+    basicauth: 'Provides basic authentication',
+    oauth2client: 'Provides OAuth2 client authentication',
+    sigv4auth: 'Provides AWS SigV4 authentication'
   }
 };
 
@@ -202,6 +216,13 @@ export const Sidebar = () => {
         border: 'border-amber-400 dark:border-amber-500',
         item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-300',
         icon: 'bg-amber-100 text-amber-600'
+      },
+      'extension': {
+        bg: 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700',
+        text: 'text-white',
+        border: 'border-yellow-400 dark:border-yellow-500',
+        item: 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-yellow-700 dark:text-yellow-300',
+        icon: 'bg-yellow-100 text-yellow-600'
       }
     }[type] || {
       bg: 'bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700',

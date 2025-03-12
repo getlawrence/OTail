@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { Node, Edge } from 'reactflow';
 import { dump } from 'js-yaml';
-import { OtelConfig } from './types';
+import { OtelConfig } from '../types';
 
 // Helper to create a graph representation for finding connected components
 const createAdjacencyList = (nodes: Node[], edges: Edge[]) => {
@@ -29,8 +29,10 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       processors: {},
       exporters: {},
       connectors: {},
+      extensions: {},
       service: {
-        pipelines: {}
+        pipelines: {},
+        extensions: []
       }
     };
 
@@ -104,6 +106,25 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       // Skip empty pipelines
       if (pipelineNodes.size === 0) return;
       
+      // Handle extensions section separately
+      if (sectionType === 'extensions') {
+        // Process extension nodes
+        pipelineNodes.forEach(node => {
+          if (node.type === 'extension') {
+            // Add extension config if it doesn't exist
+            if (!config.extensions[node.data.label]) {
+              config.extensions[node.data.label] = node.data.config || {};
+            }
+            
+            // Add to service extensions list if not already there
+            if (!config.service.extensions.includes(node.data.label)) {
+              config.service.extensions.push(node.data.label);
+            }
+          }
+        });
+        return; // Skip regular pipeline processing for extensions
+      }
+      
       // Create a pipeline key using section type and pipeline ID
       // For example: 'traces/pipeline1', 'metrics/pipeline2'
       const pipelineKey = `${sectionType}/pipeline${id}`;
@@ -120,6 +141,9 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       // Process nodes in the pipeline
       pipelineNodes.forEach(node => {
         if (!node.type) return;
+        
+        // Skip extension nodes in regular pipelines
+        if (node.type === 'extension') return;
 
         // Special handling for connector nodes
         if (node.type === 'connector') {

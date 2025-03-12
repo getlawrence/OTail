@@ -8,7 +8,7 @@ interface ExporterNodeProps {
   handleStyle: React.CSSProperties;
 }
 
-const ExporterNode = ({ data, handleStyle }: ExporterNodeProps) => {
+export const ExporterNode = ({ data, handleStyle }: ExporterNodeProps) => {
   // Ensure the node has a high z-index to prevent it from being hidden behind sections
   const nodeStyle = {
     zIndex: 10,
@@ -53,5 +53,3 @@ const ExporterNode = ({ data, handleStyle }: ExporterNodeProps) => {
     </Card>
   );
 };
-
-export default ExporterNode;

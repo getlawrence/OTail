@@ -571,55 +571,197 @@ export const componentSchemas: Record<string, ComponentSchema> = {
   // Connectors
   count: {
     fields: {
-      source_pipeline: {
-        type: 'enum',
-        label: 'Source Pipeline',
-        options: ['traces'],
-        default: 'traces',
-        required: true,
+      spans: {
+        type: 'object',
+        label: 'Spans',
+        fields: {
+          '*': {
+            type: 'object',
+            label: 'Metric Name',
+            fields: {
+              description: {
+                type: 'string',
+                label: 'Description',
+                default: 'The number of spans observed.',
+              },
+              conditions: {
+                type: 'array',
+                label: 'Conditions',
+                itemType: 'string',
+                placeholder: 'Enter OTTL condition',
+              },
+              attributes: {
+                type: 'array',
+                label: 'Attributes',
+                itemType: 'object',
+                fields: {
+                  key: {
+                    type: 'string',
+                    label: 'Key',
+                    required: true,
+                    placeholder: 'Attribute key',
+                  },
+                  default_value: {
+                    type: 'string',
+                    label: 'Default Value',
+                    placeholder: 'Default value if attribute is missing',
+                  },
+                },
+              },
+            },
+          },
+        },
       },
-      target_pipeline: {
-        type: 'enum',
-        label: 'Target Pipeline',
-        options: ['metrics'],
-        default: 'metrics',
-        required: true,
+      spanevents: {
+        type: 'object',
+        label: 'Span Events',
+        fields: {
+          '*': {
+            type: 'object',
+            label: 'Metric Name',
+            fields: {
+              description: {
+                type: 'string',
+                label: 'Description',
+                default: 'The number of span events observed.',
+              },
+              conditions: {
+                type: 'array',
+                label: 'Conditions',
+                itemType: 'string',
+                placeholder: 'Enter OTTL condition',
+              },
+              attributes: {
+                type: 'array',
+                label: 'Attributes',
+                itemType: 'object',
+                fields: {
+                  key: {
+                    type: 'string',
+                    label: 'Key',
+                    required: true,
+                    placeholder: 'Attribute key',
+                  },
+                  default_value: {
+                    type: 'string',
+                    label: 'Default Value',
+                    placeholder: 'Default value if attribute is missing',
+                  },
+                },
+              },
+            },
+          },
+        },
       },
-      metric_name: {
-        type: 'string',
-        label: 'Metric Name',
-        default: 'trace_count',
-        required: true,
+      metrics: {
+        type: 'object',
+        label: 'Metrics',
+        fields: {
+          '*': {
+            type: 'object',
+            label: 'Metric Name',
+            fields: {
+              description: {
+                type: 'string',
+                label: 'Description',
+                default: 'The number of metrics observed.',
+              },
+              conditions: {
+                type: 'array',
+                label: 'Conditions',
+                itemType: 'string',
+                placeholder: 'Enter OTTL condition',
+              },
+            },
+          },
+        },
       },
-      dimensions: {
-        type: 'array',
-        label: 'Dimensions',
-        itemType: 'string',
-        placeholder: 'Enter attribute to use as dimension',
+      datapoints: {
+        type: 'object',
+        label: 'Data Points',
+        fields: {
+          '*': {
+            type: 'object',
+            label: 'Metric Name',
+            fields: {
+              description: {
+                type: 'string',
+                label: 'Description',
+                default: 'The number of data points observed.',
+              },
+              conditions: {
+                type: 'array',
+                label: 'Conditions',
+                itemType: 'string',
+                placeholder: 'Enter OTTL condition',
+              },
+              attributes: {
+                type: 'array',
+                label: 'Attributes',
+                itemType: 'object',
+                fields: {
+                  key: {
+                    type: 'string',
+                    label: 'Key',
+                    required: true,
+                    placeholder: 'Attribute key',
+                  },
+                  default_value: {
+                    type: 'string',
+                    label: 'Default Value',
+                    placeholder: 'Default value if attribute is missing',
+                  },
+                },
+              },
+            },
+          },
+        },
       },
-      description: {
-        type: 'string',
-        label: 'Description',
-        default: 'Count of traces',
+      logs: {
+        type: 'object',
+        label: 'Logs',
+        fields: {
+          '*': {
+            type: 'object',
+            label: 'Metric Name',
+            fields: {
+              description: {
+                type: 'string',
+                label: 'Description',
+                default: 'The number of log records observed.',
+              },
+              conditions: {
+                type: 'array',
+                label: 'Conditions',
+                itemType: 'string',
+                placeholder: 'Enter OTTL condition',
+              },
+              attributes: {
+                type: 'array',
+                label: 'Attributes',
+                itemType: 'object',
+                fields: {
+                  key: {
+                    type: 'string',
+                    label: 'Key',
+                    required: true,
+                    placeholder: 'Attribute key',
+                  },
+                  default_value: {
+                    type: 'string',
+                    label: 'Default Value',
+                    placeholder: 'Default value if attribute is missing',
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
   },
   span_metrics: {
     fields: {
-      source_pipeline: {
-        type: 'enum',
-        label: 'Source Pipeline',
-        options: ['traces'],
-        default: 'traces',
-        required: true,
-      },
-      target_pipeline: {
-        type: 'enum',
-        label: 'Target Pipeline',
-        options: ['metrics'],
-        default: 'metrics',
-        required: true,
-      },
       metrics: {
         type: 'array',
         label: 'Metrics',

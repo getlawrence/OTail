@@ -13,13 +13,10 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 import { Sidebar } from './Sidebar';
-import { ComponentConfigDialog } from './ComponentConfigDialog';
-import ReceiverNode from './ReceiverNode';
-import ProcessorNode from './ProcessorNode';
-import ExporterNode from './ExporterNode';
-import ConnectorNode from './ConnectorNode';
+import { ComponentConfigDialog } from './dialog/ComponentConfigDialog';
+import { ReceiverNode, ProcessorNode, ExporterNode, ExtensionNode, ConnectorNode } from './nodes';
 import { FlowSectionComponent } from './FlowSection';
-import { useFlowConfig } from './useFlowConfig';
+import { useFlowConfig } from './hooks/useFlowConfig';
 import { useSectionManager } from './hooks/useSectionManager';
 import { usePipelineManager } from './hooks/usePipelineManager';
 import { styles, VALID_CONNECTIONS } from './constants';
@@ -31,6 +28,9 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
 
   // Track which section is in full-screen mode (if any)
   const [fullScreenSection, setFullScreenSection] = useState<PipelineType | null>(null); // No section is in full-screen by default
+  
+  // Track which sections are collapsed
+  const [collapsedSections, setCollapsedSections] = useState<PipelineType[]>(['extensions']); // Extensions section is collapsed by default
 
   // Create refs for callbacks to avoid circular dependencies
   const handleToggleExpandRef = useRef<((type: PipelineType, expanded: boolean) => void) | null>(null);
@@ -38,8 +38,22 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   // Handle section full-screen toggle
   const handleToggleFullScreen = useCallback((type: PipelineType, enterFullScreen: boolean) => {
     setFullScreenSection(enterFullScreen ? type : null);
-  }, [fullScreenSection]);
+    
+    // If entering full-screen, ensure the section is not collapsed
+    if (enterFullScreen) {
+      setCollapsedSections(prev => prev.filter(section => section !== type));
+    }
+  }, []);
 
+
+  // Handle section collapse/expand toggle
+  const handleToggleCollapse = useCallback((type: PipelineType, collapsed: boolean) => {
+    setCollapsedSections(prev => 
+      collapsed 
+        ? [...prev, type] 
+        : prev.filter(section => section !== type)
+    );
+  }, []);
 
   // Assign callbacks to refs
   useEffect(() => {
@@ -55,7 +69,9 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   // Use the section manager hook
   const { updateSections, determineSection, getPositionInSection } = useSectionManager({
     fullScreenSection,
+    collapsedSections,
     onToggleExpand: handleToggleExpandRef.current,
+    onToggleCollapse: handleToggleCollapse,
     setNodes,
     nodes
   });
@@ -73,6 +89,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     processor: ProcessorNode as any,
     exporter: ExporterNode as any,
     connector: ConnectorNode as any,
+    extension: ExtensionNode as any,
     section: FlowSectionComponent as any, // Add FlowSection as a custom node type
   }), []);
   

@@ -15,13 +15,16 @@ export const VALID_CONNECTIONS: Record<string, string[]> = {
   'receiver': ['processor', 'exporter', 'connector'],
   'processor': ['processor', 'exporter', 'connector'],
   'exporter': [],
-  'connector': ['processor', 'exporter']
+  'connector': ['processor', 'exporter'],
+  'extension': []
 };
 
 export const PIPELINE_SECTIONS: Record<PipelineType, {
   label: string;
   background: string;
   labelBackground: string;
+  isHorizontal?: boolean;
+  isSideSection?: boolean;
 }> = {
   traces: {
     label: 'Traces',
@@ -37,6 +40,12 @@ export const PIPELINE_SECTIONS: Record<PipelineType, {
     label: 'Logs',
     background: 'rgba(155, 89, 182, 0.05)',  // Light purple tint
     labelBackground: 'rgba(155, 89, 182, 0.1)'
+  },
+  extensions: {
+    label: 'Extensions',
+    background: 'rgba(241, 196, 15, 0.05)',  // Light yellow tint
+    labelBackground: 'rgba(241, 196, 15, 0.1)',
+    isSideSection: true  // Special flag to indicate this section should be positioned to the side
   }
 };
 

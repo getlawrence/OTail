@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import OtelConfigCanvas from '@/components/config/OtelConfigCanvas';
+import OtelConfigCanvas from '@/components/canvas/OtelConfigCanvas';
 import Editor, { OnChange } from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { createDebounce } from '@/lib/utils'; 
