@@ -11,32 +11,28 @@ const componentTypes = {
   receiver: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'kafka', 'opencensus', 'fluentforward', 'hostmetrics'],
   processor: ['batch', 'memory_limiter', 'tail_sampling', 'probabilistic_sampling', 'span', 'filter', 'resource', 'transform', 'k8s_attributes'],
   exporter: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'logging', 'file', 'kafka', 'elasticsearch', 'awsxray'],
-  connector: ['count', 'span_metrics'],
-  extension: ['health_check', 'pprof', 'zpages', 'memory_ballast', 'bearer_token', 'basicauth', 'oauth2client', 'sigv4auth']
+  connector: ['count', 'span_metrics']
 };
 
 const componentIcons = {
   receiver: <ArrowDown size={20} />,
   processor: <Bolt size={20} />,
   exporter: <ArrowUp size={20} />,
-  connector: <ArrowLeftRight size={20} />,
-  extension: <Info size={20} />
+  connector: <ArrowLeftRight size={20} />
 };
 
 const typeLabels = {
   receiver: 'Receivers',
   processor: 'Processors',
   exporter: 'Exporters',
-  connector: 'Connectors',
-  extension: 'Extensions'
+  connector: 'Connectors'
 };
 
 const typeDescriptions = {
   receiver: 'Components that receive data from external sources',
   processor: 'Components that process and transform data',
   exporter: 'Components that send data to external destinations',
-  connector: 'Components that connect pipelines and convert data types',
-  extension: 'Components that provide capabilities on top of the primary functionality of the collector'
+  connector: 'Components that connect pipelines and convert data types'
 };
 
 const componentDescriptions: Record<string, Record<string, string>> = {
@@ -76,16 +72,7 @@ const componentDescriptions: Record<string, Record<string, string>> = {
     count: 'Counts spans, span events, metrics, data points, and log records.',
     span_metrics: 'Aggregates Request, Error and Duration (R.E.D) OpenTelemetry metrics from span data.'
   },
-  extension: {
-    health_check: 'Responds to health check requests',
-    pprof: 'Allows fetching performance profiles',
-    zpages: 'Provides in-process diagnostics pages',
-    memory_ballast: 'Improves memory management',
-    bearer_token: 'Provides bearer token authentication',
-    basicauth: 'Provides basic authentication',
-    oauth2client: 'Provides OAuth2 client authentication',
-    sigv4auth: 'Provides AWS SigV4 authentication'
-  }
+
 };
 
 export const Sidebar = () => {
@@ -111,7 +98,7 @@ export const Sidebar = () => {
       'processor': 'processors',
       'exporter': 'exporters',
       'connector': 'connectors',
-      'extension': 'extensions'
+
     };
     const schemeKey = colorMap[nodeType] || 'receivers';
     const scheme = COLOR_SCHEME[schemeKey];
@@ -159,6 +146,16 @@ export const Sidebar = () => {
     }
   };
 
+  const handleTypeHover = (type: string) => {
+    if (!isExpanded) {
+      setIsExpanded(true);
+    }
+    setActiveType(type);
+    
+    // Track component type selection
+    trackCanvas.sidebar.selectComponentType(type);
+  };
+  
   const toggleType = (type: string) => {
     if (isExpanded) {
       const newActiveType = activeType === type ? null : type;
@@ -192,6 +189,9 @@ export const Sidebar = () => {
   const handleClickOutside = (event: MouseEvent) => {
     if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
       setActiveType(null);
+      if (isExpanded) {
+        setIsExpanded(false);
+      }
     }
   };
 
@@ -200,7 +200,7 @@ export const Sidebar = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [isExpanded]);
 
   const filteredComponents = (type: string) => {
     if (!searchTerm) return componentTypes[type as keyof typeof componentTypes];
@@ -216,7 +216,7 @@ export const Sidebar = () => {
       'processor': 'processors',
       'exporter': 'exporters',
       'connector': 'connectors',
-      'extension': 'extensions'
+
     };
     
     // Get the color scheme for this component type
@@ -292,7 +292,15 @@ export const Sidebar = () => {
 
   return (
     <TooltipProvider>
-      <div ref={sidebarRef} className={`absolute left-4 top-4 flex items-start transition-all duration-300 z-[1000] ${isDragging ? 'opacity-90' : 'opacity-100'}`}>
+      <div 
+        ref={sidebarRef} 
+        className={`absolute left-4 top-4 flex items-start transition-all duration-300 z-[1000] ${isDragging ? 'opacity-90' : 'opacity-100'}`}
+        onMouseLeave={() => {
+          if (!isDragging && !draggedItem) {
+            setActiveType(null);
+          }
+        }}
+      >
         {/* Expanded sidebar */}
         <div 
           className={`bg-white dark:bg-slate-900 shadow-xl border rounded-lg transition-all duration-300 overflow-hidden flex ${isExpanded ? 'w-[320px]' : 'w-14'}`}
@@ -307,6 +315,7 @@ export const Sidebar = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => toggleType(type)}
+                    onMouseEnter={() => handleTypeHover(type)}
                     className={`h-10 w-10 rounded-lg transition-all duration-200 shadow-sm
                       ${activeType === type ? 'scale-110 ring-2 ring-offset-2 ' + typeColor(type).border : 'hover:scale-105'}
                       ${typeColor(type).bg} ${typeColor(type).text}`}

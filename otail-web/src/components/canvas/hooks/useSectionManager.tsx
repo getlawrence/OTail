@@ -29,7 +29,7 @@ export function useSectionManager({
       traces: 0,
       metrics: 0,
       logs: 0,
-      extensions: 0
+
     };
 
     // Get the viewport height for calculating section heights
@@ -150,7 +150,7 @@ export function useSectionManager({
 
     let currentTop = 60;
 
-    // First check side sections (extensions)
+
     for (let i = 0; i < sectionTypes.length; i++) {
       const type = sectionTypes[i];
       const sectionConfig = PIPELINE_SECTIONS[type];

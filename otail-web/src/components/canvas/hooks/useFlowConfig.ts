@@ -29,10 +29,10 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       processors: {},
       exporters: {},
       connectors: {},
-      extensions: {},
+
       service: {
         pipelines: {},
-        extensions: []
+
       }
     };
 
@@ -106,24 +106,7 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       // Skip empty pipelines
       if (pipelineNodes.size === 0) return;
       
-      // Handle extensions section separately
-      if (sectionType === 'extensions') {
-        // Process extension nodes
-        pipelineNodes.forEach(node => {
-          if (node.type === 'extension') {
-            // Add extension config if it doesn't exist
-            if (!config.extensions[node.data.label]) {
-              config.extensions[node.data.label] = node.data.config || {};
-            }
-            
-            // Add to service extensions list if not already there
-            if (!config.service.extensions.includes(node.data.label)) {
-              config.service.extensions.push(node.data.label);
-            }
-          }
-        });
-        return; // Skip regular pipeline processing for extensions
-      }
+
       
       // Create a pipeline key using section type and pipeline ID
       // For example: 'traces/pipeline1', 'metrics/pipeline2'
@@ -152,8 +135,7 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
       pipelineNodes.forEach(node => {
         if (!node.type) return;
         
-        // Skip extension nodes in regular pipelines
-        if (node.type === 'extension') return;
+
 
         // Skip connector nodes for now, we'll process them separately
         if (node.type === 'connector') return;

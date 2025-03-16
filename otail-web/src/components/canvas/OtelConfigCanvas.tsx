@@ -15,7 +15,7 @@ import 'reactflow/dist/style.css';
 
 import { Sidebar } from './Sidebar';
 import { ComponentConfigDialog } from './dialog/ComponentConfigDialog';
-import { ReceiverNode, ProcessorNode, ExporterNode, ExtensionNode, ConnectorNode } from './nodes';
+import { ReceiverNode, ProcessorNode, ExporterNode, ConnectorNode } from './nodes';
 import { FlowSectionComponent } from './FlowSection';
 import { useFlowConfig } from './hooks/useFlowConfig';
 import { useSectionManager } from './hooks/useSectionManager';
@@ -31,7 +31,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   const [fullScreenSection, setFullScreenSection] = useState<SectionType | null>(null); // No section is in full-screen by default
   
   // Track which sections are collapsed
-  const [collapsedSections, setCollapsedSections] = useState<SectionType[]>(['extensions']); // Extensions section is collapsed by default
+  const [collapsedSections, setCollapsedSections] = useState<SectionType[]>([]); // No sections collapsed by default
   
 
   // Handle section full-screen toggle
@@ -93,7 +93,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     processor: ProcessorNode as any,
     exporter: ExporterNode as any,
     connector: ConnectorNode as any,
-    extension: ExtensionNode as any,
+
     section: FlowSectionComponent as any, // Add FlowSection as a custom node type
   }), []);
   
