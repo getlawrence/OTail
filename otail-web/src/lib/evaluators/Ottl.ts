@@ -87,7 +87,7 @@ export class OttlEvaluator extends BasePolicyEvaluator {
       const result = window.evaluateOTTL(traceJSON, this.spanConditions.join(','), this.spanEventConditions.join(','), this.errorMode);
 
       if (result.error) {
-        console.error('OTTL span condition evaluation error:', result.message);
+        console.error('OTTL span condition evaluation error:', result.error);
         if (this.errorMode === 'propagate') {
           return Decision.Error;
         }
