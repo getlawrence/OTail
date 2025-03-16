@@ -15,8 +15,7 @@ export const VALID_CONNECTIONS: Record<string, string[]> = {
   'receiver': ['processor', 'exporter', 'connector'],
   'processor': ['processor', 'exporter', 'connector'],
   'exporter': [],
-  'connector': ['processor', 'exporter'],
-  'extension': []
+  'connector': ['processor', 'exporter']
 };
 
 
@@ -40,12 +39,7 @@ export const COLOR_SCHEME = {
     background: 'rgba(168, 85, 247, 0.05)', // Purple-500 background
     isSideSection: false
   },
-  extensions: {
-    color: 'pink',
-    label: 'Extensions',
-    background: 'rgba(236, 72, 153, 0.05)', // Pink-500 background
-    isSideSection: true  // Special flag to indicate this section should be positioned to the side
-  },
+
   connectors: {
     color: 'amber',
     label: 'Connectors',
@@ -82,7 +76,7 @@ export const PIPELINE_SECTIONS: Record<SectionType, {
   traces: COLOR_SCHEME.traces,
   metrics: COLOR_SCHEME.metrics,
   logs: COLOR_SCHEME.logs,
-  extensions: COLOR_SCHEME.extensions
+
 };
 
 export const styles = {
