@@ -112,7 +112,7 @@ export default function ConfigPage({ config, onUpdate }: ConfigPageProps) {
           <Button 
             onClick={() => setViewYaml(!viewYaml)} 
             variant="outline" 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 yaml-toggle"
           >
             {viewYaml ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             {viewYaml ? 'Show YAML' : 'Hide YAML'}
@@ -120,7 +120,7 @@ export default function ConfigPage({ config, onUpdate }: ConfigPageProps) {
           { config && (
             <Button 
               onClick={() => onUpdate?.(editorValue)} 
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 send-button"
             >
               <Send className="w-4 h-4" /> Send to Agent
             </Button>
@@ -128,11 +128,13 @@ export default function ConfigPage({ config, onUpdate }: ConfigPageProps) {
         </div>
       </div>
       <div className={`grid ${viewYaml ? 'grid-cols-1' : 'grid-cols-2'} gap-4 flex-grow`}>
-        <OtelConfigCanvas
-          ref={canvasRef}
-          onChange={handleBuilderChange}
-          initialYaml={initialYamlRef.current}
-        />
+        <div className="canvas-container">
+          <OtelConfigCanvas
+            ref={canvasRef}
+            onChange={handleBuilderChange}
+            initialYaml={initialYamlRef.current}
+          />
+        </div>
         {!viewYaml && (
           <div className="border rounded-lg overflow-hidden">
             <Editor
@@ -148,6 +150,7 @@ export default function ConfigPage({ config, onUpdate }: ConfigPageProps) {
                 wordWrap: 'on',
                 automaticLayout: true,
               }}
+              className="monaco-editor"
             />
           </div>
         )}

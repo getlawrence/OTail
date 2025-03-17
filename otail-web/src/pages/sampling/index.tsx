@@ -141,12 +141,12 @@ const ConfigEditor = () => {
         <div className="mb-6 shrink-0">
           <h3 className="text-sm font-medium mb-3">Pinned Recipes</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-3 h-full">
+            <div className="md:col-span-3 h-full pinned-recipes">
               <div className="h-full">
                 <PinnedRecipes onSelect={handlePopularPolicySelect} />
               </div>
             </div>
-            <div className="md:col-span-1 h-full">
+            <div className="md:col-span-1 h-full policy-actions">
               <div className="h-full">
                 <PolicyActions
                   currentPolicies={policies}
@@ -167,7 +167,7 @@ const ConfigEditor = () => {
                   <p className="text-sm text-muted-foreground">Configure your sampling policies</p>
                 </div>
               </div>
-              <div className="p-6 h-full overflow-auto">
+              <div className="p-6 h-full overflow-auto policy-builder">
                 <PolicyBuilder
                   policies={policies}
                   addPolicy={handlePolicyAdd}
@@ -194,9 +194,11 @@ const ConfigEditor = () => {
                     }
                   </p>
                 </div>
-                <ModeToggle mode={mode} onToggleMode={toggleMode} />
+                <div className="mode-toggle">
+                  <ModeToggle mode={mode} onToggleMode={toggleMode} />
+                </div>
               </div>
-              <div className="p-4 h-full overflow-auto">
+              <div className="p-4 h-full overflow-auto config-viewer">
                 {mode === 'Edit' ? (
                   <ConfigViewer
                     policies={policies}
