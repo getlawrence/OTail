@@ -1,18 +1,18 @@
 import { Trace, Decision } from "@/types/trace";
-import { BasePolicyEvaluator } from "./BaseEvaluator";
+import { BaseAsyncPolicyEvaluator } from "./BaseEvaluator";
 
 declare global {
   interface Window {
     evaluateOTTL: (traceJSON: string, spanConditions: string, spanEventConditions: string, errorMode: string) => {
       error: boolean;
-      decision: number;
+      decision: string;
       message?: string;
     };
     Go: any;
   }
 }
 
-export class OttlEvaluator extends BasePolicyEvaluator {
+export class OttlEvaluator extends BaseAsyncPolicyEvaluator {
   private errorMode: string;
   private spanConditions: string[];
   private spanEventConditions: string[];
@@ -75,9 +75,6 @@ export class OttlEvaluator extends BasePolicyEvaluator {
     }
   }
 
-  /**
-   * Evaluates a trace against the OTTL expressions
-   */
   async evaluateAsync(trace: Trace): Promise<Decision> {
     try {
       await this.ensureWasmReady();
@@ -95,7 +92,7 @@ export class OttlEvaluator extends BasePolicyEvaluator {
       }
 
       // If the condition matched, return the decision
-      if (result.decision === Decision.Sampled) {
+      if (result.decision === "Sampled") {
         return Decision.Sampled;
       }
 
@@ -105,20 +102,5 @@ export class OttlEvaluator extends BasePolicyEvaluator {
       console.error('Failed to evaluate OTTL expression:', error);
       return Decision.Error;
     }
-  }
-
-  /**
-   * Synchronous version of evaluate that returns NotSampled for initial rendering
-   * and then updates the decision asynchronously
-   */
-  evaluate(trace: Trace): Decision {
-    // Start the async evaluation
-    this.evaluateAsync(trace).then(decision => {
-      // This could trigger an update or callback if needed
-      console.log(`OTTL Evaluation complete: ${Decision[decision]}`);
-    });
-
-    // Return NotSampled by default for synchronous calls
-    return Decision.NotSampled;
   }
 }

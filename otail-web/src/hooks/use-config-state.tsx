@@ -19,11 +19,11 @@ export const useConfigState = (initialPolicies?: Policy[]) => {
         setMode(prev => prev === 'Edit' ? 'Test' : 'Edit');
     }, []);
 
-    const handleViewerChange = useCallback((value: string) => {
+    const handleViewerChange = useCallback(async (value: string) => {
         if (mode === 'Test') {
             try {
                 const parsedData = JSON.parse(value);
-                const decision = makeDecision(parsedData, policyState.policies.map(buildPolicy));
+                const decision = await makeDecision(parsedData, policyState.policies.map(buildPolicy));
                 evaluation.updateEvaluationResults(decision.policyDecisions, decision.finalDecision);
             } catch (error) {
                 console.error('Invalid trace data:', error);
