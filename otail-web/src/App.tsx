@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/hooks/use-theme"
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import { Toaster } from "@/components/ui/toaster"
 import { OTailWalkthrough } from '@/components/walkthrough/OTailWalkthrough'
+import { MobileWarning } from '@/components/MobileWarning'
 
 const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
 
@@ -33,6 +34,7 @@ function App() {
     <ThemeProvider defaultTheme="system">
       <Router>
         <AuthProvider>
+          <MobileWarning />
           <Routes>
             <Route path="/login" element={
               <div className="h-screen w-screen flex items-center justify-center">

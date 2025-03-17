@@ -18,7 +18,7 @@ const policyBuilderSteps: Step[] = [
   },
   {
     selector: '.policy-actions',
-    content: 'Click here to create a new policy or manage your existing recipes. This is where you\'ll start building your sampling configuration.',
+    content: 'Click here to create a new recipes or manage your existing recipes. This is where you\'ll start building your sampling configuration.',
     position: 'right',
   },
   {
@@ -41,7 +41,7 @@ const policyBuilderSteps: Step[] = [
 const canvasSteps: Step[] = [
   {
     selector: '.canvas-container',
-    content: 'Welcome to the Canvas view! Here you can visualize and debug your sampling policies in real-time.',
+    content: 'Welcome to the Canvas view! Here you can visualize your otel collector pipelines.',
     position: 'center',
   },
   {
@@ -56,7 +56,7 @@ const canvasSteps: Step[] = [
   },
   {
     selector: '.send-button',
-    content: 'Once you\'re happy with your configuration, send it to your OpenTelemetry agent to start sampling your traces.',
+    content: 'Once you\'re happy with your configuration, send it to your OpenTelemetry agent.',
     position: 'left',
   },
 ];
