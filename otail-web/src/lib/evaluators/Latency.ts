@@ -7,22 +7,22 @@ export class LatencyEvaluator extends BasePolicyEvaluator {
         super(name);
     }
     evaluate(trace: Trace): Decision {
-        let minTime: number = Infinity;
-        let maxTime: number = -Infinity;
+        let minTime: bigint = BigInt(Infinity);
+        let maxTime: bigint = BigInt(-Infinity);
 
         return hasSpanWithCondition(trace, (span: Span) => {
-            if (span.startTime < minTime) {
-                minTime = span.startTime;
+            if (BigInt(span.startTimeUnixNano) < minTime) {
+                minTime = BigInt(span.startTimeUnixNano);
             }
-            if (span.endTime > maxTime) {
-                maxTime = span.endTime;
+            if (BigInt(span.endTimeUnixNano) > maxTime) {
+                maxTime = BigInt(span.endTimeUnixNano);
             }
             const duration = maxTime - minTime;
 
             if (this.upperThresholdMs === 0) {
-                return duration >= this.thresholdMs;
+                return duration >= BigInt(this.thresholdMs * 1e6);
             }
-            return duration >= this.thresholdMs && duration <= this.upperThresholdMs;
+            return duration >= BigInt(this.thresholdMs * 1e6) && duration <= BigInt(this.upperThresholdMs * 1e6);
         })
     }
 }

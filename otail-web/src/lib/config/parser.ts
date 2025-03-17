@@ -108,6 +108,14 @@ const parsePolicyConfig = (config: any): Policy => {
         type: 'and' as const,
         subPolicies: policyConfig.and_sub_policy?.map(parsePolicyConfig) || [],
       };
+    case 'ottl_condition':
+      return {
+        ...basePolicy,
+        type: 'ottl_condition' as const,
+        errorMode: policyConfig.error_mode || 'ignore',
+        spanConditions: policyConfig.span_conditions || [],
+        spanEventConditions: policyConfig.span_event_conditions || [],
+      };
     default:
       throw new Error(`Unsupported policy type: ${type}`);
   }
@@ -129,7 +137,7 @@ const getPolicyType = (config: any): PolicyType => {
   const types: PolicyType[] = [
     'numeric_attribute', 'probabilistic', 'rate_limiting', 'status_code',
     'string_attribute', 'latency', 'always_sample', 'boolean_attribute',
-    'composite', 'ottl_condition', 'span_count', 'string_attribute', 'trace_state', 'and'
+  'composite', 'ottl_condition', 'span_count', 'string_attribute', 'trace_state', 'and'
   ];
   const foundType = types.find(type => config.type === type);
   if (!foundType) {

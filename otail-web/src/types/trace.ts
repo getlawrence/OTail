@@ -5,15 +5,15 @@ export interface Span {
   parentSpanId?: string;
   traceState?: string;
   name: string;
-  kind: string;
-  startTime: number;
-  endTime: number;
+  kind: number;
+  startTimeUnixNano: string;
+  endTimeUnixNano: string;
   attributes: Record<string, any>;
-  status: {
+  status?: Partial<{
     code: StatusCode;
     message?: string;
-  };
-  events: Array<{
+  }>;
+  events?: Array<{
     time: number;
     name: string;
     attributes: Record<string, any>;
@@ -21,7 +21,6 @@ export interface Span {
 }
 
 export interface Trace {
-  traceId: string;
   resourceSpans: ResourceSpan[]
 }
 
@@ -35,7 +34,14 @@ export interface ResourceSpan {
 }
 
 export interface ScopeSpan {
+  scope: Scope;
   spans: Span[];
+}
+
+export interface Scope {
+  name: string;
+  version: string;
+  attributes: Record<string, any>;
 }
 
 export enum Decision {
@@ -51,49 +57,74 @@ export interface DecisionResult {
   policyDecisions: Record<string, Decision>;
 }
 
+
 export const defaultTrace: Trace = {
-  traceId: "abcdef0123456789",
   resourceSpans: [
     {
       resource: {
-        attributes: {
-          "service.name": "example-service",
-          "deployment.environment": "production"
-        }
+        attributes: [
+          {
+            key: "service.name",
+            value: {
+              stringValue: "example-service"
+            }
+          },
+          {
+              key: "deployment.environment",
+              value: {
+                stringValue: "production"
+              }
+          }
+        ]
       },
       scopeSpans: [
         {
+          scope: {
+            name: "my.library",
+            version: "1.0.0",
+            attributes: [
+              {
+                key: "my.scope.attribute",
+                value: {
+                  stringValue: "some scope attribute"
+                }
+              }
+            ]
+          },
           spans: [
             {
-              traceId: "abcdef0123456789",
-              spanId: "span123",
-              parentSpanId: "parent456",
+              traceId: "5b8efff798038103d269b633813fc60c",
+              spanId: "eee19b7ec3c1b174",
+              parentSpanId: "eee19b7ec3c1b173",
               name: "process-request",
-              kind: "SERVER",
-              startTime: 1673510400000,
-              endTime: 1673510401000,
-              attributes: {
-                "http.method": "GET",
-                "http.url": "/api/data",
-                "http.status_code": 200
-              },
-              status: {
-                code: "OK",
-                message: "Request processed successfully"
-              },
-              events: [
+              startTimeUnixNano: "1544712660000000000",
+              endTimeUnixNano: "1544712661000000000",
+              kind: 2,
+              attributes: [
                 {
-                  time: 1673510400500,
-                  name: "cache.hit",
-                  attributes: {
-                    "cache.key": "user-123"
+                  key: "http.method",
+                  value: {
+                    stringValue: "GET"
+                  }
+                },
+                {
+                  key: "http.url",
+                  value: {
+                    stringValue: "http://example.com/api/data"
+                  }
+                },
+                {
+                  key: "http.status_code",
+                  value: {
+                    stringValue: "200"
                   }
                 }
-              ]
+              ],
+              status: {}
             }
           ]
         }
       ]
     }
   ]
-};
+}

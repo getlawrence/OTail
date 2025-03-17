@@ -10,6 +10,7 @@ import { SpanCountEvaluator } from "../evaluators/SpanCount";
 import { StatusCodeFilterEvaluator } from "../evaluators/StatusCodeFilter";
 import { StringAttributeEvaluator } from "../evaluators/StringAttribute";
 import { ProbabilisticEvaluator } from "../evaluators/Probabilistic";
+import { OttlEvaluator } from "../evaluators/Ottl";
 import { AndPolicy, CompositePolicy, Policy } from "@/types/policy";
 import { TraceStateEvaluator } from "../evaluators/TraceState";
 
@@ -33,6 +34,8 @@ const getSharedPolicyEvaluator = (policy: Policy): PolicyEvaluator => {
             return new ProbabilisticEvaluator(policy.name, policy.hashSalt, policy.samplingPercentage);
         case 'trace_state':
             return new TraceStateEvaluator(policy.name, policy.key, policy.values);
+        case 'ottl_condition':
+            return new OttlEvaluator(policy.name, policy.errorMode || 'ignore', policy.spanConditions || [], policy.spanEventConditions || []);
         case 'and':
             return getNewAndPolicy(policy);
         case 'composite':

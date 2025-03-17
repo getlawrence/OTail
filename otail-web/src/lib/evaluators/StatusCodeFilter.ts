@@ -9,7 +9,7 @@ export class StatusCodeFilterEvaluator extends BasePolicyEvaluator {
     evaluate(trace: Trace): Decision {
         return hasSpanWithCondition(trace, (span: Span) => {
             for (const statusCode of this.statusCodeString) {
-                if (span.status.code === statusCode) {
+                if (span.status?.code === statusCode) {
                     return true
                 }
             }

@@ -1,8 +1,8 @@
-import { PolicyEvaluator } from '../evaluators/BaseEvaluator';
+import { PolicyEvaluator, AsyncPolicyEvaluator, evaluatePolicy } from '../evaluators/BaseEvaluator';
 import { Trace, Decision, DecisionResult } from '@/types/trace';
 
 
-export const makeDecision = (trace: Trace, policies: PolicyEvaluator[]): DecisionResult => {
+export const makeDecision = async (trace: Trace, policies: (PolicyEvaluator | AsyncPolicyEvaluator)[]): Promise<DecisionResult> => {
     let finalDecision: Decision = Decision.NotSampled;
 
     const samplingDecision: Record<Decision, boolean> = {
@@ -16,7 +16,7 @@ export const makeDecision = (trace: Trace, policies: PolicyEvaluator[]): Decisio
 
     for (const policy of policies) {
         try {
-            const decision = policy.evaluate(trace);
+            const decision = await evaluatePolicy(policy, trace);
             samplingDecision[decision] = true;
             policyDecisions[policy.policyName] = decision;
 
