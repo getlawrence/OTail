@@ -37,6 +37,10 @@ export const OTailWalkthrough: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const location = useLocation();
 
+  const checkIfMobile = () => {
+    return window.innerWidth <= 768; // Standard mobile breakpoint
+  };
+  
   useEffect(() => {
     // Get the list of tours that have been shown
     const shownTours = JSON.parse(localStorage.getItem(TOUR_STORAGE_KEY) || '[]');
@@ -55,7 +59,8 @@ export const OTailWalkthrough: React.FC = () => {
     }
   }, [location.pathname]);
 
-  if (!isReady) {
+  // Don't render anything if not ready or on mobile
+  if (!isReady || checkIfMobile()) {
     return null;
   }
 
