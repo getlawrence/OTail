@@ -19,10 +19,11 @@ export class ProbabilisticEvaluator extends BasePolicyEvaluator {
     }
 
     evaluate(trace: Trace): Decision {
-        if (!trace.traceId) {
+        const traceId = trace.resourceSpans[0].scopeSpans[0].spans[0].traceId;
+        if (!traceId) {
             return Decision.NotSampled;
         }
-        if (this.hashTraceId(trace.traceId) <= this.threshold) {
+        if (this.hashTraceId(traceId) <= this.threshold) {
             return Decision.Sampled;
         }
         return Decision.NotSampled;
