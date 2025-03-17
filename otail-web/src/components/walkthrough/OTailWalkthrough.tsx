@@ -1,90 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import Tour from 'reactour';
 import { useLocation } from 'react-router-dom';
-import './OTailWalkthrough.css';
+import { Tour, Step } from './Tour';
 
-interface Step {
-  selector: string;
-  content: string;
-  position?: 'top' | 'right' | 'bottom' | 'left' | 'center';
-  action?: () => void;
-}
+const TOUR_STORAGE_KEY = 'otail_tours_shown';
 
 const policyBuilderSteps: Step[] = [
   {
-    selector: '.pinned-recipes',
-    content: 'Welcome to OTail! This is the Policy Builder, where you can create and manage sampling policies for your OpenTelemetry data. Start by exploring our pinned recipes for common sampling scenarios.',
-    position: 'bottom',
-  },
-  {
-    selector: '.policy-actions',
-    content: 'Click here to create a new recipes or manage your existing recipes. This is where you\'ll start building your sampling configuration.',
-    position: 'right',
-  },
-  {
     selector: '.policy-builder',
-    content: 'The Policy Builder lets you create and edit sampling rules. You can add multiple rules to create complex sampling strategies.',
-    position: 'left',
+    content: 'Welcome to OTail! This is where you create and manage sampling policies. The Policy Builder lets you create and edit sampling rules to build complex sampling strategies.',
+    position: 'right',
   },
   {
     selector: '.config-viewer',
     content: 'View and edit your configuration in YAML format. This gives you full control over your sampling rules.',
-    position: 'right',
+    position: 'left',
   },
   {
     selector: '.mode-toggle',
     content: 'Switch between Edit and Test modes. In Test mode, you can validate your sampling rules against real OpenTelemetry data.',
     position: 'bottom',
   },
-];
-
-const canvasSteps: Step[] = [
   {
-    selector: '.canvas-container',
-    content: 'Welcome to the Canvas view! Here you can visualize your otel collector pipelines.',
-    position: 'center',
-  },
-  {
-    selector: '.yaml-toggle',
-    content: 'Toggle between the visual canvas and YAML editor. The YAML editor gives you direct control over your configuration.',
+    selector: '.pinned-recipes',
+    content: 'Need inspiration? Explore our pinned recipes for common sampling scenarios.',
     position: 'bottom',
   },
   {
-    selector: '.monaco-editor',
-    content: 'Edit your YAML configuration directly. Changes will be reflected in the canvas view in real-time.',
-    position: 'right',
-  },
-  {
-    selector: '.send-button',
-    content: 'Once you\'re happy with your configuration, send it to your OpenTelemetry agent.',
-    position: 'left',
-  },
+    selector: '.policy-actions',
+    content: 'Click here to create new recipes or manage your existing recipes.',
+    position: 'bottom',
+  }
 ];
 
 export const OTailWalkthrough: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    // Check if this is the user's first visit
-    const hasSeenWalkthrough = localStorage.getItem('hasSeenWalkthrough');
-    if (!hasSeenWalkthrough) {
-      // Add a longer delay to ensure all components are mounted and rendered
+    // Get the list of tours that have been shown
+    const shownTours = JSON.parse(localStorage.getItem(TOUR_STORAGE_KEY) || '[]');
+
+    // If this tour hasn't been shown yet, wait for components to be ready
+    if (!shownTours.includes('policy-builder')) {
+      // Add a small delay to ensure components are mounted
       const timer = setTimeout(() => {
+        setIsReady(true);
         setIsOpen(true);
-        // Set the flag after showing the tour
-        localStorage.setItem('hasSeenWalkthrough', 'true');
-      }, 2000); // Increased delay to 2 seconds
+        // Mark this tour as shown
+        localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify([...shownTours, 'policy-builder']));
+      }, 1000); // 1 second delay
 
       return () => clearTimeout(timer);
     }
-  }, [location.pathname]); // Add location.pathname as a dependency
+  }, [location.pathname]);
 
-  const steps = location.pathname === '/canvas' ? canvasSteps : policyBuilderSteps;
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <Tour
-      steps={steps}
+      steps={policyBuilderSteps}
       isOpen={isOpen}
       onRequestClose={() => setIsOpen(false)}
       accentColor="#2563eb"
@@ -96,7 +73,6 @@ export const OTailWalkthrough: React.FC = () => {
       showNavigationNumber={true}
       disableDotsNavigation={false}
       disableInteraction={false}
-      className="otail-walkthrough"
     />
   );
 }; 

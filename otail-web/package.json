@@ -44,7 +44,6 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.0.2",
     "reactflow": "^11.11.4",
-    "reactour": "^1.19.4",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.1"
