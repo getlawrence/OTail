@@ -32,6 +32,7 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "@tanstack/react-table": "^8.20.6",
     "@types/js-yaml": "^4.0.9",
+    "@types/reactour": "^1.18.5",
     "@vercel/analytics": "^1.4.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -43,6 +44,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.0.2",
     "reactflow": "^11.11.4",
+    "reactour": "^1.19.4",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.1"

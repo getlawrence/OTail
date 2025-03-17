@@ -9,6 +9,7 @@ import Organization from './pages/organization'
 import { ThemeProvider } from "@/hooks/use-theme"
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import { Toaster } from "@/components/ui/toaster"
+import { OTailWalkthrough } from '@/components/walkthrough/OTailWalkthrough'
 
 const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
 
@@ -60,6 +61,7 @@ function App() {
             )}
           </Routes>
           <Toaster />
+          <OTailWalkthrough />
         </AuthProvider>
       </Router>
     </ThemeProvider>

@@ -1,0 +1,97 @@
+.otail-walkthrough {
+  --reactour-accent: #2563eb;
+  --reactour-bg: #ffffff;
+  --reactour-text: #1f2937;
+  --reactour-border-radius: 8px;
+  --reactour-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.otail-walkthrough .reactour__helper {
+  background: var(--reactour-bg);
+  border-radius: var(--reactour-border-radius);
+  box-shadow: var(--reactour-box-shadow);
+  color: var(--reactour-text);
+  font-family: system-ui, -apple-system, sans-serif;
+  padding: 1.5rem;
+}
+
+.otail-walkthrough .reactour__helper h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.otail-walkthrough .reactour__helper p {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.otail-walkthrough .reactour__dot {
+  background: var(--reactour-accent);
+  border-radius: 50%;
+  height: 8px;
+  width: 8px;
+}
+
+.otail-walkthrough .reactour__dot--is-active {
+  background: var(--reactour-accent);
+  transform: scale(1.2);
+}
+
+.otail-walkthrough .reactour__button {
+  background: var(--reactour-accent);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.2s;
+}
+
+.otail-walkthrough .reactour__button:hover {
+  background: #1d4ed8;
+}
+
+.otail-walkthrough .reactour__close {
+  background: transparent;
+  border: none;
+  color: var(--reactour-text);
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+}
+
+.otail-walkthrough .reactour__close:hover {
+  color: #4b5563;
+}
+
+.otail-walkthrough .reactour__mask {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.otail-walkthrough .reactour__navigation {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.otail-walkthrough .reactour__navigation button {
+  background: transparent;
+  border: none;
+  color: var(--reactour-accent);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+}
+
+.otail-walkthrough .reactour__navigation button:hover {
+  color: #1d4ed8;
+}
+
+.otail-walkthrough .reactour__navigation button:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+} 
