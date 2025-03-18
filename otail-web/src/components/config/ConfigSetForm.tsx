@@ -11,6 +11,9 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { ConfigSet, ConfigSetType, ComponentType } from '@/types/configSet';
+import Editor from '@monaco-editor/react';
+import yaml from 'js-yaml';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface ConfigSetFormProps {
   initialData?: ConfigSet;
@@ -29,6 +32,7 @@ export function ConfigSetForm({ initialData, onSubmit, onCancel }: ConfigSetForm
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showYaml, setShowYaml] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,87 +49,133 @@ export function ConfigSetForm({ initialData, onSubmit, onCancel }: ConfigSetForm
     setFormData((prev) => ({ ...prev, tags }));
   };
 
+  const getYamlValue = () => {
+    try {
+      return yaml.dump(formData, {
+        indent: 2,
+        lineWidth: -1,
+      });
+    } catch (error) {
+      console.error('Error converting to YAML:', error);
+      return '';
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, description: e.target.value }))
-          }
-          rows={3}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="type">Type</Label>
-        <Select
-          value={formData.type}
-          onValueChange={(value: ConfigSetType) =>
-            setFormData((prev) => ({ ...prev, type: value }))
-          }
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setShowYaml(!showYaml)}
+          className="flex items-center gap-2"
         >
-          <SelectTrigger>
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="full">Full Configuration</SelectItem>
-            <SelectItem value="component">Component Configuration</SelectItem>
-          </SelectContent>
-        </Select>
+          {showYaml ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          {showYaml ? 'Hide YAML' : 'Show YAML'}
+        </Button>
       </div>
 
-      {formData.type === 'component' && (
-        <div className="space-y-2">
-          <Label htmlFor="componentType">Component Type</Label>
-          <Select
-            value={formData.componentType}
-            onValueChange={(value: ComponentType) =>
-              setFormData((prev) => ({ ...prev, componentType: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select component type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="tail_sampling">Tail Sampling</SelectItem>
-              <SelectItem value="pipeline">Pipeline</SelectItem>
-              <SelectItem value="collector">Collector</SelectItem>
-            </SelectContent>
-          </Select>
+      {showYaml ? (
+        <div className="h-[400px] border rounded-md overflow-hidden">
+          <Editor
+            height="100%"
+            defaultLanguage="yaml"
+            value={getYamlValue()}
+            theme="vs-dark"
+            options={{
+              readOnly: true,
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              fontSize: 14,
+              lineNumbers: 'on',
+            }}
+          />
         </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, description: e.target.value }))
+              }
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="type">Type</Label>
+            <Select
+              value={formData.type}
+              onValueChange={(value: ConfigSetType) =>
+                setFormData((prev) => ({ ...prev, type: value }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="full">Full Configuration</SelectItem>
+                <SelectItem value="component">Component Configuration</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formData.type === 'component' && (
+            <div className="space-y-2">
+              <Label htmlFor="componentType">Component Type</Label>
+              <Select
+                value={formData.componentType}
+                onValueChange={(value: ComponentType) =>
+                  setFormData((prev) => ({ ...prev, componentType: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select component type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tail_sampling">Tail Sampling</SelectItem>
+                  <SelectItem value="pipeline">Pipeline</SelectItem>
+                  <SelectItem value="collector">Collector</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags (comma-separated)</Label>
+            <Input
+              id="tags"
+              value={formData.tags?.join(', ')}
+              onChange={(e) => handleTagsChange(e.target.value)}
+              placeholder="tag1, tag2, tag3"
+            />
+          </div>
+
+          <div className="flex justify-end gap-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : initialData ? 'Update' : 'Create'}
+            </Button>
+          </div>
+        </form>
       )}
-
-      <div className="space-y-2">
-        <Label htmlFor="tags">Tags (comma-separated)</Label>
-        <Input
-          id="tags"
-          value={formData.tags?.join(', ')}
-          onChange={(e) => handleTagsChange(e.target.value)}
-          placeholder="tag1, tag2, tag3"
-        />
-      </div>
-
-      <div className="flex justify-end gap-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : initialData ? 'Update' : 'Create'}
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 } 
