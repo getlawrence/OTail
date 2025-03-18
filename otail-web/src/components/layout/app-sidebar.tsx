@@ -1,4 +1,4 @@
-import { Telescope, LogOut, Users, Wrench, Palette } from "lucide-react"
+import { Telescope, LogOut, Users, Wrench, Palette, Settings } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import {
   Sidebar,
@@ -38,9 +38,15 @@ const items = !noAuthRequired
       badge: "New"
     },
     {
-      title: "Configuration",
+      title: "Canvas",
       url: "/canvas",
       icon: Palette,
+      badge: "New"
+    },
+    {
+      title: "ConfigSet",
+      url: "/config",
+      icon: Settings,
       badge: "New"
     },
   ]
@@ -54,6 +60,12 @@ const items = !noAuthRequired
       title: "Canvas",
       url: "/canvas",
       icon: Palette,
+      badge: "New"
+    },
+    {
+      title: "ConfigSet",
+      url: "/config",
+      icon: Settings,
       badge: "New"
     },
   ];

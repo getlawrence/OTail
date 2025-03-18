@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Layout from './layout'
 import Sampling from './pages/sampling'
-import OtelConfig from './pages/config'
+import { CanvasPage } from './pages/canvas'
+import Config from './pages/config/ConfigSets'
 import Agents from './pages/agents'
 import Login from './pages/auth/login'
 import Register from './pages/auth/register'
@@ -49,13 +50,14 @@ function App() {
             {noAuthRequired ? (
               <Route element={<Layout />}>
                 <Route path="/sampling" element={<Sampling />} />
-                <Route path="/canvas" element={<OtelConfig />} />
+                <Route path="/canvas" element={<CanvasPage />} />
+                <Route path="/config" element={<Config />} />
                 <Route path="/" element={<Navigate to="/sampling" replace />} />
               </Route>
             ) : (
               <Route element={<RequireAuth><Layout /></RequireAuth>}>
                 <Route path="/sampling" element={<Sampling />} />
-                <Route path="/canvas" element={<OtelConfig />} />
+                <Route path="/canvas" element={<CanvasPage />} />
                 <Route path="/agents" element={<Agents />} />
                 <Route path="/organization" element={<Organization />} />
                 <Route path="/" element={<Navigate to="/sampling" replace />} />

@@ -19,6 +19,7 @@ import { useConfigState } from '@/hooks/use-config-state';
 import { trackSampling } from '@/utils/analytics';
 import { Pencil, PlayCircle, Plus } from "lucide-react";
 import { RecipesProvider } from '@/contexts/recipes-context';
+import { ConfigSetActions } from '@/components/config/ConfigSetActions';
 
 type Mode = 'Edit' | 'Test'
 
@@ -106,7 +107,8 @@ const ConfigEditor = () => {
     handleUpdatePolicy,
     handleRemovePolicy,
     handleViewerChange,
-    importPolicies
+    importPolicies,
+    updatePolicies,
   } = useConfigState();
 
   // Enhanced handlers with tracking
@@ -133,6 +135,13 @@ const ConfigEditor = () => {
   const handleRecipeSelect = (recipe: Recipe) => {
     importPolicies(recipe.policies);
     trackSampling.policyBuilderAction('add_recipe', recipe.name);
+  };
+
+  const handleConfigImport = (configuration: any) => {
+    if (Array.isArray(configuration.policies)) {
+      updatePolicies(configuration.policies);
+      trackSampling.policyBuilderAction('import_config_set', '');
+    }
   };
 
   return (
@@ -166,6 +175,11 @@ const ConfigEditor = () => {
                   <h2 className="text-lg font-medium">Policy Builder</h2>
                   <p className="text-sm text-muted-foreground">Configure your sampling policies</p>
                 </div>
+                <ConfigSetActions
+                  type="policy"
+                  getCurrentState={() => ({ policies })}
+                  onImport={handleConfigImport}
+                />
               </div>
               <div className="p-6 h-full overflow-auto policy-builder">
                 <PolicyBuilder
