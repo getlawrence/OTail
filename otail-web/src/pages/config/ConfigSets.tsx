@@ -158,15 +158,15 @@ export default function ConfigSetsPage() {
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Config Sets</h1>
+        <h1 className="text-2xl font-bold">Projects</h1>
         <Button onClick={() => setIsFormDialogOpen(true)}>
-          Create Config Set
+          Create Project
         </Button>
       </div>
 
       <div className="mb-4">
         <Input
-          placeholder="Search config sets..."
+          placeholder="Search projects..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -246,12 +246,12 @@ export default function ConfigSetsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {selectedConfigSet ? 'Edit Config Set' : 'Create Config Set'}
+              {selectedConfigSet ? 'Edit Project' : 'Create Project'}
             </DialogTitle>
             <DialogDescription>
               {selectedConfigSet
-                ? 'Edit the config set details below.'
-                : 'Fill in the details to create a new config set.'}
+                ? 'Edit the project details below.'
+                : 'Fill in the details to create a new project.'}
             </DialogDescription>
           </DialogHeader>
           <ConfigSetForm

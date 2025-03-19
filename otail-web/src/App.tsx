@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import Layout from './layout'
 import Sampling from './pages/sampling'
 import { CanvasPage } from './pages/canvas'
-import Config from './pages/config/ConfigSets'
+import Projects from './pages/config/ConfigSets'
 import Agents from './pages/agents'
 import Login from './pages/auth/login'
 import Register from './pages/auth/register'
@@ -56,7 +56,7 @@ function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/sampling" element={<Sampling />} />
                     <Route path="/canvas" element={<CanvasPage />} />
-                    <Route path="/config" element={<Config />} />
+                    <Route path="/projects" element={<Projects />} />
                   </Route>
                 ) : (
                   <Route element={<RequireAuth><Layout /></RequireAuth>}>
@@ -65,7 +65,7 @@ function App() {
                     <Route path="/canvas" element={<CanvasPage />} />
                     <Route path="/agents" element={<Agents />} />
                     <Route path="/organization" element={<Organization />} />
-                    <Route path="/config" element={<Config />} />
+                    <Route path="/projects" element={<Projects />} />
                   </Route>
                 )}
               </Routes>

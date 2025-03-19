@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useChecklist } from '@/contexts/ChecklistContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
