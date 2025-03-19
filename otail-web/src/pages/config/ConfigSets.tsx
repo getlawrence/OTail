@@ -177,7 +177,6 @@ export default function ConfigSetsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Tags</TableHead>
               <TableHead>Status</TableHead>
