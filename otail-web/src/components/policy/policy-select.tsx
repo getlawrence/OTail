@@ -13,7 +13,7 @@ export const PolicySelect: FC<PolicySelectProps> = ({ onSelect, trigger }) => {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 {trigger || (
-                    <Button variant="outline">
+                    <Button variant="default">
                         Add Policy
                     </Button>
                 )}

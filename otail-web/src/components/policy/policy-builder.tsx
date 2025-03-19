@@ -39,13 +39,12 @@ export const PolicyBuilder = ({
       <PolicySelect
         onSelect={addPolicy}
         trigger={
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-2 text-foreground"
+          <Button
+            variant="default"
+            size="sm"
+            className="gap-2"
           >
-            <Plus className="h-4 w-4" />
-            <span>Add Policy</span>
+            <Plus className="h-4 w-4" /> Add Policy
           </Button>
         }
       />
