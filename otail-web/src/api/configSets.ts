@@ -1,20 +1,12 @@
 import type {
-  ConfigSet,
-  ConfigSetListResponse,
   CreateConfigSetRequest,
   UpdateConfigSetRequest,
 } from '../types/configSet';
 import { localConfigSetsStorage } from '@/lib/storage/configSets';
 
-interface ListParams {
-  page?: number;
-  limit?: number;
-  type?: string;
-}
-
 export const configSetsApi = {
-  list: async (params?: ListParams) => {
-    return localConfigSetsStorage.list(params);
+  list: async () => {
+    return localConfigSetsStorage.list();
   },
 
   get: async (id: string) => {

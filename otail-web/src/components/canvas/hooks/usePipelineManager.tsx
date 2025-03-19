@@ -57,7 +57,6 @@ export function usePipelineManager({
         const createNodes = (
           components: string[],
           type: 'receiver' | 'processor' | 'exporter',
-          index: number
         ) => {
           return components
             .filter(label => !connectorNames.has(label)) // Skip connectors, we'll create them separately
@@ -86,9 +85,9 @@ export function usePipelineManager({
         };
 
         // Create nodes for each component type
-        const receiverNodes = createNodes(pipeline.receivers || [], 'receiver', 0);
-        const processorNodes = createNodes(pipeline.processors || [], 'processor', 1);
-        const exporterNodes = createNodes(pipeline.exporters || [], 'exporter', 2);
+        const receiverNodes = createNodes(pipeline.receivers || [], 'receiver');
+        const processorNodes = createNodes(pipeline.processors || [], 'processor');
+        const exporterNodes = createNodes(pipeline.exporters || [], 'exporter');
 
         // Add nodes to their respective pipeline type group
         if (!nodesByPipelineType[pipelineType]) {

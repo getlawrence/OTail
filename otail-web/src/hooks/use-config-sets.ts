@@ -79,10 +79,10 @@ export function useConfigSets() {
     }
   };
 
-  const listConfigSets = async (type?: string) => {
+  const listConfigSets = async () => {
     try {
       setLoading(true);
-      const response = await configSetsApi.list({ type });
+      const response = await configSetsApi.list();
       return response.configSets;
     } catch (error) {
       toast({

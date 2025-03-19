@@ -21,15 +21,12 @@ function saveConfigSets(configSets: ConfigSet[]): void {
 }
 
 export const localConfigSetsStorage = {
-  list: async (params?: { type?: string }): Promise<ConfigSetListResponse> => {
+  list: async (): Promise<ConfigSetListResponse> => {
     const configSets = getStoredConfigSets();
-    const filtered = params?.type 
-      ? configSets.filter(set => set.type === params.type)
-      : configSets;
     
     return {
-      configSets: filtered,
-      total: filtered.length,
+      configSets: configSets,
+      total: configSets.length,
     };
   },
 

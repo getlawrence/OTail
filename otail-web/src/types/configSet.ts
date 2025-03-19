@@ -7,8 +7,6 @@ export interface ConfigSet {
   updatedAt: string;
   tags?: string[];
   version: string;
-  type: string;
-  componentType?: string;
 }
 
 export interface ConfigSetListResponse {

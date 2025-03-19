@@ -23,20 +23,19 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ConfigSetForm } from '@/components/config/ConfigSetForm';
 import { Pencil, Trash, Check } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useActiveConfigSet } from '@/hooks/use-active-config-set';
 
 export default function ConfigSetsPage() {
   const [configSets, setConfigSets] = useState<ConfigSet[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedConfigSet, setSelectedConfigSet] = useState<ConfigSet | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const { toast } = useToast();
   const location = useLocation();
-  const navigate = useNavigate();
-  const { activeConfigSet, setActive, clearActive } = useActiveConfigSet();
+  const { activeConfigSet, setActive } = useActiveConfigSet();
 
   useEffect(() => {
     loadConfigSets();
@@ -93,7 +92,7 @@ export default function ConfigSetsPage() {
 
   const handleSubmit = async (data: Partial<ConfigSet>) => {
     try {
-      if (!data.name || !data.type) {
+      if (!data.name) {
         toast({
           title: 'Error',
           description: 'Name and type are required',
@@ -111,9 +110,7 @@ export default function ConfigSetsPage() {
       } else {
         const createData = {
           name: data.name,
-          type: data.type,
           description: data.description,
-          componentType: data.componentType,
           configuration: data.configuration || {},
           tags: data.tags,
         };
@@ -147,22 +144,6 @@ export default function ConfigSetsPage() {
       toast({
         title: 'Error',
         description: 'Failed to set config set as active',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleClearActive = async () => {
-    try {
-      clearActive();
-      toast({
-        title: 'Success',
-        description: 'Active config set cleared',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to clear active config set',
         variant: 'destructive',
       });
     }
@@ -207,7 +188,6 @@ export default function ConfigSetsPage() {
             {filteredConfigSets.map((configSet) => (
               <TableRow key={configSet.id}>
                 <TableCell>{configSet.name}</TableCell>
-                <TableCell>{configSet.type}</TableCell>
                 <TableCell>{configSet.description}</TableCell>
                 <TableCell>
                   <div className="flex gap-1 flex-wrap">
