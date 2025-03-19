@@ -4,7 +4,6 @@ import Editor, { OnChange } from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { createDebounce } from '@/lib/utils'; 
 import { Eye, EyeOff, Send, RefreshCw } from 'lucide-react'; 
-import { useActiveConfigSet } from '@/hooks/use-active-config-set';
 import { ConfigSetActions } from '@/components/config/ConfigSetActions';
 
 interface CanvasPageProps {
@@ -37,8 +36,6 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
   
   // Timeout reference for sync indicator
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const { activeConfigSet, updateActiveConfig } = useActiveConfigSet();
   
   // Apply editor changes to canvas after delay
   const applyEditorChanges = useCallback(

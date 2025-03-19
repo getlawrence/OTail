@@ -24,7 +24,7 @@ const steps = [
 export const Checklist: React.FC = () => {
     const { currentStep, isMinimized, isPermanentlyHidden, toggleMinimize, completedSteps } = useChecklist();
     const [showConfetti, setShowConfetti] = useState(false);
-    const [windowSize, setWindowSize] = useState({
+    const [_, setWindowSize] = useState({
         width: window.innerWidth,
         height: window.innerHeight,
     });

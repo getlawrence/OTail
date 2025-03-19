@@ -1,4 +1,3 @@
-import React from 'react';
 import { Telescope, LogOut, Users, Wrench, Palette, FolderKanban } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { AnalyticsToggle } from "@/components/layout/analytics-toggle"

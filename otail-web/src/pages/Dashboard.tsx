@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus, Clock, BookOpen, Pencil } from 'lucide-react';
+import { Plus, Clock, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useActiveConfigSet } from '@/hooks/use-active-config-set';
