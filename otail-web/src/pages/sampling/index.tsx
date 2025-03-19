@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
-import { Card } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,13 +11,10 @@ import {
 import { ConfigViewer } from '@/components/simulation/config-viewer'
 import { SimulationViewer } from '@/components/simulation/simulation-viewer'
 import { PolicyBuilder } from '@/components/policy/policy-builder'
-import { RecipeDialog } from '@/components/recipes/recipe-dialog'
-import { PinnedRecipes } from '@/components/policy/popular-policies';
-import { Policy, PolicyType, Recipe } from '@/types/policy'
+import { Policy, PolicyType } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config-state';
 import { trackSampling } from '@/utils/analytics';
-import { Pencil, PlayCircle, Plus } from "lucide-react";
-import { RecipesProvider } from '@/contexts/recipes-context';
+import { Pencil, PlayCircle } from "lucide-react";
 import { ConfigSetActions } from '@/components/config/ConfigSetActions';
 import { toEmptyCollectorConfig } from './utils';
 import { useActiveConfigSet } from '@/hooks/use-active-config-set';
@@ -27,43 +23,6 @@ import { createNewPolicy } from '@/lib/policy/utils';
 
 type Mode = 'Edit' | 'Test'
 
-const PolicyActions = ({
-  currentPolicies,
-  onApplyRecipe
-}: {
-  currentPolicies: Policy[];
-  onApplyRecipe: (recipe: Recipe) => void;
-}) => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const handlePolicyAction = () => {
-    setDialogOpen(true);
-    trackSampling.policyAction('manage_recipes');
-  };
-
-  return (
-    <>
-      <div className="h-full">
-        <Card
-          onClick={handlePolicyAction}
-          className="h-full rounded-xl border-dashed bg-card text-card-foreground shadow p-4 hover:bg-accent/50 transition-colors flex items-center justify-center"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-        </Card>
-      </div>
-      <RecipeDialog
-        isOpen={dialogOpen}
-        onOpenChange={setDialogOpen}
-        currentPolicies={currentPolicies}
-        onApplyRecipe={(recipe) => {
-          onApplyRecipe(recipe);
-          trackSampling.policyAction('apply_recipe');
-          setDialogOpen(false);
-        }}
-      />
-    </>
-  );
-};
 
 const ModeToggle = ({ mode, onToggleMode }: { mode: Mode; onToggleMode: () => void }) => {
   const handleModeChange = (newMode: Mode) => {
@@ -111,7 +70,6 @@ const ConfigEditor = () => {
     handleUpdatePolicy,
     handleRemovePolicy,
     handleViewerChange,
-    importPolicies,
     updatePolicies,
   } = useConfigState();
 
@@ -157,22 +115,6 @@ const ConfigEditor = () => {
     }
   };
 
-  const handlePopularPolicySelect = async (recipe: Recipe) => {
-    importPolicies(recipe.policies);
-    trackSampling.policyBuilderAction('add_popular_recipe', recipe.name);
-    if (activeConfigSet) {
-      await updateActiveConfig(toEmptyCollectorConfig([...policies, ...recipe.policies]));
-    }
-  };
-
-  const handleRecipeSelect = async (recipe: Recipe) => {
-    importPolicies(recipe.policies);
-    trackSampling.policyBuilderAction('add_recipe', recipe.name);
-    if (activeConfigSet) {
-      await updateActiveConfig(toEmptyCollectorConfig([...policies, ...recipe.policies]));
-    }
-  };
-
   const handleConfigImport = async (configuration: any) => {
     const cfg = yaml.load(configuration) as any;
     const policies = cfg.processors?.tail_sampling?.policies || [];
@@ -186,27 +128,7 @@ const ConfigEditor = () => {
   };
 
   return (
-    <RecipesProvider>
       <div className="h-full flex flex-col">
-        <div className="mb-6 shrink-0">
-          <h3 className="text-sm font-medium mb-3">Pinned Recipes</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-3 h-full pinned-recipes">
-              <div className="h-full">
-                <PinnedRecipes onSelect={handlePopularPolicySelect} />
-              </div>
-            </div>
-            <div className="md:col-span-1 h-full policy-actions">
-              <div className="h-full">
-                <PolicyActions
-                  currentPolicies={policies}
-                  onApplyRecipe={handleRecipeSelect}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 flex-1">
           {/* Left Panel - Policy Editor */}
           <div className="flex flex-col h-full min-h-0">
@@ -269,7 +191,6 @@ const ConfigEditor = () => {
           </div>
         </div>
       </div>
-    </RecipesProvider>
   );
 };
 
