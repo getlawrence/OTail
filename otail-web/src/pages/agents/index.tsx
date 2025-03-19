@@ -10,6 +10,9 @@ import { OnboardingState } from "@/components/agents/OnboardingState"
 import { load } from 'js-yaml'
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 const AgentsPage = () => {
     const [agents, setAgents] = useState<Agent[]>([])
@@ -19,6 +22,8 @@ const AgentsPage = () => {
     const [applyConfigSetOpen, setApplyConfigSetOpen] = useState(false)
     const [logs, setLogs] = useState<Log[]>([])
     const [loading, setLoading] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
+    const [isConnectAgentDialogOpen, setIsConnectAgentDialogOpen] = useState(false)
     const { toast } = useToast()
     const { organization } = useAuth()
 
@@ -87,19 +92,19 @@ const AgentsPage = () => {
         }
     }
 
-    const tableColumns = columns({ 
-        onViewConfig: handleViewConfig, 
+    const tableColumns = columns({
+        onViewConfig: handleViewConfig,
         onViewLogs: handleViewLogs,
-        onApplyConfigSet: handleApplyConfigSet 
+        onApplyConfigSet: handleApplyConfigSet
     })
 
     // Show onboarding state if no agents are connected and org has never connected an agent
     if (agents.length === 0 && organization && !organization.has_connected_agent) {
         return (
             <div className="container mx-auto py-10">
-                <OnboardingState 
-                    onRefresh={fetchAgents} 
-                    apiToken={organization.tokens[0]?.token || ''} 
+                <OnboardingState
+                    onRefresh={fetchAgents}
+                    apiToken={organization.tokens[0]?.token || ''}
                 />
             </div>
         )
@@ -107,8 +112,30 @@ const AgentsPage = () => {
 
     return (
         <div className="container mx-auto py-10">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">Agents</h1>
+                <Button onClick={() => setIsConnectAgentDialogOpen(true)}>
+                    Connect Agent
+                </Button>
+            </div>
+
+            <div className="mb-4">
+                <Input
+                    placeholder="Search agents..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
             <DataTable columns={tableColumns} data={agents} />
-            
+            {<Dialog open={isConnectAgentDialogOpen} onOpenChange={() => setIsConnectAgentDialogOpen(!isConnectAgentDialogOpen)}>
+                <DialogContent>
+                    <OnboardingState
+                        onRefresh={fetchAgents}
+                        apiToken={organization?.tokens[0]?.token || ''}
+                    />
+                </DialogContent>
+            </Dialog>}
+
             {selectedAgent && (
                 <>
                     <ConfigDialog

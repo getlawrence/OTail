@@ -115,6 +115,8 @@ export default function ConfigSetsPage() {
           tags: data.tags,
         };
         await configSetsApi.create(createData);
+        // Dispatch project created event
+        window.dispatchEvent(new Event('projectCreated'));
         toast({
           title: 'Success',
           description: 'Config set created successfully',
