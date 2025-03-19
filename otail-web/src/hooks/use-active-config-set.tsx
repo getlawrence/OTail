@@ -41,7 +41,6 @@ export function ActiveConfigSetProvider({ children }: { children: React.ReactNod
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         version: '1.0.0',
-        type: 'loading',
       });
       
       // Get the full config set data
