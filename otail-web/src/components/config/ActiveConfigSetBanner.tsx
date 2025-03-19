@@ -16,7 +16,7 @@ export function ActiveConfigSetBanner() {
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500" />
           <span className="text-sm font-medium">
-            Active Config Set: {activeConfigSet.name}
+            Active Project: {activeConfigSet.name}
           </span>
         </div>
         {hasUnsavedChanges && (

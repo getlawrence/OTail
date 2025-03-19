@@ -67,14 +67,15 @@ export default function Dashboard() {
         tags: data.tags,
       };
       
-      await configSetsApi.create(createData);
+      const newConfigSet = await configSetsApi.create(createData);
+      await setActive(newConfigSet.id);
       toast({
         title: 'Success',
-        description: 'Config set created successfully',
+        description: 'Config set created and set as active',
       });
       loadRecentConfigSets();
       setIsFormDialogOpen(false);
-      navigate('/config'); // Navigate to the config sets page
+      navigate('/sampling'); // Navigate to the policy builder page
     } catch (error) {
       toast({
         title: 'Error',

@@ -98,7 +98,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   }), []);
   
   const { generateConfig } = useFlowConfig(nodes, edges, onChange);
-  const { project } = useReactFlow();
+  const { screenToFlowPosition } = useReactFlow();
 
   const hasParsedYaml = useRef(false); // Keeps track of whether the YAML has been parsed.
 
@@ -188,10 +188,9 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
 
     if (!type || !name) return;
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    const position = project({
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top
+    const position = screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY
     });
 
     // Determine which section the drop occurred in
@@ -205,7 +204,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     
     // Create the component node using the pipeline manager
     createComponentNode(type, name, section, adjustedPosition);
-  }, [determineSection, getPositionInSection, createComponentNode, project]);
+  }, [determineSection, getPositionInSection, createComponentNode]);
 
   // Add effect to generate YAML when nodes or edges change
   useEffect(() => {

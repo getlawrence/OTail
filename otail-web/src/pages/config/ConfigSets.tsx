@@ -142,8 +142,7 @@ export default function ConfigSetsPage() {
         title: 'Success',
         description: 'Config set set as active',
       });
-      // Navigate to canvas page
-      navigate('/canvas');
+
     } catch (error) {
       toast({
         title: 'Error',

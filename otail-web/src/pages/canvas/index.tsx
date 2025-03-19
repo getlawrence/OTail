@@ -41,41 +41,65 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
   // Active config set state
   const { activeConfigSet, updateActiveConfig } = useActiveConfigSet();
 
+  // Last update timestamp to prevent rapid updates
+  const lastUpdateRef = useRef<number>(0);
+
   // Apply editor changes to canvas after delay
   const applyEditorChanges = useCallback(
     createDebounce((value: string) => {
-      if (updateSource.current === 'editor') {
-        setYaml(value);
-        if (canvasRef.current && canvasRef.current.parseYaml) {
-          canvasRef.current.parseYaml(value);
-        }
-        // Update active config set if one is active
-        if (activeConfigSet) {
-          updateActiveConfig(value);
-        }
-        // Hide syncing indicator after changes are applied
-        setIsSyncing(false);
+      // Prevent updates if the source is canvas or if we're not editing
+      if (updateSource.current === 'canvas' || !isEditing.current) {
+        return;
       }
-    }, 3000), // Increased delay to 3 seconds for more typing time
-    [activeConfigSet, updateActiveConfig]
+
+      // Prevent rapid updates (less than 1 second apart)
+      const now = Date.now();
+      if (now - lastUpdateRef.current < 1000) {
+        return;
+      }
+      lastUpdateRef.current = now;
+
+      updateSource.current = 'editor';
+      setYaml(value);
+      
+      if (canvasRef.current?.parseYaml) {
+        canvasRef.current.parseYaml(value);
+      }
+
+      // Update active config set if one is active and content has changed
+      if (activeConfigSet && value !== yaml) {
+        updateActiveConfig(value);
+      }
+
+      setIsSyncing(false);
+      updateSource.current = null;
+    }, 1000), // Reduced delay to 1 second for better responsiveness
+    [activeConfigSet, updateActiveConfig, yaml]
   );
 
   const handleBuilderChange = useCallback((newYaml: string) => {
-    // Only update editor if user is not currently editing
-    if (!isEditing.current) {
+    // Only update editor if user is not currently editing and content has changed
+    if (!isEditing.current && newYaml !== yaml) {
       updateSource.current = 'canvas';
       setYaml(newYaml);
       setEditorValue(newYaml);
+
       // Update active config set if one is active
       if (activeConfigSet) {
         updateActiveConfig(newYaml);
       }
+
       updateSource.current = null;
     }
-  }, [activeConfigSet, updateActiveConfig]);
+  }, [activeConfigSet, updateActiveConfig, yaml]);
 
   const handleYamlChange: OnChange = useCallback((value: string | undefined) => {
     if (!value) {
+      return;
+    }
+
+    // Prevent updates if the source is canvas
+    if (updateSource.current === 'canvas') {
       return;
     }
 
@@ -98,7 +122,7 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
 
     syncTimeoutRef.current = setTimeout(() => {
       isEditing.current = false;
-    }, 3500);
+    }, 1500); // Reduced delay to 1.5 seconds
   }, [applyEditorChanges]);
 
   const handleConfigImport = (configuration: any) => {
