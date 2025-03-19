@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Policy, PolicyType } from '@/types/policy';
-import { createNewPolicy } from '@/lib/policy/utils';
+import { Policy } from '@/types/policy';
 
 export const usePolicyState = (initialPolicies?: Policy[]) => {
     const [policies, setPolicies] = useState<Policy[]>(initialPolicies || []);
@@ -9,12 +8,17 @@ export const usePolicyState = (initialPolicies?: Policy[]) => {
         setPolicies(newPolicies);
     }, []);
 
-    const addPolicy = useCallback((typeOrPolicies: PolicyType | Policy[]) => {
-        setPolicies(prev => 
-            Array.isArray(typeOrPolicies)
-                ? [...prev, ...typeOrPolicies]
-                : [...prev, createNewPolicy(typeOrPolicies)]
-        );
+    const addPolicy = useCallback((policyOrPolicies: Policy | Policy[]) => {
+        setPolicies(prev => {
+            const newPolicies = Array.isArray(policyOrPolicies)
+                ? [...prev, ...policyOrPolicies]
+                : [...prev, policyOrPolicies];
+            
+            // Dispatch policy added event when a policy is added
+            window.dispatchEvent(new Event('policyAdded'));
+            
+            return newPolicies;
+        });
     }, []);
 
     const updatePolicy = useCallback((index: number, updatedPolicy: Policy) => {

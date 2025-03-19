@@ -16,9 +16,10 @@ import { Agent } from "@/api/types"
 interface ColumnsProps {
     onViewConfig: (agent: Agent) => void
     onViewLogs: (agent: Agent) => void
+    onApplyConfigSet: (agent: Agent) => void
 }
 
-export const columns = ({ onViewConfig, onViewLogs }: ColumnsProps): ColumnDef<Agent>[] => [
+export const columns = ({ onViewConfig, onViewLogs, onApplyConfigSet }: ColumnsProps): ColumnDef<Agent>[] => [
     {
         accessorKey: "InstanceId",
         header: "Instance Id",
@@ -62,6 +63,9 @@ export const columns = ({ onViewConfig, onViewLogs }: ColumnsProps): ColumnDef<A
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onViewLogs(agent)}>
                                 View logs
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onApplyConfigSet(agent)}>
+                                Apply config set
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                         </DropdownMenuContent>

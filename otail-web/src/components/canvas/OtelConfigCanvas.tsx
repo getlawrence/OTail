@@ -98,7 +98,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   }), []);
   
   const { generateConfig } = useFlowConfig(nodes, edges, onChange);
-  const { project } = useReactFlow();
+  const { screenToFlowPosition } = useReactFlow();
 
   const hasParsedYaml = useRef(false); // Keeps track of whether the YAML has been parsed.
 
@@ -139,18 +139,38 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     );
 
     setEdges(eds => {
-      const newEdges = eds.filter(edge => edge.target !== connection.target);
+      let existingEdges = eds;
+
+      // Handle processor to processor connections (1-to-1)
+      if (sourceNode.type === 'processor' && targetNode.type === 'processor') {
+        // Remove any existing connections where this source connects to any processor
+        existingEdges = eds.filter(edge => 
+          !(edge.source === connection.source && 
+            nodes.find(n => n.id === edge.target)?.type === 'processor')
+        );
+        // Remove any existing connections to this target from any processor
+        existingEdges = existingEdges.filter(edge => 
+          !(edge.target === connection.target && 
+            nodes.find(n => n.id === edge.source)?.type === 'processor')
+        );
+      }
+      // Handle other cases where we don't want multiple incoming connections
+      else if (targetNode.type !== 'processor' && targetNode.type !== 'exporter') {
+        // Remove existing connections to the target
+        existingEdges = eds.filter(edge => edge.target !== connection.target);
+      }
+
       return addEdge({
         ...connection,
         style: {
           ...styles.validConnectionStyle,
-          zIndex: 1000, // Ensure edges are always on top
+          zIndex: 1000,
           strokeWidth: 2,
           stroke: '#222',
         },
         animated: true,
-        zIndex: 1000, // Set zIndex at the edge level too
-      }, newEdges);
+        zIndex: 1000,
+      }, existingEdges);
     });
   }, [nodes, setEdges]);
 
@@ -168,10 +188,9 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
 
     if (!type || !name) return;
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    const position = project({
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top
+    const position = screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY
     });
 
     // Determine which section the drop occurred in
@@ -185,7 +204,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     
     // Create the component node using the pipeline manager
     createComponentNode(type, name, section, adjustedPosition);
-  }, [determineSection, getPositionInSection, createComponentNode, project]);
+  }, [determineSection, getPositionInSection, createComponentNode]);
 
   // Add effect to generate YAML when nodes or edges change
   useEffect(() => {

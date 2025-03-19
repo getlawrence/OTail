@@ -16,7 +16,13 @@ export const useConfigState = (initialPolicies?: Policy[]) => {
     const evaluation = useEvaluation();
 
     const toggleMode = useCallback(() => {
-        setMode(prev => prev === 'Edit' ? 'Test' : 'Edit');
+        setMode(prev => {
+            const newMode = prev === 'Edit' ? 'Test' : 'Edit';
+            if (newMode === 'Test') {
+                window.dispatchEvent(new Event('testModeActivated'));
+            }
+            return newMode;
+        });
     }, []);
 
     const handleViewerChange = useCallback(async (value: string) => {

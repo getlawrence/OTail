@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
-import { Node, useReactFlow } from 'reactflow';
+import { Node, Edge, useEdges } from 'reactflow';
 import { PIPELINE_SECTIONS } from '../constants';
 import type { PipelineType, SectionType } from '../types';
+import { calculateNodeLayout } from '../utils/layoutCalculator';
 
 interface UseSectionManagerProps {
   fullScreenSection: SectionType | null;
@@ -12,15 +13,15 @@ interface UseSectionManagerProps {
   nodes: Node[];
 }
 
-export function useSectionManager({ 
-  fullScreenSection, 
-  collapsedSections = [], 
-  onToggleExpand, 
+export function useSectionManager({
+  fullScreenSection,
+  collapsedSections = [],
+  onToggleExpand,
   onToggleCollapse,
   setNodes,
-  nodes 
+  nodes
 }: UseSectionManagerProps) {
-  const { } = useReactFlow(); // Using ReactFlow context but not project specifically
+  const edges = useEdges(); // Use the dedicated useEdges hook
 
   // Create section nodes - always create all sections
   const createSectionNodes = useCallback(() => {
@@ -42,36 +43,36 @@ export function useSectionManager({
     // Calculate total height needed for all regular sections
     let totalRegularSectionsHeight = 0;
     let regularSectionCount = 0;
-    
+
     // First count how many regular sections we have and calculate total height
     Object.keys(PIPELINE_SECTIONS).forEach((type) => {
       const sectionType = type as SectionType;
       const sectionConfig = PIPELINE_SECTIONS[sectionType];
       const isSideSection = sectionConfig.isSideSection === true;
-      
+
       if (!isSideSection) {
         regularSectionCount++;
         const sectionHeight = fullScreenSection === sectionType ? fullScreenSectionHeight : defaultSectionHeight;
         totalRegularSectionsHeight += sectionHeight;
       }
     });
-    
+
     // Add spacing between sections
     totalRegularSectionsHeight += (regularSectionCount - 1) * 20; // 20px spacing between sections
-    
+
     // Now calculate positions
     Object.keys(PIPELINE_SECTIONS).forEach((type) => {
       const sectionType = type as SectionType;
       const sectionConfig = PIPELINE_SECTIONS[sectionType];
       const isSideSection = sectionConfig.isSideSection === true;
-      
+
       if (isSideSection) {
         // Position side sections at the top
         positions[sectionType] = 20; // Same top margin as regular sections
       } else {
         // Regular vertical sections
         positions[sectionType] = currentY;
-        
+
         // Update Y position for next section
         // If this section is in full-screen mode, it takes up most of the viewport
         // Otherwise, it takes 1/4 of the viewport
@@ -85,22 +86,19 @@ export function useSectionManager({
     const sectionNodes = Object.keys(PIPELINE_SECTIONS).map((type, index) => {
       const sectionType = type as PipelineType;
       const sectionConfig = PIPELINE_SECTIONS[sectionType];
-      const isSideSection = sectionConfig.isSideSection === true;
-      
+
       // If we're in full-screen mode and this is not the full-screen section, hide it
       const isHidden = fullScreenSection !== null && fullScreenSection !== sectionType;
-      
+
       // Check if this section is collapsed
       const isCollapsed = collapsedSections.includes(sectionType);
-      
+
       return {
         id: `section-${sectionType}`, // Use stable ID without timestamp
         type: 'section',
         position: {
           // Position sections with enough margin to avoid sidebar overlap
-          x: isSideSection 
-            ? 80 // Position side sections on the left side
-            : 300, // Regular sections positioned to the right of the side section
+          x: 100, // Regular sections positioned to the right of the side section
           y: fullScreenSection === sectionType ? window.innerHeight * 0.075 : positions[sectionType] // Keep vertical positioning
         },
         data: {
@@ -108,12 +106,12 @@ export function useSectionManager({
           index,
           // When in full-screen, use most of the canvas width and height but not all
           // For regular mode, adjust width to account for sidebar and right margin
-          width: sectionConfig.isSideSection 
+          width: sectionConfig.isSideSection
             ? 200 // Side sections are narrower
             : window.innerWidth - 320, // Regular sections account for sidebar, side section, and right margin
-          height: fullScreenSection === sectionType 
-            ? window.innerHeight * 0.85 
-            : sectionConfig.isSideSection 
+          height: fullScreenSection === sectionType
+            ? window.innerHeight * 0.85
+            : sectionConfig.isSideSection
               ? totalRegularSectionsHeight // Side sections are as tall as all regular sections combined
               : window.innerHeight / 4, // Regular sections use 1/4 height
           isFullScreen: fullScreenSection === sectionType,
@@ -136,6 +134,11 @@ export function useSectionManager({
 
   // Function to determine which section a position belongs to
   const determineSection = useCallback((x: number, y: number): SectionType => {
+    // If a section is in full screen mode, always return that section
+    if (fullScreenSection !== null) {
+      return fullScreenSection;
+    }
+
     // Check if the position is within any section card
     const sectionTypes = Object.keys(PIPELINE_SECTIONS) as SectionType[];
 
@@ -155,12 +158,12 @@ export function useSectionManager({
       const type = sectionTypes[i];
       const sectionConfig = PIPELINE_SECTIONS[type];
       const isSideSection = sectionConfig.isSideSection === true;
-      
+
       if (isSideSection) {
         // Calculate the total height for regular sections to determine side section height
         let totalHeight = 0;
         let regularCount = 0;
-        
+
         for (let j = 0; j < sectionTypes.length; j++) {
           const regType = sectionTypes[j];
           const regConfig = PIPELINE_SECTIONS[regType];
@@ -169,12 +172,12 @@ export function useSectionManager({
             totalHeight += baseHeight;
           }
         }
-        
+
         // Add spacing between sections
         if (regularCount > 1) {
           totalHeight += (regularCount - 1) * sectionSpacing;
         }
-        
+
         if (
           x >= leftOffset &&
           x <= leftOffset + sideWidth &&
@@ -191,10 +194,10 @@ export function useSectionManager({
       const type = sectionTypes[i];
       const sectionConfig = PIPELINE_SECTIONS[type];
       const isSideSection = sectionConfig.isSideSection === true;
-      
+
       // Skip side sections as we already checked them
       if (isSideSection) continue;
-      
+
       const sectionHeight = baseHeight;
 
       if (
@@ -229,27 +232,114 @@ export function useSectionManager({
     }
 
     return closestSection?.type || sectionTypes[0];
-  }, []);
+  }, [fullScreenSection]);
 
   // Update section nodes when relevant state changes
   const updateSections = useCallback(() => {
-    
     // Get current non-section nodes
     const nonSectionNodes = nodes.filter(node => node.type !== 'section');
-    
+
     // Create new section nodes with updated properties
     const updatedSectionNodes = createSectionNodes();
-    
+
+    // Group nodes by section
+    const nodesBySection: Record<SectionType, Node[]> = {
+      logs: [],
+      metrics: [],
+      traces: [],
+    };
+    const edgesBySection: Record<SectionType, Edge[]> = {
+      logs: [],
+      metrics: [],
+      traces: [],
+    };
+
+    // Initialize empty arrays for each section
+    Object.keys(PIPELINE_SECTIONS).forEach((type) => {
+      const sectionType = type as SectionType;
+      nodesBySection[sectionType] = [];
+      edgesBySection[sectionType] = [];
+    });
+
+    // Group nodes by section
+    nonSectionNodes.forEach(node => {
+      // Determine which section this node belongs to
+      const sectionType = node.data?.sectionType as SectionType ||
+        determineSection(node.position.x, node.position.y);
+
+      if (nodesBySection[sectionType]) {
+        nodesBySection[sectionType].push(node);
+      }
+    });
+
+    // Group edges by section (based on source node's section)
+    edges.forEach((edge: Edge) => {
+      const sourceNode = nonSectionNodes.find(node => node.id === edge.source);
+      if (sourceNode) {
+        const sectionType = sourceNode.data?.sectionType as SectionType ||
+          determineSection(sourceNode.position.x, sourceNode.position.y);
+
+        if (edgesBySection[sectionType]) {
+          edgesBySection[sectionType].push(edge);
+        }
+      }
+    });
+
+    // Process layout for each section
+    const rearrangedNodes: Node[] = [];
+
+    Object.keys(PIPELINE_SECTIONS).forEach((type) => {
+      const sectionType = type as SectionType;
+      const sectionNode = updatedSectionNodes.find(n => n.id === `section-${sectionType}`);
+      const sectionNodes = nodesBySection[sectionType];
+      const sectionEdges = edgesBySection[sectionType];
+
+      if (sectionNode && sectionNodes.length > 0) {
+        // Get section boundaries
+        const sectionX = sectionNode.position.x;
+        const sectionY = sectionNode.position.y;
+        const sectionWidth = sectionNode.data.width;
+        const sectionHeight = sectionNode.data.height;
+
+        // Use the layout calculator
+        const layoutedNodes = calculateNodeLayout(sectionNodes, sectionEdges, {
+          direction: 'LR',
+          nodeSpacing: 50,
+          rankSpacing: 50,
+          marginX: 40,
+          marginY: 40,
+          fitWithinBounds: true,
+          bounds: {
+            x: sectionX,
+            y: sectionY,
+            width: sectionWidth,
+            height: sectionHeight
+          },
+          headerHeight: 40
+        });
+
+        // Add section type to node data
+        const nodesWithSectionType = layoutedNodes.map(node => ({
+          ...node,
+          data: {
+            ...node.data,
+            sectionType,
+          },
+        }));
+
+        rearrangedNodes.push(...nodesWithSectionType);
+      }
+    });
+
     // Always force an update when this function is called
-    // This ensures the UI reflects the current state
-    setNodes(() => [...nonSectionNodes, ...updatedSectionNodes]);
-  }, [fullScreenSection, collapsedSections, setNodes]);
+    setNodes(() => [...rearrangedNodes, ...updatedSectionNodes]);
+  }, [fullScreenSection, collapsedSections, setNodes, createSectionNodes, nodes, determineSection, edges]);
 
   // Calculate position relative to a section
   const getPositionInSection = useCallback((absolutePosition: { x: number, y: number }, sectionType: SectionType) => {
     const sectionNode = nodes.find(node => node.id === `section-${sectionType}`);
     let adjustedPosition = { ...absolutePosition };
-    
+
     if (sectionNode) {
       // Make position relative to the section's position
       adjustedPosition = {
@@ -261,7 +351,7 @@ export function useSectionManager({
     return adjustedPosition;
   }, [nodes]);
 
-  return { 
+  return {
     createSectionNodes,
     determineSection,
     updateSections,

@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { ReceiverConfig, ProcessorConfig } from '../types';
 import { componentSchemas, ComponentType } from './componentSchemas';
 import { DynamicForm } from '@/components/shared/DynamicForm';
+import { createNewPolicy } from '@/lib/policy/utils';
 
 interface ComponentConfigDialogProps {
   node: Node;
@@ -129,7 +130,7 @@ export const ComponentConfigDialog = ({
           {isTailSampling && (
             <PolicyBuilder
               policies={policies}
-              addPolicy={handleAddPolicy}
+              addPolicy={(type) => handleAddPolicy(createNewPolicy(type))}
               updatePolicy={handleUpdatePolicy}
               removePolicy={handleRemovePolicy}
             />
