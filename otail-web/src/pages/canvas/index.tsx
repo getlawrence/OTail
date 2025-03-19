@@ -5,11 +5,7 @@ import { Button } from '@/components/ui/button';
 import { createDebounce } from '@/lib/utils';
 import { Eye, EyeOff, Send, RefreshCw } from 'lucide-react';
 import { ConfigSetActions } from '@/components/config/ConfigSetActions';
-import { SaveConfigDialog } from '@/components/config/SaveConfigDialog';
-import { ImportConfigDialog } from '@/components/config/ImportConfigDialog';
-import { useConfigSets } from '@/hooks/use-config-sets';
-import { useToast } from '@/hooks/use-toast';
-import { ConfigSet } from '@/types/configSet';
+import { useActiveConfigSet } from '@/hooks/use-active-config-set';
 
 interface CanvasPageProps {
   config?: string;
@@ -42,12 +38,8 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
   // Timeout reference for sync indicator
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // New state for dialogs
-  const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
-  const [isImportDialogOpen, setImportDialogOpen] = useState(false);
-  const [availableConfigSets, setAvailableConfigSets] = useState<ConfigSet[]>([]);
-  const { toast } = useToast();
-  const { saveToConfigSet, loadConfigSet, listConfigSets } = useConfigSets();
+  // Active config set state
+  const { activeConfigSet, updateActiveConfig } = useActiveConfigSet();
 
   // Apply editor changes to canvas after delay
   const applyEditorChanges = useCallback(
@@ -57,11 +49,15 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
         if (canvasRef.current && canvasRef.current.parseYaml) {
           canvasRef.current.parseYaml(value);
         }
+        // Update active config set if one is active
+        if (activeConfigSet) {
+          updateActiveConfig(value);
+        }
         // Hide syncing indicator after changes are applied
         setIsSyncing(false);
       }
     }, 3000), // Increased delay to 3 seconds for more typing time
-    []
+    [activeConfigSet, updateActiveConfig]
   );
 
   const handleBuilderChange = useCallback((newYaml: string) => {
@@ -70,9 +66,13 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
       updateSource.current = 'canvas';
       setYaml(newYaml);
       setEditorValue(newYaml);
+      // Update active config set if one is active
+      if (activeConfigSet) {
+        updateActiveConfig(newYaml);
+      }
       updateSource.current = null;
     }
-  }, []);
+  }, [activeConfigSet, updateActiveConfig]);
 
   const handleYamlChange: OnChange = useCallback((value: string | undefined) => {
     if (!value) {
@@ -101,7 +101,6 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
     }, 3500);
   }, [applyEditorChanges]);
 
-
   const handleConfigImport = (configuration: any) => {
     handleYamlChange(configuration, {
       changes: [],
@@ -112,59 +111,6 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
       isFlush: false,
       isEolChange: false
     });
-  };
-
-  const handleSave = async (name: string) => {
-    try {
-      await saveToConfigSet(name.trim(), 'component', editorValue, {
-        componentType: 'collector',
-      });
-      toast({
-        title: 'Success',
-        description: 'Configuration saved successfully',
-      });
-      setSaveDialogOpen(false);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to save configuration',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleImport = async (configSetId: string) => {
-    try {
-      const configSet = await loadConfigSet(configSetId);
-      handleConfigImport(configSet.configuration);
-      toast({
-        title: 'Success',
-        description: 'Configuration imported successfully',
-      });
-      setImportDialogOpen(false);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to import configuration',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const loadAvailableConfigSets = async () => {
-    try {
-      const configs = await listConfigSets();
-      const filtered = configs.filter(
-        (config) => config.type === 'component' && config.componentType === 'collector'
-      );
-      setAvailableConfigSets(filtered);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load available config sets',
-        variant: 'destructive',
-      });
-    }
   };
 
   // Cleanup debounced function and timeouts
@@ -179,19 +125,6 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
 
   return (
     <>
-      <SaveConfigDialog
-        open={isSaveDialogOpen}
-        onOpenChange={setSaveDialogOpen}
-        onSave={handleSave}
-      />
-      
-      <ImportConfigDialog
-        open={isImportDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        onImport={handleImport}
-        availableConfigSets={availableConfigSets}
-      />
-
       <div className="flex flex-col h-full gap-4 p-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Configuration Canvas</h1>
@@ -203,7 +136,6 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
               </div>
             )}
             <ConfigSetActions
-              type="canvas"
               getCurrentState={() => editorValue}
               onImport={handleConfigImport}
             />

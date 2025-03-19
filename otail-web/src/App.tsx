@@ -7,11 +7,13 @@ import Agents from './pages/agents'
 import Login from './pages/auth/login'
 import Register from './pages/auth/register'
 import Organization from './pages/organization'
+import Dashboard from './pages/Dashboard'
 import { ThemeProvider } from "@/hooks/use-theme"
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import { Toaster } from "@/components/ui/toaster"
 import { OTailWalkthrough } from '@/components/walkthrough/OTailWalkthrough'
 import { MobileWarning } from '@/components/MobileWarning'
+import { ActiveConfigSetProvider } from '@/hooks/use-active-config-set'
 
 const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
 
@@ -35,37 +37,40 @@ function App() {
     <ThemeProvider defaultTheme="system">
       <Router>
         <AuthProvider>
-          <MobileWarning />
-          <Routes>
-            <Route path="/login" element={
-              <div className="h-screen w-screen flex items-center justify-center">
-                <Login />
-              </div>
-            } />
-            <Route path="/register" element={
-              <div className="h-screen w-screen flex items-center justify-center">
-                <Register />
-              </div>
-            } />
-            {noAuthRequired ? (
-              <Route element={<Layout />}>
-                <Route path="/sampling" element={<Sampling />} />
-                <Route path="/canvas" element={<CanvasPage />} />
-                <Route path="/config" element={<Config />} />
-                <Route path="/" element={<Navigate to="/sampling" replace />} />
-              </Route>
-            ) : (
-              <Route element={<RequireAuth><Layout /></RequireAuth>}>
-                <Route path="/sampling" element={<Sampling />} />
-                <Route path="/canvas" element={<CanvasPage />} />
-                <Route path="/agents" element={<Agents />} />
-                <Route path="/organization" element={<Organization />} />
-                <Route path="/" element={<Navigate to="/sampling" replace />} />
-              </Route>
-            )}
-          </Routes>
-          <Toaster />
-          <OTailWalkthrough />
+          <ActiveConfigSetProvider>
+            <MobileWarning />
+            <Routes>
+              <Route path="/login" element={
+                <div className="h-screen w-screen flex items-center justify-center">
+                  <Login />
+                </div>
+              } />
+              <Route path="/register" element={
+                <div className="h-screen w-screen flex items-center justify-center">
+                  <Register />
+                </div>
+              } />
+              {noAuthRequired ? (
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/sampling" element={<Sampling />} />
+                  <Route path="/canvas" element={<CanvasPage />} />
+                  <Route path="/config" element={<Config />} />
+                </Route>
+              ) : (
+                <Route element={<RequireAuth><Layout /></RequireAuth>}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/sampling" element={<Sampling />} />
+                  <Route path="/canvas" element={<CanvasPage />} />
+                  <Route path="/agents" element={<Agents />} />
+                  <Route path="/organization" element={<Organization />} />
+                  <Route path="/config" element={<Config />} />
+                </Route>
+              )}
+            </Routes>
+            <Toaster />
+            <OTailWalkthrough />
+          </ActiveConfigSetProvider>
         </AuthProvider>
       </Router>
     </ThemeProvider>

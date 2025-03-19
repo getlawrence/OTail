@@ -176,8 +176,7 @@ const ConfigEditor = () => {
                   <p className="text-sm text-muted-foreground">Configure your sampling policies</p>
                 </div>
                 <ConfigSetActions
-                  type="policy"
-                  getCurrentState={() => ({ policies })}
+                  getCurrentState={() => JSON.stringify({ policies })}
                   onImport={handleConfigImport}
                 />
               </div>

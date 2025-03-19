@@ -16,29 +16,24 @@ import type { ConfigSet } from '@/types/configSet';
 interface ConfigSetActionsProps {
   getCurrentState: () => string;
   onImport: (configuration: any) => void;
-  type: 'canvas' | 'policy';
   className?: string;
 }
 
 export function ConfigSetActions({
   getCurrentState,
   onImport,
-  type,
   className,
 }: ConfigSetActionsProps) {
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
   const [isImportDialogOpen, setImportDialogOpen] = useState(false);
   const [availableConfigSets, setAvailableConfigSets] = useState<ConfigSet[]>([]);
   const { toast } = useToast();
-  const { saveToConfigSet, loadConfigSet, listConfigSets } = useConfigSets();
-
-  const componentType = type === 'policy' ? 'tail_sampling' : 'collector';
+  const { saveToConfigSet, updateConfigSet, loadConfigSet, listConfigSets } = useConfigSets();
 
   const handleSave = async (name: string) => {
     try {
-      await saveToConfigSet(name.trim(), 'component', getCurrentState(), {
-        componentType,
-      });
+      const currentState = getCurrentState();
+      await saveToConfigSet(name.trim(), currentState);
       toast({
         title: 'Success',
         description: 'Configuration saved successfully',
@@ -48,6 +43,24 @@ export function ConfigSetActions({
       toast({
         title: 'Error',
         description: 'Failed to save configuration',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleUpdate = async (configSetId: string) => {
+    try {
+      const currentState = getCurrentState();
+      await updateConfigSet(configSetId, currentState);
+      toast({
+        title: 'Success',
+        description: 'Configuration updated successfully',
+      });
+      setSaveDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update configuration',
         variant: 'destructive',
       });
     }
@@ -74,10 +87,7 @@ export function ConfigSetActions({
   const loadAvailableConfigSets = async () => {
     try {
       const configs = await listConfigSets();
-      const filtered = configs.filter(
-        (config) => config.type === 'component' && config.componentType === componentType
-      );
-      setAvailableConfigSets(filtered);
+      setAvailableConfigSets(configs);
     } catch (error) {
       toast({
         title: 'Error',
@@ -108,11 +118,14 @@ export function ConfigSetActions({
               Import Config Set
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => setSaveDialogOpen(true)}
+              onClick={() => {
+                loadAvailableConfigSets();
+                setSaveDialogOpen(true);
+              }}
               className="gap-2"
             >
               <Save className="h-4 w-4" />
-              Save as Config Set
+              Save/Update Config Set
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -122,8 +135,10 @@ export function ConfigSetActions({
         open={isSaveDialogOpen}
         onOpenChange={setSaveDialogOpen}
         onSave={handleSave}
+        onUpdate={handleUpdate}
+        availableConfigSets={availableConfigSets}
       />
-      
+
       <ImportConfigDialog
         open={isImportDialogOpen}
         onOpenChange={setImportDialogOpen}

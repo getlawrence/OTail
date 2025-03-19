@@ -1,5 +1,6 @@
 import { Telescope, LogOut, Users, Wrench, Palette, Settings } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
+import { AnalyticsToggle } from "@/components/layout/analytics-toggle"
 import {
   Sidebar,
   SidebarContent,
@@ -123,44 +124,47 @@ export function AppSidebar() {
         <div className="mt-auto border-t border-border">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
-              {user && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
-                          {user.email.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <div className="flex items-center justify-start gap-2 p-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
-                          {user.email.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user.email}</p>
-                      </div>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/organization" className="flex items-center">
-                        <Users className="h-4 w-4 mr-2" />
-                        <span>Organization</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => logout()} className="text-destructive">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      <span>Logout</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
               <ThemeToggle />
+              <div className="flex items-center gap-2">
+                <AnalyticsToggle />
+                {user && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="relative h-8 w-8 rounded-full">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            {user.email.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <div className="flex items-center justify-start gap-2 p-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>
+                            {user.email.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{user.email}</p>
+                        </div>
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/organization" className="flex items-center">
+                          <Users className="h-4 w-4 mr-2" />
+                          <span>Organization</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => logout()} className="text-destructive">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        <span>Logout</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
           </div>
         </div>

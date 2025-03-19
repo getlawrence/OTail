@@ -22,7 +22,9 @@ import type { ConfigSet } from '@/types/configSet';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ConfigSetForm } from '@/components/config/ConfigSetForm';
-import { Pencil, Trash } from 'lucide-react';
+import { Pencil, Trash, Check } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useActiveConfigSet } from '@/hooks/use-active-config-set';
 
 export default function ConfigSetsPage() {
   const [configSets, setConfigSets] = useState<ConfigSet[]>([]);
@@ -32,10 +34,25 @@ export default function ConfigSetsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const { toast } = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { activeConfigSet, setActive, clearActive } = useActiveConfigSet();
 
   useEffect(() => {
     loadConfigSets();
   }, []);
+
+  useEffect(() => {
+    // Handle selected config set from navigation state
+    const state = location.state as { selectedConfigSetId?: string } | null;
+    if (state?.selectedConfigSetId) {
+      const configSet = configSets.find(cs => cs.id === state.selectedConfigSetId);
+      if (configSet) {
+        setSelectedConfigSet(configSet);
+        setIsFormDialogOpen(true);
+      }
+    }
+  }, [location.state, configSets]);
 
   const loadConfigSets = async () => {
     try {
@@ -53,14 +70,18 @@ export default function ConfigSetsPage() {
     }
   };
 
-  const handleDelete = async (configSet: ConfigSet) => {
+  const handleDelete = async () => {
+    if (!selectedConfigSet) return;
+
     try {
-      await configSetsApi.delete(configSet.id);
+      await configSetsApi.delete(selectedConfigSet.id);
       toast({
         title: 'Success',
         description: 'Config set deleted successfully',
       });
       loadConfigSets();
+      setIsDeleteDialogOpen(false);
+      setSelectedConfigSet(null);
     } catch (error) {
       toast({
         title: 'Error',
@@ -68,7 +89,6 @@ export default function ConfigSetsPage() {
         variant: 'destructive',
       });
     }
-    setIsDeleteDialogOpen(false);
   };
 
   const handleSubmit = async (data: Partial<ConfigSet>) => {
@@ -115,6 +135,40 @@ export default function ConfigSetsPage() {
     }
   };
 
+  const handleSetActive = async (configSet: ConfigSet) => {
+    try {
+      await setActive(configSet.id);
+      toast({
+        title: 'Success',
+        description: 'Config set set as active',
+      });
+      // Navigate to canvas page
+      navigate('/canvas');
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to set config set as active',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleClearActive = async () => {
+    try {
+      clearActive();
+      toast({
+        title: 'Success',
+        description: 'Active config set cleared',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to clear active config set',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const filteredConfigSets = configSets.filter(
     (configSet) =>
       configSet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,7 +180,7 @@ export default function ConfigSetsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Config Sets</h1>
         <Button onClick={() => setIsFormDialogOpen(true)}>
-          Create New Config Set
+          Create Config Set
         </Button>
       </div>
 
@@ -135,126 +189,90 @@ export default function ConfigSetsPage() {
           placeholder="Search config sets..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
         />
       </div>
 
-      <div className="rounded-md border">
+      <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead>Component Type</TableHead>
-              <TableHead>Created At</TableHead>
+              <TableHead>Description</TableHead>
               <TableHead>Tags</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">
-                  Loading...
+            {filteredConfigSets.map((configSet) => (
+              <TableRow key={configSet.id}>
+                <TableCell>{configSet.name}</TableCell>
+                <TableCell>{configSet.type}</TableCell>
+                <TableCell>{configSet.description}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1 flex-wrap">
+                    {configSet.tags?.map((tag) => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {activeConfigSet?.id === configSet.id ? (
+                    <Badge variant="default" className="flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Active
+                    </Badge>
+                  ) : null}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleSetActive(configSet)}
+                    >
+                      <Check className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedConfigSet(configSet);
+                        setIsFormDialogOpen(true);
+                      }}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedConfigSet(configSet);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
-            ) : filteredConfigSets.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">
-                  No config sets found
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredConfigSets.map((configSet) => (
-                <TableRow key={configSet.id}>
-                  <TableCell className="font-medium">{configSet.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{configSet.type}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {configSet.componentType && (
-                      <Badge>{configSet.componentType}</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(configSet.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      {configSet.tags?.map((tag) => (
-                        <Badge key={tag} variant="outline">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedConfigSet(configSet);
-                          setIsFormDialogOpen(true);
-                        }}
-                      >
-                        <Pencil />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedConfigSet(configSet);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+            ))}
           </TableBody>
         </Table>
       </div>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Config Set</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{selectedConfigSet?.name}"? This
-              action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => selectedConfigSet && handleDelete(selectedConfigSet)}
-            >
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
             <DialogTitle>
-              {selectedConfigSet ? 'Edit Config Set' : 'Create New Config Set'}
+              {selectedConfigSet ? 'Edit Config Set' : 'Create Config Set'}
             </DialogTitle>
             <DialogDescription>
               {selectedConfigSet
-                ? 'Update the configuration for this config set.'
-                : 'Create a new configuration set that can be reused later.'}
+                ? 'Edit the config set details below.'
+                : 'Fill in the details to create a new config set.'}
             </DialogDescription>
           </DialogHeader>
           <ConfigSetForm
@@ -265,6 +283,31 @@ export default function ConfigSetsPage() {
               setSelectedConfigSet(null);
             }}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Config Set</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this config set? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setSelectedConfigSet(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

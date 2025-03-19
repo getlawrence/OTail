@@ -2,15 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { ConfigSet, ConfigSetType, ComponentType } from '@/types/configSet';
+import type { ConfigSet } from '@/types/configSet';
 import Editor from '@monaco-editor/react';
 import yaml from 'js-yaml';
 import { Eye, EyeOff } from 'lucide-react';
@@ -25,8 +18,6 @@ export function ConfigSetForm({ initialData, onSubmit, onCancel }: ConfigSetForm
   const [formData, setFormData] = useState<Partial<ConfigSet>>({
     name: initialData?.name || '',
     description: initialData?.description || '',
-    type: initialData?.type || 'component',
-    componentType: initialData?.componentType,
     configuration: initialData?.configuration || {},
     tags: initialData?.tags || [],
   });
@@ -116,45 +107,6 @@ export function ConfigSetForm({ initialData, onSubmit, onCancel }: ConfigSetForm
               rows={3}
             />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="type">Type</Label>
-            <Select
-              value={formData.type}
-              onValueChange={(value: ConfigSetType) =>
-                setFormData((prev) => ({ ...prev, type: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="full">Full Configuration</SelectItem>
-                <SelectItem value="component">Component Configuration</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {formData.type === 'component' && (
-            <div className="space-y-2">
-              <Label htmlFor="componentType">Component Type</Label>
-              <Select
-                value={formData.componentType}
-                onValueChange={(value: ComponentType) =>
-                  setFormData((prev) => ({ ...prev, componentType: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select component type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tail_sampling">Tail Sampling</SelectItem>
-                  <SelectItem value="pipeline">Pipeline</SelectItem>
-                  <SelectItem value="collector">Collector</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
 
           <div className="space-y-2">
             <Label htmlFor="tags">Tags (comma-separated)</Label>
