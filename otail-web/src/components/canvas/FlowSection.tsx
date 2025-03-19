@@ -52,38 +52,38 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
     switch (baseColor) {
       case 'blue':
         return {
-          bg: 'bg-blue-50/50 dark:bg-blue-950/20',
-          border: 'border-blue-200 dark:border-blue-800',
+          bg: 'bg-blue-50/50 dark:bg-blue-500/[0.02]',
+          border: 'border-blue-200 dark:border-blue-800/40',
           badge: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700'
         };
       case 'green':
         return {
-          bg: 'bg-green-50/50 dark:bg-green-950/20',
-          border: 'border-green-200 dark:border-green-800',
+          bg: 'bg-green-50/50 dark:bg-green-500/[0.02]',
+          border: 'border-green-200 dark:border-green-800/40',
           badge: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700'
         };
       case 'purple':
         return {
-          bg: 'bg-purple-50/50 dark:bg-purple-950/20',
-          border: 'border-purple-200 dark:border-purple-800',
+          bg: 'bg-purple-50/50 dark:bg-purple-500/[0.02]',
+          border: 'border-purple-200 dark:border-purple-800/40',
           badge: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700'
         };
       case 'pink':
         return {
-          bg: 'bg-pink-50/50 dark:bg-pink-950/20',
-          border: 'border-pink-200 dark:border-pink-800',
+          bg: 'bg-pink-50/50 dark:bg-pink-500/[0.02]',
+          border: 'border-pink-200 dark:border-pink-800/40',
           badge: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 border-pink-300 dark:border-pink-700'
         };
       case 'amber':
         return {
-          bg: 'bg-amber-50/50 dark:bg-amber-950/20',
-          border: 'border-amber-200 dark:border-amber-800',
+          bg: 'bg-amber-50/50 dark:bg-amber-500/[0.02]',
+          border: 'border-amber-200 dark:border-amber-800/40',
           badge: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700'
         };
       default:
         return {
-          bg: 'bg-gray-50/50 dark:bg-gray-950/20',
-          border: 'border-gray-200 dark:border-gray-800',
+          bg: 'bg-gray-50/50 dark:bg-gray-500/[0.02]',
+          border: 'border-gray-200 dark:border-gray-800/40',
           badge: 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700'
         };
     }
@@ -217,7 +217,7 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
   
   return (
     <div 
-      className={`section-node ${colors.bg} rounded-lg border-2 ${colors.border} shadow-sm backdrop-blur-sm transition-all duration-500`}
+      className={`section-node ${colors.bg} rounded-lg border-2 ${colors.border} shadow-sm transition-all duration-500`}
       onClick={handleSectionClick}
       style={{
         width: isSideSection ? '200px' : 'calc(100vw - 320px)',

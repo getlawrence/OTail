@@ -124,7 +124,7 @@ export function useSectionManager({
         hidden: isHidden, // Hide if not the full-screen section when in full-screen mode
         style: {
           zIndex: 1, // Base z-index for section container
-          backgroundColor: 'rgba(255, 255, 255, 0.5)', // Semi-transparent background
+          backgroundColor: 'transparent', // Make background transparent
         },
       };
     });

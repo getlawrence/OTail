@@ -20,6 +20,7 @@ import { useConfigSets } from "@/hooks/use-config-sets"
 import { ConfigSet } from "@/types/configSet"
 import { Agent } from "@/api/types"
 import { updateConfig } from "@/api/agent"
+import { load } from "js-yaml"
 
 interface ApplyConfigSetDialogProps {
     open: boolean
@@ -65,8 +66,8 @@ export function ApplyConfigSetDialog({ open, onOpenChange, agent }: ApplyConfigS
             if (!configSet) {
                 throw new Error("Config set not found")
             }
-
-            await updateConfig(agent.InstanceId, JSON.stringify(configSet.configuration))
+            const parsedConfig = JSON.stringify(load(configSet.configuration))
+            await updateConfig(agent.InstanceId, parsedConfig)
             toast({
                 title: "Success",
                 description: "Config set applied successfully",
@@ -87,18 +88,18 @@ export function ApplyConfigSetDialog({ open, onOpenChange, agent }: ApplyConfigS
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Apply Config Set</DialogTitle>
+                    <DialogTitle>Apply Project Configuration</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Select Config Set</label>
+                        <label className="text-sm font-medium">Select Project Configuration</label>
                         <Select
                             value={selectedConfigSet}
                             onValueChange={setSelectedConfigSet}
                             disabled={loading}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Select a config set" />
+                                <SelectValue placeholder="Select a project" />
                             </SelectTrigger>
                             <SelectContent>
                                 {configSets.map((set) => (

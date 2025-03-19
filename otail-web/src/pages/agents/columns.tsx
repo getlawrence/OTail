@@ -40,7 +40,7 @@ export const columns = ({ onViewConfig, onViewLogs, onApplyConfigSet }: ColumnsP
             if (status === undefined) {
                 return row.original.Status?.health?.last_error || "Unknown";
             }
-            return status?.health?.healthy ? "Healthy" : "No";
+            return status?.health?.healthy ? "Healthy" : "Unhealthy";
         },
     },
     {
@@ -65,7 +65,7 @@ export const columns = ({ onViewConfig, onViewLogs, onApplyConfigSet }: ColumnsP
                                 View logs
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onApplyConfigSet(agent)}>
-                                Apply config set
+                                Apply config
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                         </DropdownMenuContent>

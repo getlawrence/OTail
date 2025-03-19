@@ -7,8 +7,8 @@ export class LatencyEvaluator extends BasePolicyEvaluator {
         super(name);
     }
     evaluate(trace: Trace): Decision {
-        let minTime: bigint = BigInt(Infinity);
-        let maxTime: bigint = BigInt(-Infinity);
+        let minTime: bigint = BigInt(Number.MAX_SAFE_INTEGER);
+        let maxTime: bigint = BigInt(Number.MIN_SAFE_INTEGER);
 
         return hasSpanWithCondition(trace, (span: Span) => {
             if (BigInt(span.startTimeUnixNano) < minTime) {
