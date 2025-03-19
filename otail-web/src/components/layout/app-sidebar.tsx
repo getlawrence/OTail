@@ -1,6 +1,8 @@
-import { Telescope, LogOut, Users, Wrench, Palette, Settings } from "lucide-react"
+import React from 'react';
+import { Telescope, LogOut, Users, Wrench, Palette, FolderKanban } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { AnalyticsToggle } from "@/components/layout/analytics-toggle"
+import { Checklist } from "@/components/Checklist"
 import {
   Sidebar,
   SidebarContent,
@@ -43,9 +45,9 @@ const items = !noAuthRequired
       icon: Palette,
     },
     {
-      title: "ConfigSet",
-      url: "/config",
-      icon: Settings,
+      title: "Projects",
+      url: "/projects",
+      icon: FolderKanban,
       badge: "New"
     },
   ]
@@ -61,9 +63,9 @@ const items = !noAuthRequired
       icon: Palette
     },
     {
-      title: "ConfigSet",
-      url: "/config",
-      icon: Settings,
+      title: "Projects",
+      url: "/projects",
+      icon: FolderKanban,
       badge: "New"
     },
   ];
@@ -76,14 +78,15 @@ export function AppSidebar() {
     <Sidebar className="border-r border-border">
       <SidebarContent className="flex flex-col h-full">
         <div className="flex items-center px-6 py-4 mb-2">
-          <div className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
               <Telescope className="h-4 w-4 text-primary" />
             </div>
             <h2 className="text-xl font-semibold tracking-tight">OTail</h2>
-          </div>
+          </Link>
         </div>
-        <SidebarGroup className="px-2">
+
+        <SidebarGroup className="px-2 flex-1">
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
@@ -117,6 +120,10 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <div className="px-4 pb-4 border-border">
+          <Checklist />
+        </div>
 
         <div className="mt-auto border-t border-border">
           <div className="px-4 py-3">

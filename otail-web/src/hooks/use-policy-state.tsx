@@ -9,11 +9,16 @@ export const usePolicyState = (initialPolicies?: Policy[]) => {
     }, []);
 
     const addPolicy = useCallback((policyOrPolicies: Policy | Policy[]) => {
-        setPolicies(prev => 
-            Array.isArray(policyOrPolicies)
+        setPolicies(prev => {
+            const newPolicies = Array.isArray(policyOrPolicies)
                 ? [...prev, ...policyOrPolicies]
-                : [...prev,  policyOrPolicies]
-        );
+                : [...prev, policyOrPolicies];
+            
+            // Dispatch policy added event when a policy is added
+            window.dispatchEvent(new Event('policyAdded'));
+            
+            return newPolicies;
+        });
     }, []);
 
     const updatePolicy = useCallback((index: number, updatedPolicy: Policy) => {

@@ -70,9 +70,11 @@ export default function Dashboard() {
 
       const newConfigSet = await configSetsApi.create(createData);
       await setActive(newConfigSet.id);
+      // Dispatch project created event
+      window.dispatchEvent(new Event('projectCreated'));
       toast({
         title: 'Success',
-        description: 'Config set created and set as active',
+        description: 'Project created successfully',
       });
       loadRecentConfigSets();
       setIsFormDialogOpen(false);
@@ -80,7 +82,7 @@ export default function Dashboard() {
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to create config set',
+        description: 'Failed to create project',
         variant: 'destructive',
       });
     }

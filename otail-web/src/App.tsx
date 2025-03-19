@@ -11,9 +11,9 @@ import Dashboard from './pages/Dashboard'
 import { ThemeProvider } from "@/hooks/use-theme"
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import { Toaster } from "@/components/ui/toaster"
-import { OTailWalkthrough } from '@/components/walkthrough/OTailWalkthrough'
 import { MobileWarning } from '@/components/MobileWarning'
 import { ActiveConfigSetProvider } from '@/hooks/use-active-config-set'
+import { ChecklistProvider } from '@/contexts/ChecklistContext'
 
 const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
 
@@ -38,38 +38,39 @@ function App() {
       <Router>
         <AuthProvider>
           <ActiveConfigSetProvider>
-            <MobileWarning />
-            <Routes>
-              <Route path="/login" element={
-                <div className="h-screen w-screen flex items-center justify-center">
-                  <Login />
-                </div>
-              } />
-              <Route path="/register" element={
-                <div className="h-screen w-screen flex items-center justify-center">
-                  <Register />
-                </div>
-              } />
-              {noAuthRequired ? (
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/sampling" element={<Sampling />} />
-                  <Route path="/canvas" element={<CanvasPage />} />
-                  <Route path="/config" element={<Config />} />
-                </Route>
-              ) : (
-                <Route element={<RequireAuth><Layout /></RequireAuth>}>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/sampling" element={<Sampling />} />
-                  <Route path="/canvas" element={<CanvasPage />} />
-                  <Route path="/agents" element={<Agents />} />
-                  <Route path="/organization" element={<Organization />} />
-                  <Route path="/config" element={<Config />} />
-                </Route>
-              )}
-            </Routes>
-            <Toaster />
-            <OTailWalkthrough />
+            <ChecklistProvider>
+              <MobileWarning />
+              <Routes>
+                <Route path="/login" element={
+                  <div className="h-screen w-screen flex items-center justify-center">
+                    <Login />
+                  </div>
+                } />
+                <Route path="/register" element={
+                  <div className="h-screen w-screen flex items-center justify-center">
+                    <Register />
+                  </div>
+                } />
+                {noAuthRequired ? (
+                  <Route element={<Layout />}>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/sampling" element={<Sampling />} />
+                    <Route path="/canvas" element={<CanvasPage />} />
+                    <Route path="/config" element={<Config />} />
+                  </Route>
+                ) : (
+                  <Route element={<RequireAuth><Layout /></RequireAuth>}>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/sampling" element={<Sampling />} />
+                    <Route path="/canvas" element={<CanvasPage />} />
+                    <Route path="/agents" element={<Agents />} />
+                    <Route path="/organization" element={<Organization />} />
+                    <Route path="/config" element={<Config />} />
+                  </Route>
+                )}
+              </Routes>
+              <Toaster />
+            </ChecklistProvider>
           </ActiveConfigSetProvider>
         </AuthProvider>
       </Router>
