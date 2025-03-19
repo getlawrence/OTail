@@ -5,6 +5,7 @@ import { getAgents, fetchAgentLogs, updateConfig } from "@/api/agent"
 import { Agent, Log } from "@/api/types"
 import { LogsDialog } from "@/components/agents/LogsDialog"
 import { ConfigDialog } from "@/components/agents/ConfigDialog"
+import { ApplyConfigSetDialog } from "@/components/agents/ApplyConfigSetDialog"
 import { OnboardingState } from "@/components/agents/OnboardingState"
 import { load } from 'js-yaml'
 import { useToast } from "@/hooks/use-toast"
@@ -15,6 +16,7 @@ const AgentsPage = () => {
     const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
     const [configOpen, setConfigOpen] = useState(false)
     const [logsOpen, setLogsOpen] = useState(false)
+    const [applyConfigSetOpen, setApplyConfigSetOpen] = useState(false)
     const [logs, setLogs] = useState<Log[]>([])
     const [loading, setLoading] = useState(false)
     const { toast } = useToast()
@@ -58,6 +60,11 @@ const AgentsPage = () => {
         }
     }
 
+    const handleApplyConfigSet = (agent: Agent) => {
+        setSelectedAgent(agent)
+        setApplyConfigSetOpen(true)
+    }
+
     const handleUpdateConfig = async (value: string) => {
         if (!selectedAgent) return
 
@@ -80,7 +87,11 @@ const AgentsPage = () => {
         }
     }
 
-    const tableColumns = columns({ onViewConfig: handleViewConfig, onViewLogs: handleViewLogs })
+    const tableColumns = columns({ 
+        onViewConfig: handleViewConfig, 
+        onViewLogs: handleViewLogs,
+        onApplyConfigSet: handleApplyConfigSet 
+    })
 
     // Show onboarding state if no agents are connected and org has never connected an agent
     if (agents.length === 0 && organization && !organization.has_connected_agent) {
@@ -112,6 +123,12 @@ const AgentsPage = () => {
                         onOpenChange={setLogsOpen}
                         logs={logs}
                         loading={loading}
+                    />
+
+                    <ApplyConfigSetDialog
+                        open={applyConfigSetOpen}
+                        onOpenChange={setApplyConfigSetOpen}
+                        agent={selectedAgent}
                     />
                 </>
             )}
