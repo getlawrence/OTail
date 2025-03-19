@@ -36,13 +36,11 @@ const items = !noAuthRequired
       title: "Agents",
       url: "/agents",
       icon: Telescope,
-      badge: "New"
     },
     {
       title: "Canvas",
       url: "/canvas",
       icon: Palette,
-      badge: "New"
     },
     {
       title: "ConfigSet",
@@ -60,8 +58,7 @@ const items = !noAuthRequired
     {
       title: "Canvas",
       url: "/canvas",
-      icon: Palette,
-      badge: "New"
+      icon: Palette
     },
     {
       title: "ConfigSet",

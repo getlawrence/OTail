@@ -20,6 +20,8 @@ import { trackSampling } from '@/utils/analytics';
 import { Pencil, PlayCircle, Plus } from "lucide-react";
 import { RecipesProvider } from '@/contexts/recipes-context';
 import { ConfigSetActions } from '@/components/config/ConfigSetActions';
+import { toEmptyCollectorConfig } from './utils';
+import yaml from 'js-yaml';
 
 type Mode = 'Edit' | 'Test'
 
@@ -176,7 +178,7 @@ const ConfigEditor = () => {
                   <p className="text-sm text-muted-foreground">Configure your sampling policies</p>
                 </div>
                 <ConfigSetActions
-                  getCurrentState={() => JSON.stringify({ policies })}
+                  getCurrentState={() => yaml.dump(toEmptyCollectorConfig(policies))}
                   onImport={handleConfigImport}
                 />
               </div>
