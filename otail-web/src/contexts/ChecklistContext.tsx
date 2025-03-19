@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 interface ChecklistContextType {
     currentStep: number;
     isMinimized: boolean;
-    isPermanentlyHidden: boolean;
     toggleMinimize: () => void;
     goToNextStep: () => void;
     goToPreviousStep: () => void;
@@ -25,31 +24,31 @@ export const useChecklist = () => {
 export const ChecklistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [isMinimized, setIsMinimized] = useState(false);
-    const [isPermanentlyHidden, setIsPermanentlyHidden] = useState(false);
-    const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-
-    // Load saved state from localStorage on mount
-    useEffect(() => {
-        const savedState = localStorage.getItem(STORAGE_KEY);
-        if (savedState) {
-            try {
-                const { completedSteps: savedCompletedSteps, isPermanentlyHidden: savedHidden } = JSON.parse(savedState);
-                setCompletedSteps(new Set(savedCompletedSteps));
-                setIsPermanentlyHidden(savedHidden);
-            } catch (error) {
-                console.error('Failed to load checklist state:', error);
+    const [completedSteps, setCompletedSteps] = useState<Set<number>>(() => {
+        // Initialize from localStorage on component mount
+        try {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if (savedState) {
+                const { completedSteps: savedSteps } = JSON.parse(savedState);
+                return new Set(savedSteps);
             }
+        } catch (error) {
+            console.error('Failed to load checklist state:', error);
         }
-    }, []);
+        return new Set();
+    });
 
     // Save state to localStorage whenever it changes
     useEffect(() => {
-        const stateToSave = {
-            completedSteps: Array.from(completedSteps),
-            isPermanentlyHidden,
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
-    }, [completedSteps, isPermanentlyHidden]);
+        try {
+            const stateToSave = {
+                completedSteps: Array.from(completedSteps),
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+        } catch (error) {
+            console.error('Failed to save checklist state:', error);
+        }
+    }, [completedSteps]);
 
     const toggleMinimize = () => setIsMinimized(prev => !prev);
     const goToNextStep = () => setCurrentStep(prev => Math.min(prev + 1, 2));
@@ -57,17 +56,26 @@ export const ChecklistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     useEffect(() => {
         const handleProjectCreated = () => {
-            setCompletedSteps(prev => new Set([...prev, 0]));
+            setCompletedSteps(prev => {
+                const newSet = new Set([...prev, 0]);
+                return newSet;
+            });
             goToNextStep();
         };
 
         const handlePolicyAdded = () => {
-            setCompletedSteps(prev => new Set([...prev, 1]));
+            setCompletedSteps(prev => {
+                const newSet = new Set([...prev, 1]);
+                return newSet;
+            });
             goToNextStep();
         };
 
         const handleTestModeActivated = () => {
-            setCompletedSteps(prev => new Set([...prev, 2]));
+            setCompletedSteps(prev => {
+                const newSet = new Set([...prev, 2]);
+                return newSet;
+            });
             goToNextStep();
         };
 
@@ -87,7 +95,6 @@ export const ChecklistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             value={{
                 currentStep,
                 isMinimized,
-                isPermanentlyHidden,
                 toggleMinimize,
                 goToNextStep,
                 goToPreviousStep,

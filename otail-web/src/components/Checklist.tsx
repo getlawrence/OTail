@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useChecklist } from '@/contexts/ChecklistContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,40 +22,12 @@ const steps = [
 ];
 
 export const Checklist: React.FC = () => {
-    const { currentStep, isMinimized, isPermanentlyHidden, toggleMinimize, completedSteps } = useChecklist();
+    const { currentStep, isMinimized, toggleMinimize, completedSteps } = useChecklist();
     const [showConfetti, setShowConfetti] = useState(false);
-    const [_, setWindowSize] = useState({
-        width: window.innerWidth,
-        height: window.innerHeight,
-    });
 
     const progress = (completedSteps.size / steps.length) * 100;
     const remainingSteps = steps.length - completedSteps.size;
 
-    // Update window size on resize
-    useEffect(() => {
-        const handleResize = () => {
-            setWindowSize({
-                width: window.innerWidth,
-                height: window.innerHeight,
-            });
-        };
-
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    // Show confetti immediately when all steps are completed
-    useEffect(() => {
-        if (completedSteps.size === steps.length) {
-            setShowConfetti(true);
-        }
-    }, [completedSteps.size]);
-
-    // Don't render anything if permanently hidden
-    if (isPermanentlyHidden) {
-        return null;
-    }
 
     if (isMinimized) {
         return (
