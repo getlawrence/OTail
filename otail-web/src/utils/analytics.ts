@@ -55,7 +55,7 @@ export const trackSampling = {
     trackEvent('sampling_config_changed', { type: changeType }),
   simulationRun: () => trackEvent('sampling_simulation_run'),
   policyBuilderAction: (
-    action: 'add' | 'update' | 'remove' | 'add_popular_recipe' | 'add_recipe' | 'import_config_set',
+    action: 'add' | 'update' | 'remove' | 'add_popular_recipe' | 'add_recipe' | 'import_config_set' | 'save_config',
     policyType: string
   ) => trackEvent('sampling_policy_builder_action', { action, policyType })
 }

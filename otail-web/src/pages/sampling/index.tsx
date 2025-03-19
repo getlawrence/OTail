@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card } from '@/components/ui/card';
 import {
@@ -21,7 +21,9 @@ import { Pencil, PlayCircle, Plus } from "lucide-react";
 import { RecipesProvider } from '@/contexts/recipes-context';
 import { ConfigSetActions } from '@/components/config/ConfigSetActions';
 import { toEmptyCollectorConfig } from './utils';
+import { useActiveConfigSet } from '@/hooks/use-active-config-set';
 import yaml from 'js-yaml';
+import { createNewPolicy } from '@/lib/policy/utils';
 
 type Mode = 'Edit' | 'Test'
 
@@ -113,36 +115,73 @@ const ConfigEditor = () => {
     updatePolicies,
   } = useConfigState();
 
-  // Enhanced handlers with tracking
-  const handlePolicyAdd = (policy: PolicyType) => {
+  const { activeConfigSet, updateActiveConfig } = useActiveConfigSet();
+  const initialLoadDone = useRef(false);
+
+  useEffect(() => {
+    if (activeConfigSet?.configuration && !initialLoadDone.current) {
+      const cfg = yaml.load(activeConfigSet.configuration) as any;
+      const policies = cfg.processors?.tail_sampling?.policies || [];
+      if (Array.isArray(policies)) {
+        updatePolicies(policies);
+        initialLoadDone.current = true;
+      }
+    }
+  }, [activeConfigSet])
+
+  const handlePolicyAdd = async (policyType: PolicyType) => {
+    const policy = createNewPolicy(policyType);
     handleAddPolicy(policy);
-    trackSampling.policyBuilderAction('add', policy);
+    trackSampling.policyBuilderAction('add', policyType);
+    if (activeConfigSet) {
+      await updateActiveConfig(toEmptyCollectorConfig([...policies, policy]));
+    }
   };
 
-  const handlePolicyUpdate = (index: number, updatedPolicy: Policy) => {
+  const handlePolicyUpdate = async (index: number, updatedPolicy: Policy) => {
+    const updatedPolicies = [...policies];
+    updatedPolicies[index] = updatedPolicy;
     handleUpdatePolicy(index, updatedPolicy);
     trackSampling.policyBuilderAction('update', updatedPolicy.type);
+    if (activeConfigSet) {
+      await updateActiveConfig(toEmptyCollectorConfig(updatedPolicies));
+    }
   };
 
-  const handlePolicyRemove = (index: number, policy: Policy) => {
+  const handlePolicyRemove = async (index: number, policy: Policy) => {
+    const updatedPolicies = policies.filter((_, i) => i !== index);
     handleRemovePolicy(index);
     trackSampling.policyBuilderAction('remove', policy.type);
+    if (activeConfigSet) {
+      await updateActiveConfig(toEmptyCollectorConfig(updatedPolicies));
+    }
   };
 
-  const handlePopularPolicySelect = (recipe: Recipe) => {
+  const handlePopularPolicySelect = async (recipe: Recipe) => {
     importPolicies(recipe.policies);
     trackSampling.policyBuilderAction('add_popular_recipe', recipe.name);
+    if (activeConfigSet) {
+      await updateActiveConfig(toEmptyCollectorConfig([...policies, ...recipe.policies]));
+    }
   };
 
-  const handleRecipeSelect = (recipe: Recipe) => {
+  const handleRecipeSelect = async (recipe: Recipe) => {
     importPolicies(recipe.policies);
     trackSampling.policyBuilderAction('add_recipe', recipe.name);
+    if (activeConfigSet) {
+      await updateActiveConfig(toEmptyCollectorConfig([...policies, ...recipe.policies]));
+    }
   };
 
-  const handleConfigImport = (configuration: any) => {
-    if (Array.isArray(configuration.policies)) {
-      updatePolicies(configuration.policies);
+  const handleConfigImport = async (configuration: any) => {
+    const cfg = yaml.load(configuration) as any;
+    const policies = cfg.processors?.tail_sampling?.policies || [];
+    if (Array.isArray(policies)) {
+      updatePolicies(policies);
       trackSampling.policyBuilderAction('import_config_set', '');
+      if (activeConfigSet) {
+        await updateActiveConfig(toEmptyCollectorConfig(policies));
+      }
     }
   };
 
@@ -178,7 +217,7 @@ const ConfigEditor = () => {
                   <p className="text-sm text-muted-foreground">Configure your sampling policies</p>
                 </div>
                 <ConfigSetActions
-                  getCurrentState={() => yaml.dump(toEmptyCollectorConfig(policies))}
+                  getCurrentState={() => toEmptyCollectorConfig(policies)}
                   onImport={handleConfigImport}
                 />
               </div>

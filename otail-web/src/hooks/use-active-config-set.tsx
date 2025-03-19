@@ -4,85 +4,72 @@ import type { ConfigSet } from '@/types/configSet';
 
 interface ActiveConfigSetContextType {
   activeConfigSet: ConfigSet | null;
-  hasUnsavedChanges: boolean;
+  activeConfigSetId: string | null;
   setActive: (id: string) => Promise<void>;
   clearActive: () => void;
-  updateActiveConfig: (config: any) => void;
-  saveActiveConfig: () => Promise<void>;
+  updateActiveConfig: (config: any) => Promise<void>;
 }
 
 const ActiveConfigSetContext = createContext<ActiveConfigSetContextType | null>(null);
 
 export function ActiveConfigSetProvider({ children }: { children: React.ReactNode }) {
+  const [activeConfigSetId, setActiveConfigSetId] = useState<string | null>(null);
   const [activeConfigSet, setActiveConfigSet] = useState<ConfigSet | null>(null);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Load active config set from localStorage on mount
+  // Load active config set ID from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem('activeConfigSet');
-    if (stored) {
-      try {
-        const configSet = JSON.parse(stored);
-        setActiveConfigSet(configSet);
-      } catch (error) {
-        console.error('Failed to parse stored active config set:', error);
-        localStorage.removeItem('activeConfigSet');
-      }
+    const storedId = localStorage.getItem('activeConfigSetId');
+    if (storedId) {
+      setActiveConfigSetId(storedId);
     }
   }, []);
 
+  // Fetch config set data whenever ID changes
+  useEffect(() => {
+    if (activeConfigSetId) {
+      configSetsApi.get(activeConfigSetId)
+        .then(setActiveConfigSet)
+        .catch(() => {
+          setActiveConfigSetId(null);
+          setActiveConfigSet(null);
+          localStorage.removeItem('activeConfigSetId');
+        });
+    } else {
+      setActiveConfigSet(null);
+    }
+  }, [activeConfigSetId]);
+
   const setActive = async (id: string) => {
     try {
-      // Immediately set a partial active state
-      setActiveConfigSet({
-        id,
-        name: 'Loading...',
-        configuration: {},
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        version: '1.0.0',
-      });
-      
-      // Get the full config set data
       const configSet = await configSetsApi.get(id);
-      
-      // Update with complete data
+      setActiveConfigSetId(id);
       setActiveConfigSet(configSet);
-      localStorage.setItem('activeConfigSet', JSON.stringify(configSet));
-      setHasUnsavedChanges(false);
+      localStorage.setItem('activeConfigSetId', id);
     } catch (error) {
-      // If there's an error, clear the active state
+      setActiveConfigSetId(null);
       setActiveConfigSet(null);
-      localStorage.removeItem('activeConfigSet');
+      localStorage.removeItem('activeConfigSetId');
       throw error;
     }
   };
 
   const clearActive = () => {
+    setActiveConfigSetId(null);
     setActiveConfigSet(null);
-    setHasUnsavedChanges(false);
-    localStorage.removeItem('activeConfigSet');
+    localStorage.removeItem('activeConfigSetId');
   };
 
-  const updateActiveConfig = (config: any) => {
-    if (activeConfigSet) {
-      setActiveConfigSet({
-        ...activeConfigSet,
-        configuration: config,
-      });
-      setHasUnsavedChanges(true);
-    }
-  };
-
-  const saveActiveConfig = async () => {
-    if (!activeConfigSet) return;
+  const updateActiveConfig = async (config: any) => {
+    if (!activeConfigSetId) return;
 
     try {
       await configSetsApi.update({
-        id: activeConfigSet.id,
-        configuration: activeConfigSet.configuration,
+        id: activeConfigSetId,
+        configuration: config,
       });
-      setHasUnsavedChanges(false);
+      // Refresh the config set data after update
+      const updated = await configSetsApi.get(activeConfigSetId);
+      setActiveConfigSet(updated);
     } catch (error) {
       throw error;
     }
@@ -92,11 +79,10 @@ export function ActiveConfigSetProvider({ children }: { children: React.ReactNod
     <ActiveConfigSetContext.Provider
       value={{
         activeConfigSet,
-        hasUnsavedChanges,
+        activeConfigSetId,
         setActive,
         clearActive,
         updateActiveConfig,
-        saveActiveConfig,
       }}
     >
       {children}

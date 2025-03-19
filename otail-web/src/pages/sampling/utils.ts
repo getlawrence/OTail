@@ -1,7 +1,8 @@
 import { Policy } from "@/types/policy";
+import yaml from 'js-yaml';
 
 const toEmptyCollectorConfig = (policies: Policy[]) => {
-    return {
+    return yaml.dump({
         processors: {
             "tail_sampling": {
                 decision_wait: "30s",
@@ -20,7 +21,7 @@ const toEmptyCollectorConfig = (policies: Policy[]) => {
                 }
             }
         }
-    }
+    })
 }
 
 export { toEmptyCollectorConfig }
