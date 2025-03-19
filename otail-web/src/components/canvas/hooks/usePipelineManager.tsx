@@ -3,6 +3,7 @@ import { Node, Edge, Position } from 'reactflow';
 import { load } from 'js-yaml';
 import { styles, LAYOUT_CONFIG } from '../constants';
 import type { OtelConfig, SectionType } from '../types';
+import { calculateNodeLayout } from '../utils/layoutCalculator';
 
 interface UsePipelineManagerProps {
   setNodes: (updater: (nodes: Node[]) => Node[]) => void;
@@ -23,10 +24,14 @@ export function usePipelineManager({
     try {
       const config: OtelConfig = load(yamlString) as OtelConfig;
       const newNodes: Node[] = [];
-      const newEdges: Edge[] = [];
       const connectorNodes: Node[] = [];
       const connectorMap = new Map<string, { sourcePipelines: string[], targetPipelines: string[] }>();
       const connectorNames = new Set<string>();
+
+      // Group nodes by pipeline type for layout
+      const nodesByPipelineType: Record<string, Node[]> = {};
+      const edgesByPipelineType: Record<string, Edge[]> = {};
+      const allEdges: Edge[] = [];
 
       // Identify all connectors first to avoid creating duplicate nodes
       if (config.connectors) {
@@ -36,6 +41,15 @@ export function usePipelineManager({
         });
       }
 
+      // Initialize pipeline type groups
+      Object.keys(config.service?.pipelines || {}).forEach(([pipelineKey]) => {
+        const [pipelineType] = pipelineKey.split('/');
+        if (!nodesByPipelineType[pipelineType]) {
+          nodesByPipelineType[pipelineType] = [];
+          edgesByPipelineType[pipelineType] = [];
+        }
+      });
+
       // Process each pipeline in the config
       Object.entries(config.service?.pipelines || {}).forEach(([pipelineKey, pipeline]) => {
         const [pipelineType, _] = pipelineKey.split('/');
@@ -43,17 +57,16 @@ export function usePipelineManager({
         const createNodes = (
           components: string[],
           type: 'receiver' | 'processor' | 'exporter',
-          startX: number,
-          y: number
+          index: number
         ) => {
           return components
             .filter(label => !connectorNames.has(label)) // Skip connectors, we'll create them separately
-            .map((label, index) => ({
-              id: `${type}-${label}-${pipelineType}-${index}`,
+            .map((label, componentIndex) => ({
+              id: `${type}-${label}-${pipelineType}-${componentIndex}`,
               type,
               position: {
-                x: startX + (index * LAYOUT_CONFIG.NODE_SPACING),
-                y
+                x: 0, // Initial position, will be updated by layout calculator
+                y: 0
               },
               data: {
                 label,
@@ -73,12 +86,18 @@ export function usePipelineManager({
         };
 
         // Create nodes for each component type
-        const receiverNodes = createNodes(pipeline.receivers || [], 'receiver', 50, 50);
-        const processorNodes = createNodes(pipeline.processors || [], 'processor', 300, 50);
-        const exporterNodes = createNodes(pipeline.exporters || [], 'exporter', 550, 50);
+        const receiverNodes = createNodes(pipeline.receivers || [], 'receiver', 0);
+        const processorNodes = createNodes(pipeline.processors || [], 'processor', 1);
+        const exporterNodes = createNodes(pipeline.exporters || [], 'exporter', 2);
 
-        newNodes.push(...receiverNodes, ...processorNodes, ...exporterNodes);
+        // Add nodes to their respective pipeline type group
+        if (!nodesByPipelineType[pipelineType]) {
+          nodesByPipelineType[pipelineType] = [];
+          edgesByPipelineType[pipelineType] = [];
+        }
 
+        nodesByPipelineType[pipelineType].push(...receiverNodes, ...processorNodes, ...exporterNodes);
+        
         // Create edges between nodes
         const createEdges = (sourceNodes: Node[], targetNodes: Node[]) => {
           return sourceNodes.flatMap(source =>
@@ -92,15 +111,24 @@ export function usePipelineManager({
           );
         };
 
+        let pipelineEdges: Edge[] = [];
+        
         if (receiverNodes.length && processorNodes.length) {
-          newEdges.push(...createEdges(receiverNodes, processorNodes));
+          const edges = createEdges(receiverNodes, processorNodes);
+          pipelineEdges.push(...edges);
         }
         if (processorNodes.length && exporterNodes.length) {
-          newEdges.push(...createEdges(processorNodes, exporterNodes));
+          const edges = createEdges(processorNodes, exporterNodes);
+          pipelineEdges.push(...edges);
         }
         if (receiverNodes.length && exporterNodes.length && processorNodes.length === 0) {
-          newEdges.push(...createEdges(receiverNodes, exporterNodes));
+          const edges = createEdges(receiverNodes, exporterNodes);
+          pipelineEdges.push(...edges);
         }
+        
+        // Add edges to their respective pipeline type group
+        edgesByPipelineType[pipelineType].push(...pipelineEdges);
+        allEdges.push(...pipelineEdges);
         
         // Track connectors used in this pipeline
         pipeline.receivers.forEach(receiver => {
@@ -126,6 +154,37 @@ export function usePipelineManager({
         });
       });
       
+      // Apply layout to each pipeline type
+      const layoutedNodesByType: Record<string, Node[]> = {};
+      
+      Object.keys(nodesByPipelineType).forEach(pipelineType => {
+        const pipelineNodes = nodesByPipelineType[pipelineType];
+        const pipelineEdges = edgesByPipelineType[pipelineType];
+        
+        if (pipelineNodes.length === 0) return;
+        
+        // Default section bounds - these could be retrieved from your section nodes
+        const sectionBounds = {
+          x: 100,
+          y: 50, // This would ideally be dynamically determined based on the section's position
+          width: window.innerWidth - 320,
+          height: window.innerHeight / 4
+        };
+        
+        // Apply layout
+        const layoutedNodes = calculateNodeLayout(pipelineNodes, pipelineEdges, {
+          direction: 'LR',
+          nodeSpacing: LAYOUT_CONFIG.NODE_SPACING || 50,
+          rankSpacing: 50,
+          fitWithinBounds: true,
+          bounds: sectionBounds,
+          headerHeight: 40
+        });
+        
+        layoutedNodesByType[pipelineType] = layoutedNodes;
+        newNodes.push(...layoutedNodes);
+      });
+      
       // Process connectors after all pipeline nodes are created
       if (config.connectors) {
         Object.entries(config.connectors).forEach(([connectorName, connectorConfig]) => {
@@ -141,7 +200,8 @@ export function usePipelineManager({
           const [sourceType] = sourcePipeline.split('/');
           const [targetType] = targetPipeline.split('/');
           
-          // Create connector node in the source pipeline section
+          // Position the connector node between processors and exporters
+          // This could be improved to use layout calculations
           const connectorNode: Node = {
             id: `connector-${connectorName}`,
             type: 'connector',
@@ -196,7 +256,7 @@ export function usePipelineManager({
             const [pipelineType] = targetPipeline.split('/');
             
             const receivers = newNodes.filter(node => {
-              const match = node.data.pipelineType === pipelineType && node.type === 'receiver';sourcePipeline
+              const match = node.data.pipelineType === pipelineType && node.type === 'receiver';
               return match;
             });
             
@@ -227,7 +287,7 @@ export function usePipelineManager({
               if (sourceNode.id === connectorNode.id) return; // Skip self-connections
               
               const edgeId = `edge-${sourceNode.id}-${connectorNode.id}`;
-              newEdges.push({
+              allEdges.push({
                 id: edgeId,
                 source: sourceNode.id,
                 target: connectorNode.id,
@@ -241,7 +301,7 @@ export function usePipelineManager({
               
               const edgeId = `edge-${connectorNode.id}-${targetNode.id}`;
               
-              newEdges.push({
+              allEdges.push({
                 id: edgeId,
                 source: connectorNode.id,
                 target: targetNode.id,
@@ -253,7 +313,7 @@ export function usePipelineManager({
             allSourceExporters.forEach(exporter => {
               const edgeId = `edge-${exporter.id}-${connectorNode.id}`;
               
-              newEdges.push({
+              allEdges.push({
                 id: edgeId,
                 source: exporter.id,
                 target: connectorNode.id,
@@ -265,7 +325,7 @@ export function usePipelineManager({
             allTargetReceivers.forEach(receiver => {
               const edgeId = `edge-${connectorNode.id}-${receiver.id}`;
               
-              newEdges.push({
+              allEdges.push({
                 id: edgeId,
                 source: connectorNode.id,
                 target: receiver.id,
@@ -287,7 +347,7 @@ export function usePipelineManager({
         return [...sectionNodes, ...newNodes];
       });
       
-      setEdges(newEdges);
+      setEdges(allEdges);
     } catch (error) {
       console.error('Error parsing YAML:', error);
     }
@@ -348,10 +408,11 @@ export function usePipelineManager({
       id: `edge-${sourceNode.id}-${targetNode.id}`,
       source: sourceNode.id,
       target: targetNode.id,
-      ...styles.validConnectionStyle, // Use all properties from the style definition
+      ...styles.validConnectionStyle,
     };
 
-    setEdges(edges => [...edges, newEdge]);
+    // Add the new edge to existing edges instead of replacing
+    setEdges(currentEdges => [...currentEdges, newEdge]);
     return newEdge;
   }, [setEdges]);
 

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { Node, Edge, useEdges } from 'reactflow';
 import { PIPELINE_SECTIONS } from '../constants';
 import type { PipelineType, SectionType } from '../types';
-import dagre from '@dagrejs/dagre';
+import { calculateNodeLayout } from '../utils/layoutCalculator';
 
 interface UseSectionManagerProps {
   fullScreenSection: SectionType | null;
@@ -301,76 +301,33 @@ export function useSectionManager({
         const sectionWidth = sectionNode.data.width;
         const sectionHeight = sectionNode.data.height;
 
-        // Add padding for section header and borders
-        const padding = 40;
-        const headerHeight = 40;
-
-        // Use dagre to calculate layout
-        const dagreGraph = new dagre.graphlib.Graph();
-        dagreGraph.setDefaultEdgeLabel(() => ({}));
-
-        // Set graph direction and spacing
-        dagreGraph.setGraph({
-          rankdir: 'LR', // Left to right layout (changed from TB)
-          nodesep: 50,   // Horizontal spacing between nodes
-          ranksep: 50,   // Vertical spacing between ranks
-          marginx: padding,
-          marginy: padding + headerHeight,
+        // Use the layout calculator
+        const layoutedNodes = calculateNodeLayout(sectionNodes, sectionEdges, {
+          direction: 'LR',
+          nodeSpacing: 50,
+          rankSpacing: 50,
+          marginX: 40,
+          marginY: 40,
+          fitWithinBounds: true,
+          bounds: {
+            x: sectionX,
+            y: sectionY,
+            width: sectionWidth,
+            height: sectionHeight
+          },
+          headerHeight: 40
         });
 
-        // Add nodes to dagre graph with their dimensions
-        sectionNodes.forEach(node => {
-          dagreGraph.setNode(node.id, {
-            width: node.width || 150,
-            height: node.height || 50,
-          });
-        });
+        // Add section type to node data
+        const nodesWithSectionType = layoutedNodes.map(node => ({
+          ...node,
+          data: {
+            ...node.data,
+            sectionType,
+          },
+        }));
 
-        // Add edges to dagre graph
-        sectionEdges.forEach(edge => {
-          dagreGraph.setEdge(edge.source, edge.target);
-        });
-
-        // Calculate the layout
-        dagre.layout(dagreGraph);
-
-        // Apply the calculated layout with adjustments to fit within section
-        const layoutedNodes = sectionNodes.map(node => {
-          const dagreNode = dagreGraph.node(node.id);
-
-          // Skip if dagre node is not found
-          if (!dagreNode) return node;
-
-          // Calculate position within section boundaries
-          const x = sectionX + dagreNode.x - (dagreNode.width / 2);
-          const y = sectionY + dagreNode.y - (dagreNode.height / 2) + headerHeight;
-
-          // Ensure node stays within section boundaries
-          const boundedX = Math.max(
-            sectionX + padding,
-            Math.min(x, sectionX + sectionWidth - (node.width || 150) - padding)
-          );
-          const boundedY = Math.max(
-            sectionY + padding + headerHeight,
-            Math.min(y, sectionY + sectionHeight - (node.height || 50) - padding)
-          );
-
-          // Apply the calculated position to the node
-          return {
-            ...node,
-            position: {
-              x: boundedX,
-              y: boundedY,
-            },
-            // Store section type in node data for future reference
-            data: {
-              ...node.data,
-              sectionType,
-            },
-          };
-        });
-
-        rearrangedNodes.push(...layoutedNodes);
+        rearrangedNodes.push(...nodesWithSectionType);
       }
     });
 
