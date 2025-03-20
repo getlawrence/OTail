@@ -35,13 +35,19 @@ const ModeToggle = ({ mode, onToggleMode }: { mode: Mode; onToggleMode: () => vo
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button
+          id="test-mode-button"
+          variant="outline"
+          size="sm"
+          onClick={() => handleModeChange(mode === 'Edit' ? 'Test' : 'Edit')}
+          className="gap-2"
+        >
           {mode === 'Edit' ? (
             <Pencil className="h-4 w-4" />
           ) : (
             <PlayCircle className="h-4 w-4" />
           )}
-          {mode} Mode
+          {mode === 'Edit' ? 'Switch to Test Mode' : 'Switch to Edit Mode'}
           <span className="opacity-70">↓</span>
         </Button>
       </DropdownMenuTrigger>
