@@ -8,6 +8,12 @@ frontend:
     repository: mottibec123/otail
     tag: otail-web
     pullPolicy: Always
+    buildArgs:
+      VITE_API_BASE_URL: "http://otail.local/api"
+      VITE_NO_AUTH_REQUIRED: "false"
+      VITE_POSTHOG_KEY: "phc_I35cAhURhANsxly4E2IbYkrvsdc09DpkPCeIi3uMRNv"
+      VITE_POSTHOG_HOST: "https://us.i.posthog.com"
+      VITE_FORCE_POSTHOG: "false"
   service:
     type: ClusterIP
     port: 3000
@@ -22,6 +28,14 @@ frontend:
     - name: NODE_ENV
       value: "production"
     - name: VITE_NO_AUTH_REQUIRED
+      value: "false"
+    - name: VITE_API_BASE_URL
+      value: "http://otail.local/api"
+    - name: VITE_POSTHOG_KEY
+      value: "phc_I35cAhURhANsxly4E2IbYkrvsdc09DpkPCeIi3uMRNv"
+    - name: VITE_POSTHOG_HOST
+      value: "https://us.i.posthog.com"
+    - name: VITE_FORCE_POSTHOG
       value: "false"
   ingress:
     enabled: true

@@ -30,11 +30,11 @@ spec:
             - name: CLICKHOUSE_DSN
               value: "clickhouse://clickhouse:9000/otail"
             - name: MONGODB_URI
-              value: "mongodb://{{ .Release.Name }}-mongodb:27017"
+              value: "mongodb://mongodb:27017"
             - name: MONGODB_DB
               value: "otail"
             - name: OTLP_ENDPOINT
-              value: "{{ .Release.Name }}-collector:4317"
+              value: "collector:4317"
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
 ---

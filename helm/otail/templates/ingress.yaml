@@ -2,46 +2,41 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-ingress
+  name: otail-ingress
   namespace: {{ .Release.Namespace }}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
+  ingressClassName: nginx
   rules:
-    - host: {{ .Values.ingress.host | quote }}
+    - host: otail.local
       http:
         paths:
-          {{- if .Values.frontend.ingress.enabled }}
-          - path: /?(.*)
-            pathType: Prefix
+          - path: /(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Release.Name }}-frontend
+                name: otail-web
                 port:
                   number: 3000
-          {{- end }}
-          {{- if .Values.backend.ingress.enabled }}
-          - path: /api/?(.*)
-            pathType: Prefix
+          - path: /api/(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Release.Name }}-backend
+                name: otail-server
                 port:
                   number: 8080
-          {{- end }}
-          {{- if .Values.grafana.ingress.enabled }}
-          - path: /grafana/?(.*)
-            pathType: Prefix
+          - path: /grafana/(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ .Release.Name }}-grafana
+                name: grafana
                 port:
                   number: 3000
-          {{- end }}
   {{- if .Values.ingress.tls }}
   tls:
     - hosts:
-        - {{ .Values.ingress.host | quote }}
+        - otail.local
       secretName: {{ .Release.Name }}-tls
   {{- end }}
 {{- end }} 
