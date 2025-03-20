@@ -1,0 +1,52 @@
+name: Update Changelog
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  update-changelog:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Update Changelog
+        uses: TriPSs/conventional-changelog-action@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version-file: |
+            helm/otail/Chart.yaml:version
+            helm/otail/Chart.yaml:appVersion
+          skip-version-file: true
+          skip-commit: true
+          skip-tag: true
+          release-count: 0
+          git-message: "chore: update changelog"
+          preset: "angular"
+          tag-prefix: "v"
+          output-file: "CHANGELOG.md"
+          release-summary: true
+          commit-path: "."
+          types: |
+            feat: Added
+            fix: Fixed
+            docs: Changed
+            style: Changed
+            refactor: Changed
+            perf: Changed
+            test: Changed
+            build: Changed
+            ci: Changed
+            chore: Changed
+            revert: Changed
+            security: Security 

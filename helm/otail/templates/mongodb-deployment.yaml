@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.mongodb.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.mongodb.name }}
+spec:
+  serviceName: {{ .Values.mongodb.name }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.mongodb.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.mongodb.name }}
+    spec:
+      containers:
+        - name: {{ .Values.mongodb.name }}
+          image: "{{ .Values.mongodb.image.repository }}:{{ .Values.mongodb.image.tag }}"
+          env:
+            - name: MONGODB_USERNAME
+              value: ""
+            - name: MONGODB_PASSWORD
+              value: ""
+            - name: MONGODB_DATABASE
+              value: "otail"
+          ports:
+            - containerPort: 27017
+              name: mongodb
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "200m"
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.mongodb.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.mongodb.name }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      targetPort: mongodb
+  selector:
+    app: {{ .Values.mongodb.name }} 

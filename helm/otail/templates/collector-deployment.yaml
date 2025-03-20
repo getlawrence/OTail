@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-collector
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.collector.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.collector.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.collector.name }}
+    spec:
+      containers:
+        - name: {{ .Values.collector.name }}
+          image: "{{ .Values.collector.image.repository }}:{{ .Values.collector.image.tag }}"
+          imagePullPolicy: {{ .Values.collector.image.pullPolicy }}
+          args:
+            - --config=/etc/otel/config.yaml
+          ports:
+            {{- range .Values.collector.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .port }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.collector.resources | nindent 12 }}
+          volumeMounts:
+            - name: collector-config
+              mountPath: /etc/otel
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: collector-config
+          configMap:
+            name: {{ .Release.Name }}-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.collector.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.collector.name }}
+spec:
+  type: {{ .Values.collector.service.type }}
+  ports:
+    {{- range .Values.collector.service.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .name }}
+      protocol: TCP
+      name: {{ .name }}
+    {{- end }}
+  selector:
+    app: {{ .Values.collector.name }} 

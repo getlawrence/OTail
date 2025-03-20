@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.opampSupervisor.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.opampSupervisor.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.opampSupervisor.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.opampSupervisor.name }}
+    spec:
+      containers:
+        - name: {{ .Values.opampSupervisor.name }}
+          image: "{{ .Values.opampSupervisor.image.repository }}:{{ .Values.opampSupervisor.image.tag }}"
+          imagePullPolicy: {{ .Values.opampSupervisor.image.pullPolicy }}
+          ports:
+            {{- range .Values.opampSupervisor.service.ports }}
+            - containerPort: {{ .port }}
+              name: {{ .name }}
+            {{- end }}
+          env:
+            {{- range .Values.opampSupervisor.env }}
+            - name: {{ .name }}
+              {{- if .valueFrom }}
+              {{- toYaml .valueFrom | nindent 14 }}
+              {{- else }}
+              value: {{ .value | quote }}
+              {{- end }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.opampSupervisor.resources | nindent 12 }}
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/opamp
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.opampSupervisor.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.opampSupervisor.name }}
+spec:
+  type: {{ .Values.opampSupervisor.service.type }}
+  ports:
+    {{- range .Values.opampSupervisor.service.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .name }}
+      protocol: TCP
+      name: {{ .name }}
+    {{- end }}
+  selector:
+    app: {{ .Values.opampSupervisor.name }} 

@@ -114,7 +114,7 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
   return (
     <div className="flex flex-col h-full gap-4 p-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Configuration Canvas</h1>
+        <h1 className="text-2xl font-bold">Canvas</h1>
         <div className="flex space-x-2 items-center">
           {isSyncing && !viewYaml && (
             <div className="flex items-center text-yellow-500 mr-2">

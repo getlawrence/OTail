@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.jaeger.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.jaeger.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.jaeger.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.jaeger.name }}
+    spec:
+      containers:
+        - name: {{ .Values.jaeger.name }}
+          image: "{{ .Values.jaeger.image.repository }}:{{ .Values.jaeger.image.tag }}"
+          imagePullPolicy: {{ .Values.jaeger.image.pullPolicy }}
+          ports:
+            {{- range .Values.jaeger.service.ports }}
+            - containerPort: {{ .port }}
+              name: {{ .name }}
+            {{- end }}
+          env:
+            - name: COLLECTOR_OTLP_ENABLED
+              value: "true"
+          resources:
+            {{- toYaml .Values.jaeger.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 14269
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 14269
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.jaeger.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.jaeger.name }}
+spec:
+  type: {{ .Values.jaeger.service.type }}
+  ports:
+    {{- range .Values.jaeger.service.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .name }}
+      protocol: TCP
+      name: {{ .name }}
+    {{- end }}
+  selector:
+    app: {{ .Values.jaeger.name }} 
