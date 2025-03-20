@@ -122,13 +122,12 @@ export default function Dashboard() {
                 Create and manage sampling configurations to optimize your observability costs and control data ingestion.
               </p>
               <div className="flex gap-4 items-center">
-                <Button 
-                  size="lg"
+                <Button
+                  id="new-project-button"
                   onClick={() => setIsFormDialogOpen(true)}
                   className="gap-2"
                 >
-                  <Plus className="h-4 w-4" />
-                  Create project
+                  <Plus className="h-4 w-4" /> New Project
                 </Button>
               </div>
             </div>

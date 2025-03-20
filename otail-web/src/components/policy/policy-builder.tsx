@@ -40,6 +40,7 @@ export const PolicyBuilder = ({
         onSelect={addPolicy}
         trigger={
           <Button
+            id="add-policy-button"
             variant="default"
             size="sm"
             className="gap-2"

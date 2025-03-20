@@ -11,7 +11,7 @@ interface ChecklistContextType {
 
 const ChecklistContext = createContext<ChecklistContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'otail_checklist_state';
+const STORAGE_KEY = 'checklist_state';
 
 export const useChecklist = () => {
     const context = useContext(ChecklistContext);
@@ -23,7 +23,19 @@ export const useChecklist = () => {
 
 export const ChecklistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [currentStep, setCurrentStep] = useState(0);
-    const [isMinimized, setIsMinimized] = useState(false);
+    const [isMinimized, setIsMinimized] = useState(() => {
+        // Initialize from localStorage on component mount
+        try {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if (savedState) {
+                const { isMinimized: savedMinimized } = JSON.parse(savedState);
+                return savedMinimized;
+            }
+        } catch (error) {
+            console.error('Failed to load checklist state:', error);
+        }
+        return false;
+    });
     const [completedSteps, setCompletedSteps] = useState<Set<number>>(() => {
         // Initialize from localStorage on component mount
         try {
@@ -43,14 +55,15 @@ export const ChecklistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         try {
             const stateToSave = {
                 completedSteps: Array.from(completedSteps),
+                isMinimized,
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
         } catch (error) {
             console.error('Failed to save checklist state:', error);
         }
-    }, [completedSteps]);
+    }, [completedSteps, isMinimized]);
 
-    const toggleMinimize = () => setIsMinimized(prev => !prev);
+    const toggleMinimize = () => setIsMinimized((prev: boolean) => !prev);
     const goToNextStep = () => setCurrentStep(prev => Math.min(prev + 1, 2));
     const goToPreviousStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
 
