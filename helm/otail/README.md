@@ -1,6 +1,6 @@
 # OTail Helm Chart
 
-This Helm chart deploys OTail, an OpenTelemetry-based log management system, in a Kubernetes cluster.
+This Helm chart deploys OTail, an OpenTelemetry tail-sampling policy management system, in a Kubernetes cluster.
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ The chart deploys the following components:
 - Grafana
 - Prometheus
 - Jaeger
-- OpAMP Supervisor
+- OpAMP Supervisor (optional)
 
 ## Installation
 

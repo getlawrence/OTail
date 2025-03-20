@@ -1,11 +1,88 @@
+# Dependencies
+node_modules/
+vendor/
+.pnp/
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output/
+
+# Production
+build/
+dist/
+out/
+.next/
+.nuxt/
+.vuepress/dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Helm
+*.tgz
+.helm/
+.chart/
+gh-pages/
+
+# Kubernetes
+.kube/
+kubeconfig
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+.terraformrc
+terraform.rc
+.terraform.lock.hcl
+
+# Secrets
+*.secret
+*.pem
+*.key
+*.crt
+
+# Service-specific
+clickhouse/data/
+mongodb/data/
+prometheus/data/
+grafana/data/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -20,11 +97,7 @@ pids
 lib-cov
 
 # Coverage directory used by tools like istanbul
-coverage
 *.lcov
-
-# nyc test coverage
-.nyc_output
 
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
@@ -39,7 +112,6 @@ bower_components
 build/Release
 
 # Dependency directories
-node_modules/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
@@ -168,3 +240,31 @@ terraform.rc
 *.secret
 *.pem
 *.key
+
+# Helm
+*.tgz
+.helm/
+.chart/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local development
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build output
+dist/
+build/

@@ -1,0 +1,85 @@
+name: Helm Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'helm/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'helm/**'
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+          
+      - name: Install chart-testing
+        uses: helm/chart-testing-action@v2.6.0
+        
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
+          if [[ -n "$changed" ]]; then
+            echo "changed_charts<<EOF" >> $GITHUB_OUTPUT
+            echo "$changed" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Run chart-testing (lint)
+        run: |
+          if [[ -n "${{ steps.list-changed.outputs.changed_charts }}" ]]; then
+            ct lint --target-branch ${{ github.event.repository.default_branch }}
+          fi
+          
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.8.0
+        with:
+          install_only: true
+          
+      - name: Run chart-testing (install)
+        run: |
+          if [[ -n "${{ steps.list-changed.outputs.changed_charts }}" ]]; then
+            ct install --target-branch ${{ github.event.repository.default_branch }}
+          fi
+
+  package:
+    needs: lint-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+          
+      - name: Package Helm Charts
+        run: |
+          cd helm/otail
+          helm package .
+          mkdir -p ../../gh-pages
+          mv otail-*.tgz ../../gh-pages/
+          
+      - name: Update index.yaml
+        run: |
+          cd gh-pages
+          helm repo index .
+          
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./gh-pages
+          publish_branch: gh-pages 

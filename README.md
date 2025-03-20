@@ -5,8 +5,6 @@ OTail is a user-friendly web interface for creating and managing OpenTelemetry t
 ## UI
 <img width="1664" alt="Screenshot 2025-01-21 at 16 46 13" src="https://github.com/user-attachments/assets/f6c2e316-a365-4503-afef-f8298e298d87" />
 
-
-
 ## Features
 
 - **Visual Policy Configuration**: Easily create and manage sampling policies through an intuitive UI
@@ -14,22 +12,68 @@ OTail is a user-friendly web interface for creating and managing OpenTelemetry t
 - **View Agent Effective Config**: View the effective configuration of the agent
 - **Send Updated Config To Agent**: Send the updated YAML configuration to the agent
 
-## Local Setup
+## Repository Structure
 
-1. Clone the repository: `git clone https://github.com/your-username/otail.git`
-2. Start docker compose: `docker compose up -d`
-3. Open your browser and navigate to http://localhost:3000
+```
+.
+├── helm/              # Helm charts for deploying OTail
+│   └── otail/        # Main OTail Helm chart
+├── otail-web/        # Web UI (React/TypeScript)
+├── otail-server/     # API server (Go)
+├── otail-col/        # OpenTelemetry collector
+├── clickhouse/       # ClickHouse database configuration
+├── prometheus/       # Prometheus monitoring configuration
+├── opampsupervisor/  # OpAMP supervisor for agent management
+├── docker-compose.yml    # Local development environment
+├── build-images.sh      # Script for building Docker images
+└── local-values.yaml    # Local Helm values configuration
+```
 
+## Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.0+
+- Docker
+- Node.js 18+ (for frontend development)
+- Go 1.21+ (for backend development)
+
+## Quick Start
+
+1. Add the Helm repository:
+```bash
+helm repo add otail https://mottibec.github.io/otail
+helm repo update
+```
+
+2. Install OTail:
+```bash
+helm install otail otail/otail --namespace otail
+```
+
+## Local Development
+
+1. Clone the repository:
+```bash
+git clone https://github.com/mottibec/otail.git
+cd otail
+```
+
+2. Set up your development environment:
+```bash
+# Copy environment file
+cp .env.example .env
+
+# Start local development
+docker compose up -d
+```
+
+3. Access the application:
+- Web UI: http://localhost:3000
+- API Server: http://localhost:8080
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
 ## License
 
