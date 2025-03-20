@@ -81,7 +81,7 @@ opampsupervisor:
     tag: opampsupervisor
   env:
     - name: API_TOKEN
-      value: "Gl_8H6ohkmztsBtXkyD51OUKk68ZjvGpOGWAoBVl6ns="
+      value: "API_TOKEN_HERE"
 
 ingress:
   enabled: true
