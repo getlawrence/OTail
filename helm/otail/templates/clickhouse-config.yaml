@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-clickhouse-config
+  namespace: {{ .Release.Namespace }}
+data:
+  users.xml: |
+    <?xml version="1.0"?>
+    <yandex>
+      <users>
+        <default>
+          <password></password>
+          <networks>
+            <ip>::/0</ip>
+          </networks>
+          <profile>default</profile>
+          <quota>default</quota>
+        </default>
+      </users>
+    </yandex> 

@@ -1,0 +1,251 @@
+global:
+  environment: production
+  imageRegistry: "mottibec123/otail"
+
+frontend:
+  name: otail-web
+  image:
+    repository: mottibec123/otail
+    tag: otail-web
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: VITE_NO_AUTH_REQUIRED
+      value: "false"
+  ingress:
+    enabled: true
+    path: /
+    pathType: Prefix
+
+backend:
+  name: otail-server
+  image:
+    repository: mottibec123/otail
+    tag: otail-server
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 8080
+      - name: opamp
+        port: 4320
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  env:
+    - name: GO_ENV
+      value: "production"
+    - name: CLICKHOUSE_DSN
+      value: "clickhouse://clickhouse:9000/otail"
+    - name: MONGODB_URI
+      value: "mongodb://mongodb:27017"
+    - name: MONGODB_DB
+      value: "otail"
+    - name: OTLP_ENDPOINT
+      value: "collector:4327"
+  ingress:
+    enabled: true
+    path: /api
+    pathType: Prefix
+
+clickhouse:
+  name: clickhouse
+  image:
+    repository: clickhouse/clickhouse-server
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 8123
+      - name: native
+        port: 9000
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  env:
+    - name: CLICKHOUSE_DB
+      value: "default"
+  auth:
+    username: default
+    password: ""
+    database: otail
+
+mongodb:
+  name: mongodb
+  image:
+    repository: mongo
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 27017
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+  env:
+    - name: MONGODB_USERNAME
+      value: ""
+    - name: MONGODB_PASSWORD
+      value: ""
+    - name: MONGODB_DATABASE
+      value: "otail"
+
+collector:
+  name: collector
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    ports:
+      - name: otlp-grpc
+        port: 4317
+      - name: otlp-http
+        port: 4318
+      - name: metrics
+        port: 8889
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+grafana:
+  name: grafana
+  image:
+    repository: grafana/grafana
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  adminPassword: admin
+  ingress:
+    enabled: true
+    path: /grafana
+    pathType: Prefix
+
+prometheus:
+  name: prometheus
+  image:
+    repository: prom/prometheus
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 9090
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+jaeger:
+  name: jaeger
+  image:
+    repository: jaegertracing/all-in-one
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    ports:
+      - name: otlp-grpc
+        port: 4317
+      - name: ui
+        port: 16686
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+opampSupervisor:
+  name: opampsupervisor
+  image:
+    repository: mottibec123/otail
+    tag: opampsupervisor
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    ports:
+      - name: otlp-grpc
+        port: 4317
+      - name: otlp-http
+        port: 4318
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  env:
+    - name: OPAMP_SERVER_ENDPOINT
+      value: "ws://otail-server.otail.svc.cluster.local:4320/v1/opamp"
+    - name: API_TOKEN
+      value: "Gl_8H6ohkmztsBtXkyD51OUKk68ZjvGpOGWAoBVl6ns="
+
+networkPolicies:
+  enabled: true
+  defaultDenyAll: true
+
+ingress:
+  enabled: true
+  host: otail.local
+  tls: false 

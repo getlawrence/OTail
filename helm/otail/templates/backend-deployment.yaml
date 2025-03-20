@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.backend.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.backend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.backend.name }}
+    spec:
+      containers:
+        - name: {{ .Values.backend.name }}
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            {{- range .Values.backend.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .port }}
+            {{- end }}
+          env:
+            - name: GO_ENV
+              value: "production"
+            - name: CLICKHOUSE_DSN
+              value: "clickhouse://clickhouse:9000/otail"
+            - name: MONGODB_URI
+              value: "mongodb://{{ .Release.Name }}-mongodb:27017"
+            - name: MONGODB_DB
+              value: "otail"
+            - name: OTLP_ENDPOINT
+              value: "{{ .Release.Name }}-collector:4317"
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.backend.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.backend.name }}
+spec:
+  type: {{ .Values.backend.service.type }}
+  ports:
+    {{- range .Values.backend.service.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .name }}
+      protocol: TCP
+      name: {{ .name }}
+    {{- end }}
+  selector:
+    app: {{ .Values.backend.name }} 

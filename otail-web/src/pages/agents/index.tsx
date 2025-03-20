@@ -104,7 +104,7 @@ const AgentsPage = () => {
             <div className="container mx-auto py-10">
                 <OnboardingState
                     onRefresh={fetchAgents}
-                    apiToken={organization.tokens[0]?.token || ''}
+                    apiToken={organization.tokens?.[0]?.token || ''}
                 />
             </div>
         )
@@ -131,7 +131,7 @@ const AgentsPage = () => {
                 <DialogContent>
                     <OnboardingState
                         onRefresh={fetchAgents}
-                        apiToken={organization?.tokens[0]?.token || ''}
+                        apiToken={organization?.tokens?.[0]?.token || ''}
                     />
                 </DialogContent>
             </Dialog>}

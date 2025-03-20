@@ -1,0 +1,105 @@
+global:
+  imageRegistry: "mottibec123/otail"
+
+frontend:
+  image:
+    repository: mottibec123/otail
+    tag: otail-web
+  service:
+    type: ClusterIP
+    port: 3000
+  ingress:
+    enabled: true
+    path: /
+    pathType: Prefix
+
+backend:
+  image:
+    repository: mottibec123/otail
+    tag: otail-server
+  service:
+    type: ClusterIP
+    port: 8080
+  ingress:
+    enabled: true
+    path: /api
+    pathType: Prefix
+  env:
+    - name: MONGODB_URI
+      value: "mongodb://mongodb:27017"
+    - name: MONGODB_DB
+      value: "otail"
+    - name: CLICKHOUSE_DSN
+      value: "clickhouse://clickhouse:9000/otail"
+
+clickhouse:
+  name: clickhouse
+  image:
+    repository: clickhouse/clickhouse-server
+    tag: latest
+  auth:
+    username: default
+    password: ""
+    database: otail
+  service:
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 8123
+      - name: native
+        port: 9000
+
+mongodb:
+  name: mongodb
+  image:
+    repository: mongo
+    tag: latest
+  env:
+    - name: MONGODB_USERNAME
+      value: ""
+    - name: MONGODB_PASSWORD
+      value: ""
+    - name: MONGODB_DATABASE
+      value: "otail"
+  service:
+    type: ClusterIP
+    port: 27017
+
+grafana:
+  adminPassword: admin
+  service:
+    type: ClusterIP
+    port: 3000
+  ingress:
+    enabled: true
+    path: /grafana
+    pathType: Prefix
+
+opampsupervisor:
+  image:
+    repository: mottibec123/otail
+    tag: opampsupervisor
+  env:
+    - name: API_TOKEN
+      value: "Gl_8H6ohkmztsBtXkyD51OUKk68ZjvGpOGWAoBVl6ns="
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: otail.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: otail-web
+          port: 3000
+        - path: /api
+          pathType: Prefix
+          service: otail-server
+          port: 8080
+        - path: /grafana
+          pathType: Prefix
+          service: grafana
+          port: 3000 

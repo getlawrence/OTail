@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-clickhouse
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.clickhouse.name }}
+spec:
+  serviceName: {{ .Release.Name }}-clickhouse
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.clickhouse.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.clickhouse.name }}
+    spec:
+      containers:
+        - name: {{ .Values.clickhouse.name }}
+          image: "{{ .Values.clickhouse.image.repository }}:{{ .Values.clickhouse.image.tag }}"
+          imagePullPolicy: {{ .Values.clickhouse.image.pullPolicy }}
+          ports:
+            {{- range .Values.clickhouse.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .port }}
+            {{- end }}
+          env:
+            {{- range .Values.clickhouse.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.clickhouse.resources | nindent 12 }}
+          volumeMounts:
+            - name: clickhouse-data
+              mountPath: /var/lib/clickhouse
+            - name: clickhouse-config
+              mountPath: /etc/clickhouse-server/users.d/users.xml
+              subPath: users.xml
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: clickhouse-config
+          configMap:
+            name: {{ .Release.Name }}-clickhouse-config
+  volumeClaimTemplates:
+    - metadata:
+        name: clickhouse-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        {{- if .Values.clickhouse.persistence.storageClass }}
+        storageClassName: {{ .Values.clickhouse.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.clickhouse.persistence.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.clickhouse.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.clickhouse.name }}
+spec:
+  type: {{ .Values.clickhouse.service.type }}
+  ports:
+    {{- range .Values.clickhouse.service.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .name }}
+      protocol: TCP
+      name: {{ .name }}
+    {{- end }}
+  selector:
+    app: {{ .Values.clickhouse.name }} 
