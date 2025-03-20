@@ -14,7 +14,7 @@ import { PolicyBuilder } from '@/components/policy/policy-builder'
 import { Policy, PolicyType } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config-state';
 import { trackSampling } from '@/utils/analytics';
-import { Pencil, PlayCircle } from "lucide-react";
+import { MoreHorizontal, Pencil, PlayCircle } from "lucide-react";
 import { ConfigSetActions } from '@/components/config/ConfigSetActions';
 import { toEmptyCollectorConfig } from './utils';
 import { useActiveConfigSet } from '@/hooks/use-active-config-set';
@@ -42,13 +42,7 @@ const ModeToggle = ({ mode, onToggleMode }: { mode: Mode; onToggleMode: () => vo
           onClick={() => handleModeChange(mode === 'Edit' ? 'Test' : 'Edit')}
           className="gap-2"
         >
-          {mode === 'Edit' ? (
-            <Pencil className="h-4 w-4" />
-          ) : (
-            <PlayCircle className="h-4 w-4" />
-          )}
-          {mode === 'Edit' ? 'Switch to Test Mode' : 'Switch to Edit Mode'}
-          <span className="opacity-70">↓</span>
+          <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -134,69 +128,69 @@ const ConfigEditor = () => {
   };
 
   return (
-      <div className="h-full flex flex-col">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 flex-1">
-          {/* Left Panel - Policy Editor */}
-          <div className="flex flex-col h-full min-h-0">
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
-              <div className="flex items-center justify-between p-4 border-b bg-muted/5">
-                <div>
-                  <h2 className="text-lg font-medium">Policy Builder</h2>
-                  <p className="text-sm text-muted-foreground">Configure your sampling policies</p>
-                </div>
-                <ConfigSetActions
-                  getCurrentState={() => toEmptyCollectorConfig(policies)}
-                  onImport={handleConfigImport}
-                />
+    <div className="h-full flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 flex-1">
+        {/* Left Panel - Policy Editor */}
+        <div className="flex flex-col h-full min-h-0">
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b bg-muted/5">
+              <div>
+                <h2 className="text-lg font-medium">Policy Builder</h2>
+                <p className="text-sm text-muted-foreground">Configure your sampling policies</p>
               </div>
-              <div className="p-6 h-full overflow-auto policy-builder">
-                <PolicyBuilder
-                  policies={policies}
-                  addPolicy={handlePolicyAdd}
-                  updatePolicy={handlePolicyUpdate}
-                  removePolicy={handlePolicyRemove}
-                  evaluationResult={evaluationResults}
-                />
-              </div>
+              <ConfigSetActions
+                getCurrentState={() => toEmptyCollectorConfig(policies)}
+                onImport={handleConfigImport}
+              />
+            </div>
+            <div className="p-6 h-full overflow-auto policy-builder">
+              <PolicyBuilder
+                policies={policies}
+                addPolicy={handlePolicyAdd}
+                updatePolicy={handlePolicyUpdate}
+                removePolicy={handlePolicyRemove}
+                evaluationResult={evaluationResults}
+              />
             </div>
           </div>
+        </div>
 
-          {/* Right Panel - Configuration/Simulation */}
-          <div className="flex flex-col h-full min-h-0">
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
-              <div className="flex items-center justify-between p-4 border-b bg-muted/5">
-                <div>
-                  <h2 className="text-lg font-medium">
-                    {mode === 'Edit' ? 'YAML Configuration' : 'Validate Sampling Rules with OTEL Data'}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {mode === 'Edit'
-                      ? 'Edit your configuration in YAML format'
-                      : 'Test and validate your sampling rules'
-                    }
-                  </p>
-                </div>
-                <div className="mode-toggle">
-                  <ModeToggle mode={mode} onToggleMode={toggleMode} />
-                </div>
+        {/* Right Panel - Configuration/Simulation */}
+        <div className="flex flex-col h-full min-h-0">
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b bg-muted/5">
+              <div>
+                <h2 className="text-lg font-medium">
+                  {mode === 'Edit' ? 'YAML Configuration' : 'Validate Sampling Rules with OTEL Data'}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {mode === 'Edit'
+                    ? 'Edit your configuration in YAML format'
+                    : 'Test and validate your sampling rules'
+                  }
+                </p>
               </div>
-              <div className="p-4 h-full overflow-auto config-viewer">
-                {mode === 'Edit' ? (
-                  <ConfigViewer
-                    policies={policies}
-                    onChange={handleViewerChange}
-                  />
-                ) : (
-                  <SimulationViewer
-                    finalDecision={finalDecision}
-                    onChange={handleViewerChange}
-                  />
-                )}
+              <div className="mode-toggle">
+                <ModeToggle mode={mode} onToggleMode={toggleMode} />
               </div>
+            </div>
+            <div className="p-4 h-full overflow-auto config-viewer">
+              {mode === 'Edit' ? (
+                <ConfigViewer
+                  policies={policies}
+                  onChange={handleViewerChange}
+                />
+              ) : (
+                <SimulationViewer
+                  finalDecision={finalDecision}
+                  onChange={handleViewerChange}
+                />
+              )}
             </div>
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
