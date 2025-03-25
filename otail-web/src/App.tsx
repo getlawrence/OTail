@@ -8,6 +8,7 @@ import Login from './pages/auth/login'
 import Register from './pages/auth/register'
 import Organization from './pages/organization'
 import Dashboard from './pages/Dashboard'
+import Deployments from './pages/Deployments'
 import { ThemeProvider } from "@/hooks/use-theme"
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import { Toaster } from "@/components/ui/toaster"
@@ -57,6 +58,7 @@ function App() {
                     <Route path="/sampling" element={<Sampling />} />
                     <Route path="/canvas" element={<CanvasPage />} />
                     <Route path="/projects" element={<Projects />} />
+                    <Route path="/deployments" element={<Deployments />} />
                   </Route>
                 ) : (
                   <Route element={<RequireAuth><Layout /></RequireAuth>}>
@@ -66,6 +68,7 @@ function App() {
                     <Route path="/agents" element={<Agents />} />
                     <Route path="/organization" element={<Organization />} />
                     <Route path="/projects" element={<Projects />} />
+                    <Route path="/deployments" element={<Deployments />} />
                   </Route>
                 )}
               </Routes>

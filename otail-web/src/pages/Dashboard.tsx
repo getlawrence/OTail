@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { configSetsApi } from '@/api/configSets';
-import type { ConfigSet } from '@/types/configSet';
+import { deploymentsApi } from '@/api/deployments';
+import type { Deployment } from '@/types/deployment';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ConfigSetForm } from '@/components/config/ConfigSetForm';
+import { DeploymentForm } from '@/components/deployment/DeploymentForm';
 import {
   Dialog,
   DialogContent,
@@ -12,37 +12,33 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus, Clock, Pencil } from 'lucide-react';
+import { Plus, Clock, Pencil, Network } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useActiveConfigSet } from '@/hooks/use-active-config-set';
 import { WaveformIcon } from '@/components/icons/WaveformIcon';
 
 export default function Dashboard() {
-  const [recentConfigSets, setRecentConfigSets] = useState<ConfigSet[]>([]);
+  const [recentDeployments, setRecentDeployments] = useState<Deployment[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { setActive } = useActiveConfigSet();
 
   useEffect(() => {
-    loadRecentConfigSets();
+    loadRecentDeployments();
   }, []);
 
-  const loadRecentConfigSets = async () => {
+  const loadRecentDeployments = async () => {
     try {
       setLoading(true);
-      const response = await configSetsApi.list();
-      // Sort by createdAt and take the 5 most recent
-      const recent = response.configSets
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 5);
-      setRecentConfigSets(recent);
+      const response = await deploymentsApi.list();
+      const recent = response.deployments
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setRecentDeployments(recent);
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to load recent config sets',
+        description: 'Failed to load recent deployments',
         variant: 'destructive',
       });
     } finally {
@@ -50,7 +46,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleCreateConfigSet = async (data: Partial<ConfigSet>) => {
+  const handleCreateDeployment = async (data: Partial<Deployment>) => {
     try {
       if (!data.name) {
         toast({
@@ -64,44 +60,29 @@ export default function Dashboard() {
       const createData = {
         name: data.name,
         description: data.description,
-        configuration: data.configuration || {},
-        tags: data.tags,
+        environment: data.environment || 'development',
+        agentGroups: data.agentGroups || [],
       };
 
-      const newConfigSet = await configSetsApi.create(createData);
-      await setActive(newConfigSet.id);
-      // Dispatch project created event
-      window.dispatchEvent(new Event('projectCreated'));
+      await deploymentsApi.create(createData);
       toast({
         title: 'Success',
-        description: 'Project created successfully',
+        description: 'Deployment created successfully',
       });
-      loadRecentConfigSets();
+      loadRecentDeployments();
       setIsFormDialogOpen(false);
-      navigate('/sampling'); // Navigate to the policy builder page
+      navigate('/deployments'); // Navigate to the deployments page
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to create project',
+        description: 'Failed to create deployment',
         variant: 'destructive',
       });
     }
   };
 
-  const handleSetActive = async (configSet: ConfigSet) => {
-    try {
-      await setActive(configSet.id);
-      toast({
-        title: 'Success',
-        description: 'Config set set as active',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to set config set as active',
-        variant: 'destructive',
-      });
-    }
+  const handleViewDeployment = (deployment: Deployment) => {
+    navigate(`/deployments/${deployment.id}`);
   };
 
   return (
@@ -117,17 +98,17 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-semibold mb-3">Create your first project</h2>
+              <h2 className="text-2xl font-semibold mb-3">Create your first deployment</h2>
               <p className="text-muted-foreground text-lg mb-6">
-                Create and manage sampling configurations to optimize your observability costs and control data ingestion.
+                Create and manage OpenTelemetry agent deployments to optimize your observability costs and control data ingestion.
               </p>
               <div className="flex gap-4 items-center">
                 <Button
-                  id="new-project-button"
+                  id="new-deployment-button"
                   onClick={() => setIsFormDialogOpen(true)}
                   className="gap-2"
                 >
-                  <Plus className="h-4 w-4" /> New Project
+                  <Plus className="h-4 w-4" /> New Deployment
                 </Button>
               </div>
             </div>
@@ -139,46 +120,47 @@ export default function Dashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Recent Projects
+            Recent Deployments
           </CardTitle>
-          <CardDescription>Your recently accessed configuration sets</CardDescription>
+          <CardDescription>Your recently accessed deployments</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-4">Loading...</div>
-          ) : recentConfigSets.length === 0 ? (
+          ) : recentDeployments.length === 0 ? (
             <div className="text-center py-4 text-muted-foreground">
-              No recent projects found
+              No recent deployments found
             </div>
           ) : (
             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-              {recentConfigSets.map((configSet) => (
+              {recentDeployments.map((deployment) => (
                 <Card
-                  key={configSet.id}
+                  key={deployment.id}
                   className="hover:shadow-md transition-shadow"
                 >
                   <CardContent className="pt-6">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-medium">{configSet.name}</h3>
-                        <p className="text-sm text-muted-foreground">{configSet.description}</p>
+                        <h3 className="font-medium">{deployment.name}</h3>
+                        <p className="text-sm text-muted-foreground">{deployment.description}</p>
                         <div className="flex gap-2 mt-2">
-                          {configSet.tags?.map((tag) => (
-                            <Badge key={tag} variant="secondary">{tag}</Badge>
-                          ))}
+                          <Badge variant="secondary">{deployment.environment}</Badge>
+                          <Badge variant="outline">
+                            {deployment.agentGroups.length} Agent Groups
+                          </Badge>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <div className="text-sm text-muted-foreground">
-                          {new Date(configSet.createdAt).toLocaleDateString()}
+                          {new Date(deployment.createdAt).toLocaleDateString()}
                         </div>
                         <Button
                           variant="default"
                           size="sm"
                           className="flex items-center gap-2"
-                          onClick={() => handleSetActive(configSet)}
+                          onClick={() => handleViewDeployment(deployment)}
                         >
-                          <Pencil className="w-4 h-4" /> Edit Project
+                          <Network className="w-4 h-4" /> View
                         </Button>
                       </div>
                     </div>
@@ -193,13 +175,13 @@ export default function Dashboard() {
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
+            <DialogTitle>Create New Deployment</DialogTitle>
             <DialogDescription>
-              Create a new configuration set that can be reused later.
+              Create a new deployment that can be reused later.
             </DialogDescription>
           </DialogHeader>
-          <ConfigSetForm
-            onSubmit={handleCreateConfigSet}
+          <DeploymentForm
+            onSubmit={handleCreateDeployment}
             onCancel={() => setIsFormDialogOpen(false)}
           />
         </DialogContent>
