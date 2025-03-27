@@ -1,12 +1,39 @@
 export interface SchemaField {
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'enum' | 'multiselect';
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'enum' | 'multiselect' | 'group';
   label: string;
+  description?: string;
   required?: boolean;
   default?: any;
   placeholder?: string;
+  validation?: {
+    pattern?: string;
+    min?: number;
+    max?: number;
+    custom?: (value: any) => string | null;
+  };
+  dependencies?: Array<{
+    field: string;
+    operator: 'equals' | 'notEquals' | 'contains' | 'notContains';
+    value: any;
+  }>;
+  group?: {
+    collapsible?: boolean;
+    defaultCollapsed?: boolean;
+  };
+  array?: {
+    itemType: 'string' | 'number' | 'object';
+    fields?: Record<string, SchemaField>;
+    preview?: boolean;
+    maxItems?: number;
+    minItems?: number;
+    bulkAdd?: boolean;
+  };
   fields?: Record<string, SchemaField>;
-  itemType?: 'string' | 'number' | 'boolean' | 'object';
-  options?: string[];
+  options?: string[] | Array<{ label: string; value: string }>;
+  multiselect?: {
+    options: string[] | Array<{ label: string; value: string }>;
+  };
+  itemType?: 'string' | 'number' | 'object';
 }
 
 export interface DynamicFormProps {

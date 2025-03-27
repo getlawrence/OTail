@@ -4,7 +4,7 @@ import Editor, { OnChange } from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { createDebounce } from '@/lib/utils'; 
 import { Eye, EyeOff, Send, RefreshCw } from 'lucide-react'; 
-import { ConfigSetActions } from '@/components/config/ConfigSetActions';
+import { PipelineActions } from '@/components/config/PipelineActions';
 
 interface CanvasPageProps {
   config?: string;
@@ -122,7 +122,7 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
               <span className="text-xs">Syncing...</span>
             </div>
           )}
-          <ConfigSetActions
+          <PipelineActions
               getCurrentState={() => editorValue}
               onImport={handleConfigImport}
             />

@@ -9,31 +9,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Download, Save } from 'lucide-react';
-import { useConfigSets } from '@/hooks/use-config-sets';
 import { useToast } from '@/hooks/use-toast';
-import type { ConfigSet } from '@/types/configSet';
+import { Pipeline } from '@/types/pipeline';
+import { usePipelines } from '@/hooks/use-pipelines';
 
-interface ConfigSetActionsProps {
+interface PipelineActionsProps {
   getCurrentState: () => string;
   onImport: (configuration: any) => void;
   className?: string;
 }
 
-export function ConfigSetActions({
+export function PipelineActions({
   getCurrentState,
   onImport,
   className,
-}: ConfigSetActionsProps) {
+}: PipelineActionsProps) {
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
   const [isImportDialogOpen, setImportDialogOpen] = useState(false);
-  const [availableConfigSets, setAvailableConfigSets] = useState<ConfigSet[]>([]);
+  const [availablePipelines, setAvailablePipelines] = useState<Pipeline[]>([]);
   const { toast } = useToast();
-  const { saveToConfigSet, updateConfigSet, loadConfigSet, listConfigSets } = useConfigSets();
+  const { saveToPipeline, updatePipeline, loadPipeline, listPipelines } = usePipelines();
 
   const handleSave = async (name: string) => {
     try {
       const currentState = getCurrentState();
-      await saveToConfigSet(name.trim(), currentState);
+      await saveToPipeline(name.trim(), currentState);
       toast({
         title: 'Success',
         description: 'Configuration saved successfully',
@@ -48,10 +48,10 @@ export function ConfigSetActions({
     }
   };
 
-  const handleUpdate = async (configSetId: string) => {
+  const handleUpdate = async (pipelineId: string) => {
     try {
       const currentState = getCurrentState();
-      await updateConfigSet(configSetId, currentState);
+      await updatePipeline(pipelineId, currentState);
       toast({
         title: 'Success',
         description: 'Configuration updated successfully',
@@ -66,10 +66,10 @@ export function ConfigSetActions({
     }
   };
 
-  const handleImport = async (configSetId: string) => {
+  const handleImport = async (pipelineId: string) => {
     try {
-      const configSet = await loadConfigSet(configSetId);
-      onImport(configSet.configuration);
+      const pipeline = await loadPipeline(pipelineId);
+      onImport(pipeline.configuration);
       toast({
         title: 'Success',
         description: 'Configuration imported successfully',
@@ -84,14 +84,14 @@ export function ConfigSetActions({
     }
   };
 
-  const loadAvailableConfigSets = async () => {
+  const loadAvailablePipelines = async () => {
     try {
-      const configs = await listConfigSets();
-      setAvailableConfigSets(configs);
+      const pipelines = await listPipelines();
+      setAvailablePipelines(pipelines);
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to load available config sets',
+        description: 'Failed to load available pipelines',
         variant: 'destructive',
       });
     }
@@ -109,23 +109,23 @@ export function ConfigSetActions({
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               onClick={() => {
-                loadAvailableConfigSets();
+                loadAvailablePipelines();
                 setImportDialogOpen(true);
               }}
               className="gap-2"
             >
               <Download className="h-4 w-4" />
-              Import Config Set
+              Import Pipeline
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
-                loadAvailableConfigSets();
+                loadAvailablePipelines();
                 setSaveDialogOpen(true);
               }}
               className="gap-2"
             >
               <Save className="h-4 w-4" />
-              Save/Update Config Set
+              Save/Update Pipeline
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -136,14 +136,14 @@ export function ConfigSetActions({
         onOpenChange={setSaveDialogOpen}
         onSave={handleSave}
         onUpdate={handleUpdate}
-        availableConfigSets={availableConfigSets}
+        availablePipelines={availablePipelines}
       />
 
       <ImportConfigDialog
         open={isImportDialogOpen}
         onOpenChange={setImportDialogOpen}
         onImport={handleImport}
-        availableConfigSets={availableConfigSets}
+        availablePipelines={availablePipelines}
       />
     </>
   );

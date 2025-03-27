@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { configSetsApi } from '@/api/configSets';
-import type { ConfigSet } from '@/types/configSet';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ConfigSetForm } from '@/components/config/ConfigSetForm';
+import { PipelineForm } from '@/components/config/PipelineForm';
 import {
   Dialog,
   DialogContent,
@@ -15,34 +13,36 @@ import {
 import { Plus, Clock, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useActiveConfigSet } from '@/hooks/use-active-config-set';
+import { useActivePipeline } from '@/hooks/use-active-pipeline';
 import { WaveformIcon } from '@/components/icons/WaveformIcon';
+import { pipelinesApi } from '@/api/pipelines';
+import { Pipeline } from '@/types/pipeline';
 
 export default function Dashboard() {
-  const [recentConfigSets, setRecentConfigSets] = useState<ConfigSet[]>([]);
+  const [recentPipelines, setRecentPipelines] = useState<Pipeline[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { setActive } = useActiveConfigSet();
+  const { setActive } = useActivePipeline();
 
   useEffect(() => {
-    loadRecentConfigSets();
+    loadRecentPipelines();
   }, []);
 
-  const loadRecentConfigSets = async () => {
+  const loadRecentPipelines = async () => {
     try {
       setLoading(true);
-      const response = await configSetsApi.list();
+      const response = await pipelinesApi.list();
       // Sort by createdAt and take the 5 most recent
-      const recent = response.configSets
+      const recent = response.pipelines
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 5);
-      setRecentConfigSets(recent);
+      setRecentPipelines(recent);
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to load recent config sets',
+        description: 'Failed to load recent pipelines',
         variant: 'destructive',
       });
     } finally {
@@ -50,7 +50,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleCreateConfigSet = async (data: Partial<ConfigSet>) => {
+  const handleCreatePipeline = async (data: Partial<Pipeline>) => {
     try {
       if (!data.name) {
         toast({
@@ -68,37 +68,37 @@ export default function Dashboard() {
         tags: data.tags,
       };
 
-      const newConfigSet = await configSetsApi.create(createData);
-      await setActive(newConfigSet.id);
-      // Dispatch project created event
-      window.dispatchEvent(new Event('projectCreated'));
+      const newPipeline = await pipelinesApi.create(createData);
+      await setActive(newPipeline.id);
+      // Dispatch pipeline created event
+      window.dispatchEvent(new Event('pipelineCreated'));
       toast({
         title: 'Success',
-        description: 'Project created successfully',
+        description: 'Pipeline created successfully',
       });
-      loadRecentConfigSets();
+      loadRecentPipelines();
       setIsFormDialogOpen(false);
       navigate('/sampling'); // Navigate to the policy builder page
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to create project',
+        description: 'Failed to create pipeline',
         variant: 'destructive',
       });
     }
   };
 
-  const handleSetActive = async (configSet: ConfigSet) => {
+  const handleSetActive = async (pipeline: Pipeline) => {
     try {
-      await setActive(configSet.id);
+      await setActive(pipeline.id);
       toast({
         title: 'Success',
-        description: 'Config set set as active',
+        description: 'Pipeline set as active',
       });
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to set config set as active',
+        description: 'Failed to set pipeline as active',
         variant: 'destructive',
       });
     }
@@ -117,17 +117,17 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-semibold mb-3">Create your first project</h2>
+              <h2 className="text-2xl font-semibold mb-3">Create your first pipeline</h2>
               <p className="text-muted-foreground text-lg mb-6">
                 Create and manage sampling configurations to optimize your observability costs and control data ingestion.
               </p>
               <div className="flex gap-4 items-center">
                 <Button
-                  id="new-project-button"
+                  id="new-pipeline-button"
                   onClick={() => setIsFormDialogOpen(true)}
                   className="gap-2"
                 >
-                  <Plus className="h-4 w-4" /> New Project
+                  <Plus className="h-4 w-4" /> New Pipeline
                 </Button>
               </div>
             </div>
@@ -139,46 +139,46 @@ export default function Dashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Recent Projects
+            Recent Pipelines
           </CardTitle>
-          <CardDescription>Your recently accessed configuration sets</CardDescription>
+          <CardDescription>Your recently accessed pipelines</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-4">Loading...</div>
-          ) : recentConfigSets.length === 0 ? (
+          ) : recentPipelines.length === 0 ? (
             <div className="text-center py-4 text-muted-foreground">
-              No recent projects found
+              No recent pipelines found
             </div>
           ) : (
             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-              {recentConfigSets.map((configSet) => (
+              {recentPipelines.map((pipeline) => (
                 <Card
-                  key={configSet.id}
+                  key={pipeline.id}
                   className="hover:shadow-md transition-shadow"
                 >
                   <CardContent className="pt-6">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-medium">{configSet.name}</h3>
-                        <p className="text-sm text-muted-foreground">{configSet.description}</p>
+                        <h3 className="font-medium">{pipeline.name}</h3>
+                        <p className="text-sm text-muted-foreground">{pipeline.description}</p>
                         <div className="flex gap-2 mt-2">
-                          {configSet.tags?.map((tag) => (
+                          {pipeline.tags?.map((tag) => (
                             <Badge key={tag} variant="secondary">{tag}</Badge>
                           ))}
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <div className="text-sm text-muted-foreground">
-                          {new Date(configSet.createdAt).toLocaleDateString()}
+                          {new Date(pipeline.createdAt).toLocaleDateString()}
                         </div>
                         <Button
                           variant="default"
                           size="sm"
                           className="flex items-center gap-2"
-                          onClick={() => handleSetActive(configSet)}
+                          onClick={() => handleSetActive(pipeline)}
                         >
-                          <Pencil className="w-4 h-4" /> Edit Project
+                          <Pencil className="w-4 h-4" /> Edit Pipeline
                         </Button>
                       </div>
                     </div>
@@ -193,13 +193,13 @@ export default function Dashboard() {
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
+            <DialogTitle>Create New Pipeline</DialogTitle>
             <DialogDescription>
-              Create a new configuration set that can be reused later.
+              Create a new pipeline that can be reused later.
             </DialogDescription>
           </DialogHeader>
-          <ConfigSetForm
-            onSubmit={handleCreateConfigSet}
+          <PipelineForm
+            onSubmit={handleCreatePipeline}
             onCancel={() => setIsFormDialogOpen(false)}
           />
         </DialogContent>

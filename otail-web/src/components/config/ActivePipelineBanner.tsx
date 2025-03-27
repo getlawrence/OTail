@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button';
-import { useActiveConfigSet } from '@/hooks/use-active-config-set';
+import { useActivePipeline } from '@/hooks/use-active-pipeline';
 
-export function ActiveConfigSetBanner() {
-  const { activeConfigSet, clearActive } = useActiveConfigSet();
+export function ActivePipelineBanner() {
+  const { activePipeline, clearActive } = useActivePipeline();
 
-  if (!activeConfigSet) {
+  if (!activePipeline) {
     return null;
   }
 
@@ -14,7 +14,7 @@ export function ActiveConfigSetBanner() {
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500" />
           <span className="text-sm font-medium">
-            Active Project: {activeConfigSet.name}
+            Active Pipeline: {activePipeline.name}
           </span>
         </div>
       </div>

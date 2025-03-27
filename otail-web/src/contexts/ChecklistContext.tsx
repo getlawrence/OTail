@@ -68,7 +68,7 @@ export const ChecklistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const goToPreviousStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
 
     useEffect(() => {
-        const handleProjectCreated = () => {
+        const handlePipelineCreated = () => {
             setCompletedSteps(prev => {
                 const newSet = new Set([...prev, 0]);
                 return newSet;
@@ -92,12 +92,12 @@ export const ChecklistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             goToNextStep();
         };
 
-        window.addEventListener('projectCreated', handleProjectCreated);
+        window.addEventListener('pipelineCreated', handlePipelineCreated);
         window.addEventListener('policyAdded', handlePolicyAdded);
         window.addEventListener('testModeActivated', handleTestModeActivated);
 
         return () => {
-            window.removeEventListener('projectCreated', handleProjectCreated);
+            window.removeEventListener('pipelineCreated', handlePipelineCreated);
             window.removeEventListener('policyAdded', handlePolicyAdded);
             window.removeEventListener('testModeActivated', handleTestModeActivated);
         };

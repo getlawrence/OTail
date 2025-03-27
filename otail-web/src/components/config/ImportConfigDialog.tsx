@@ -14,65 +14,65 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import type { ConfigSet } from '@/types/configSet';
+import type { Pipeline } from '@/types/pipeline';
 import { useRef, useState } from 'react';
 
 interface ImportConfigDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImport: (configSetId: string) => Promise<void>;
-  availableConfigSets: ConfigSet[];
+  onImport: (pipelineId: string) => Promise<void>;
+  availablePipelines: Pipeline[];
 }
 
-export function ImportConfigDialog({ 
-  open, 
-  onOpenChange, 
-  onImport, 
-  availableConfigSets 
+export function ImportConfigDialog({
+  open,
+  onOpenChange,
+  onImport,
+  availablePipelines
 }: ImportConfigDialogProps) {
-  const [selectedConfigSetId, setSelectedConfigSetId] = useState('');
+  const [selectedPipelineId, setSelectedPipelineId] = useState('');
 
   const lastFocusedElement = useRef<HTMLElement | null>(null);
 
   const handleImport = async () => {
-    await onImport(selectedConfigSetId);
-    setSelectedConfigSetId('');
+    await onImport(selectedPipelineId);
+    setSelectedPipelineId('');
   };
 
   return (
-    <Dialog 
+    <Dialog
       open={open}
       onOpenChange={(newOpen) => {
         if (!newOpen) {
           setTimeout(() => lastFocusedElement.current?.focus(), 0); // Restore focus
-          setSelectedConfigSetId('');
+          setSelectedPipelineId('');
         } else {
           lastFocusedElement.current = document.activeElement as HTMLElement;
         }
         onOpenChange(newOpen);
       }}
     >
-    {open && (  <DialogContent>
+      {open && (<DialogContent>
         <DialogHeader>
-          <DialogTitle>Import Config Set</DialogTitle>
+          <DialogTitle>Import Pipeline</DialogTitle>
           <DialogDescription>
-            Select a config set to import its configuration.
+            Select a pipeline to import its configuration.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="configSet">Config Set</Label>
+            <Label htmlFor="pipeline">Pipeline</Label>
             <Select
-              value={selectedConfigSetId}
-              onValueChange={setSelectedConfigSetId}
+              value={selectedPipelineId}
+              onValueChange={setSelectedPipelineId}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a config set" />
+                <SelectValue placeholder="Select a pipeline" />
               </SelectTrigger>
               <SelectContent>
-                {availableConfigSets.map((configSet) => (
-                  <SelectItem key={configSet.id} value={configSet.id}>
-                    {configSet.name}
+                {availablePipelines.map((pipeline) => (
+                  <SelectItem key={pipeline.id} value={pipeline.id}>
+                    {pipeline.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -86,7 +86,7 @@ export function ImportConfigDialog({
           </div>
         </div>
       </DialogContent>
-    )}
+      )}
     </Dialog>
   );
 } 
