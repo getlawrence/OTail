@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import Layout from './layout'
 import Sampling from './pages/sampling'
 import { CanvasPage } from './pages/canvas'
-import Projects from './pages/config/ConfigSets'
+import Pipelines from './pages/config/Pipelines'
 import Agents from './pages/agents'
 import Login from './pages/auth/login'
 import Register from './pages/auth/register'
@@ -12,7 +12,7 @@ import { ThemeProvider } from "@/hooks/use-theme"
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import { Toaster } from "@/components/ui/toaster"
 import { MobileWarning } from '@/components/MobileWarning'
-import { ActiveConfigSetProvider } from '@/hooks/use-active-config-set'
+import { ActivePipelineProvider } from '@/hooks/use-active-pipeline'
 import { ChecklistProvider } from '@/contexts/ChecklistContext'
 
 const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
@@ -37,7 +37,7 @@ function App() {
     <ThemeProvider defaultTheme="system">
       <Router>
         <AuthProvider>
-          <ActiveConfigSetProvider>
+          <ActivePipelineProvider>
             <ChecklistProvider>
               <MobileWarning />
               <Routes>
@@ -56,7 +56,7 @@ function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/sampling" element={<Sampling />} />
                     <Route path="/canvas" element={<CanvasPage />} />
-                    <Route path="/projects" element={<Projects />} />
+                    <Route path="/pipelines" element={<Pipelines />} />
                   </Route>
                 ) : (
                   <Route element={<RequireAuth><Layout /></RequireAuth>}>
@@ -65,13 +65,13 @@ function App() {
                     <Route path="/canvas" element={<CanvasPage />} />
                     <Route path="/agents" element={<Agents />} />
                     <Route path="/organization" element={<Organization />} />
-                    <Route path="/projects" element={<Projects />} />
+                    <Route path="/pipelines" element={<Pipelines />} />
                   </Route>
                 )}
               </Routes>
               <Toaster />
             </ChecklistProvider>
-          </ActiveConfigSetProvider>
+          </ActivePipelineProvider>
         </AuthProvider>
       </Router>
     </ThemeProvider>

@@ -5,7 +5,7 @@ import { getAgents, fetchAgentLogs, updateConfig } from "@/api/agent"
 import { Agent, Log } from "@/api/types"
 import { LogsDialog } from "@/components/agents/LogsDialog"
 import { ConfigDialog } from "@/components/agents/ConfigDialog"
-import { ApplyConfigSetDialog } from "@/components/agents/ApplyConfigSetDialog"
+import { ApplyPipelineDialog } from "@/components/agents/ApplyPipelineDialog"
 import { OnboardingState } from "@/components/agents/OnboardingState"
 import { load } from 'js-yaml'
 import { useToast } from "@/hooks/use-toast"
@@ -19,7 +19,7 @@ const AgentsPage = () => {
     const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
     const [configOpen, setConfigOpen] = useState(false)
     const [logsOpen, setLogsOpen] = useState(false)
-    const [applyConfigSetOpen, setApplyConfigSetOpen] = useState(false)
+    const [applyPipelineOpen, setApplyPipelineOpen] = useState(false)
     const [logs, setLogs] = useState<Log[]>([])
     const [loading, setLoading] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
@@ -65,9 +65,9 @@ const AgentsPage = () => {
         }
     }
 
-    const handleApplyConfigSet = (agent: Agent) => {
+    const handleApplyPipeline = (agent: Agent) => {
         setSelectedAgent(agent)
-        setApplyConfigSetOpen(true)
+        setApplyPipelineOpen(true)
     }
 
     const handleUpdateConfig = async (value: string) => {
@@ -95,7 +95,7 @@ const AgentsPage = () => {
     const tableColumns = columns({
         onViewConfig: handleViewConfig,
         onViewLogs: handleViewLogs,
-        onApplyConfigSet: handleApplyConfigSet
+        onApplyPipeline: handleApplyPipeline
     })
 
     // Show onboarding state if no agents are connected and org has never connected an agent
@@ -152,9 +152,9 @@ const AgentsPage = () => {
                         loading={loading}
                     />
 
-                    <ApplyConfigSetDialog
-                        open={applyConfigSetOpen}
-                        onOpenChange={setApplyConfigSetOpen}
+                    <ApplyPipelineDialog
+                        open={applyPipelineOpen}
+                        onOpenChange={setApplyPipelineOpen}
                         agent={selectedAgent}
                     />
                 </>

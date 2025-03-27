@@ -16,40 +16,40 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { useConfigSets } from "@/hooks/use-config-sets"
-import { ConfigSet } from "@/types/configSet"
+import { usePipelines } from "@/hooks/use-pipelines"
 import { Agent } from "@/api/types"
 import { updateConfig } from "@/api/agent"
 import { load } from "js-yaml"
+import { Pipeline } from "@/types/pipeline"
 
-interface ApplyConfigSetDialogProps {
+interface ApplyPipelineDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     agent: Agent | null
 }
 
-export function ApplyConfigSetDialog({ open, onOpenChange, agent }: ApplyConfigSetDialogProps) {
-    const [selectedConfigSet, setSelectedConfigSet] = useState<string>("")
-    const [configSets, setConfigSets] = useState<ConfigSet[]>([])
+export function ApplyPipelineDialog({ open, onOpenChange, agent }: ApplyPipelineDialogProps) {
+    const [selectedPipeline, setSelectedPipeline] = useState<string>("")
+    const [pipelines, setPipelines] = useState<Pipeline[]>([])
     const [loading, setLoading] = useState(false)
     const { toast } = useToast()
-    const { listConfigSets } = useConfigSets()
+    const { listPipelines } = usePipelines()
 
     useEffect(() => {
         if (open) {
-            loadConfigSets()
+            loadPipelines()
         }
     }, [open])
 
-    const loadConfigSets = async () => {
+    const loadPipelines = async () => {
         try {
             setLoading(true)
-            const sets = await listConfigSets()
-            setConfigSets(sets)
+            const pipelines = await listPipelines()
+            setPipelines(pipelines)
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to load config sets",
+                description: "Failed to load pipelines",
                 variant: "destructive",
             })
         } finally {
@@ -58,25 +58,25 @@ export function ApplyConfigSetDialog({ open, onOpenChange, agent }: ApplyConfigS
     }
 
     const handleApply = async () => {
-        if (!agent || !selectedConfigSet) return
+        if (!agent || !selectedPipeline) return
 
         try {
             setLoading(true)
-            const configSet = configSets.find(set => set.id === selectedConfigSet)
-            if (!configSet) {
-                throw new Error("Config set not found")
+            const pipeline = pipelines.find(pipeline => pipeline.id === selectedPipeline)
+            if (!pipeline) {
+                throw new Error("Pipeline not found")
             }
-            const parsedConfig = JSON.stringify(load(configSet.configuration))
+            const parsedConfig = JSON.stringify(load(pipeline.configuration))
             await updateConfig(agent.InstanceId, parsedConfig)
             toast({
                 title: "Success",
-                description: "Config set applied successfully",
+                description: "Pipeline applied successfully",
             })
             onOpenChange(false)
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to apply config set",
+                description: "Failed to apply pipeline",
                 variant: "destructive",
             })
         } finally {
@@ -88,23 +88,23 @@ export function ApplyConfigSetDialog({ open, onOpenChange, agent }: ApplyConfigS
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Apply Project Configuration</DialogTitle>
+                    <DialogTitle>Apply Pipeline Configuration</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Select Project Configuration</label>
+                        <label className="text-sm font-medium">Select Pipeline Configuration</label>
                         <Select
-                            value={selectedConfigSet}
-                            onValueChange={setSelectedConfigSet}
+                            value={selectedPipeline}
+                            onValueChange={setSelectedPipeline}
                             disabled={loading}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Select a project" />
+                                <SelectValue placeholder="Select a pipeline" />
                             </SelectTrigger>
                             <SelectContent>
-                                {configSets.map((set) => (
-                                    <SelectItem key={set.id} value={set.id}>
-                                        {set.name}
+                                {pipelines.map((pipeline) => (
+                                    <SelectItem key={pipeline.id} value={pipeline.id}>
+                                        {pipeline.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -120,7 +120,7 @@ export function ApplyConfigSetDialog({ open, onOpenChange, agent }: ApplyConfigS
                         </Button>
                         <Button
                             onClick={handleApply}
-                            disabled={!selectedConfigSet || loading}
+                            disabled={!selectedPipeline || loading}
                         >
                             Apply
                         </Button>

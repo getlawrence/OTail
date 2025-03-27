@@ -1,4 +1,4 @@
-import { Telescope, LogOut, Users, Wrench, Palette, FolderKanban } from "lucide-react"
+import { Telescope, LogOut, Users, Wrench, Palette, Share2 } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { AnalyticsToggle } from "@/components/layout/analytics-toggle"
 import { Checklist } from "@/components/Checklist"
@@ -44,10 +44,15 @@ const items = !noAuthRequired
       icon: Palette,
     },
     {
-      title: "Projects",
-      url: "/projects",
-      icon: FolderKanban,
+      title: "Pipelines",
+      url: "/pipelines",
+      icon: Share2,
       badge: "New"
+    },
+    {
+      title: "Organization",
+      url: "/organization",
+      icon: Users,
     },
   ]
   : [
@@ -59,12 +64,12 @@ const items = !noAuthRequired
     {
       title: "Canvas",
       url: "/canvas",
-      icon: Palette
+      icon: Palette,
     },
     {
-      title: "Projects",
-      url: "/projects",
-      icon: FolderKanban,
+      title: "Pipelines",
+      url: "/pipelines",
+      icon: Share2,
       badge: "New"
     },
   ];

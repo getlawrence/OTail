@@ -3,19 +3,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import type { ConfigSet } from '@/types/configSet';
+import type { Pipeline } from '@/types/pipeline';
 import Editor from '@monaco-editor/react';
 import yaml from 'js-yaml';
 import { Eye, EyeOff } from 'lucide-react';
 
-interface ConfigSetFormProps {
-  initialData?: ConfigSet;
-  onSubmit: (data: Partial<ConfigSet>) => Promise<void>;
+interface PipelineFormProps {
+  initialData?: Pipeline;
+  onSubmit: (data: Partial<Pipeline>) => Promise<void>;
   onCancel: () => void;
 }
 
-export function ConfigSetForm({ initialData, onSubmit, onCancel }: ConfigSetFormProps) {
-  const [formData, setFormData] = useState<Partial<ConfigSet>>({
+export function PipelineForm({ initialData, onSubmit, onCancel }: PipelineFormProps) {
+  const [formData, setFormData] = useState<Partial<Pipeline>>({
     name: initialData?.name || '',
     description: initialData?.description || '',
     configuration: initialData?.configuration || {},

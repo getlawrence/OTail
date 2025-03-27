@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { configSetsApi } from '@/api/configSets';
-import type { ConfigSet, CreateConfigSetRequest, UpdateConfigSetRequest } from '@/types/configSet';
+import { pipelinesApi } from '@/api/pipelines';
+import type { Pipeline, CreatePipelineRequest, UpdatePipelineRequest } from '@/types/pipeline';
 
-export function useConfigSets() {
+export function usePipelines() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  const saveToConfigSet = async (
+  const saveToPipeline = async (
     name: string,
     configuration: any,
     options: {
@@ -17,15 +17,15 @@ export function useConfigSets() {
   ) => {
     try {
       setLoading(true);
-      const data: CreateConfigSetRequest = {
+      const data: CreatePipelineRequest = {
         name,
         configuration,
         ...options,
       };
-      await configSetsApi.create(data);
+      await pipelinesApi.create(data);
       toast({
         title: 'Success',
-        description: 'Configuration saved as config set',
+        description: 'Configuration saved as pipeline',
       });
     } catch (error) {
       toast({
@@ -39,14 +39,14 @@ export function useConfigSets() {
     }
   };
 
-  const updateConfigSet = async (id: string, configuration: any) => {
+  const updatePipeline = async (id: string, configuration: any) => {
     try {
       setLoading(true);
-      const data: UpdateConfigSetRequest = {
+      const data: UpdatePipelineRequest = {
         id,
         configuration,
       };
-      await configSetsApi.update(data);
+      await pipelinesApi.update(data);
       toast({
         title: 'Success',
         description: 'Configuration updated successfully',
@@ -63,10 +63,10 @@ export function useConfigSets() {
     }
   };
 
-  const loadConfigSet = async (id: string): Promise<ConfigSet> => {
+  const loadPipeline = async (id: string): Promise<Pipeline> => {
     try {
       setLoading(true);
-      return await configSetsApi.get(id);
+      return await pipelinesApi.get(id);
     } catch (error) {
       toast({
         title: 'Error',
@@ -79,15 +79,15 @@ export function useConfigSets() {
     }
   };
 
-  const listConfigSets = async () => {
+  const listPipelines = async () => {
     try {
       setLoading(true);
-      const response = await configSetsApi.list();
-      return response.configSets;
+      const response = await pipelinesApi.list();
+      return response.pipelines;
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to load config sets',
+        description: 'Failed to load pipelines',
         variant: 'destructive',
       });
       throw error;
@@ -98,9 +98,9 @@ export function useConfigSets() {
 
   return {
     loading,
-    saveToConfigSet,
-    updateConfigSet,
-    loadConfigSet,
-    listConfigSets,
+    saveToPipeline,
+    updatePipeline,
+    loadPipeline,
+    listPipelines,
   };
 } 
