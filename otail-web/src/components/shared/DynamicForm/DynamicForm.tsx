@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -520,7 +520,7 @@ const getValue = (path: string[], values: any) => {
 export const DynamicForm = ({ schema, values, onChange, errors = {} }: DynamicFormProps) => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const validateField = (field: SchemaField, value: any, path: string): string | null => {
+  const validateField = (field: SchemaField, value: any): string | null => {
     if (field.required && (value === undefined || value === null || value === '')) {
       return `${field.label} is required`;
     }
@@ -560,7 +560,7 @@ export const DynamicForm = ({ schema, values, onChange, errors = {} }: DynamicFo
     // Validate field
     const fieldSchema = schema[field];
     if (fieldSchema) {
-      const error = validateField(fieldSchema, value, field);
+      const error = validateField(fieldSchema, value);
       setValidationErrors(prev => ({
         ...prev,
         [field]: error || ''
