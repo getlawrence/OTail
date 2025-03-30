@@ -1,4 +1,4 @@
-export interface ConfigSet {
+export interface Pipeline {
   id: string;
   name: string;
   description?: string;
@@ -9,18 +9,18 @@ export interface ConfigSet {
   version: string;
 }
 
-export interface ConfigSetListResponse {
-  configSets: ConfigSet[];
+export interface PipelineListResponse {
+  pipelines: Pipeline[];
   total: number;
 }
 
-export interface CreateConfigSetRequest {
+export interface CreatePipelineRequest {
   name: string;
   description?: string;
   configuration: any;
   tags?: string[];
 }
 
-export interface UpdateConfigSetRequest extends Partial<CreateConfigSetRequest> {
+export interface UpdatePipelineRequest extends Partial<CreatePipelineRequest> {
   id: string;
 } 

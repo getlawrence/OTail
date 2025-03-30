@@ -9,10 +9,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 const steps = [
     {
-        title: 'Create a new project',
-        description: 'Start by creating a new project to manage your sampling policies',
+        title: 'Create a new pipeline',
+        description: 'Start by creating a new pipeline to manage your sampling policies',
         path: '/',
-        targetComponent: 'new-project-button'
+        targetComponent: 'new-pipeline-button'
     },
     {
         title: 'Add a sampling policy',

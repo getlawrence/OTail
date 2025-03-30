@@ -15,9 +15,9 @@ import { Policy, PolicyType } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config-state';
 import { trackSampling } from '@/utils/analytics';
 import { MoreHorizontal, Pencil, PlayCircle } from "lucide-react";
-import { ConfigSetActions } from '@/components/config/ConfigSetActions';
+import { PipelineActions } from '@/components/config/PipelineActions';
 import { toEmptyCollectorConfig } from './utils';
-import { useActiveConfigSet } from '@/hooks/use-active-config-set';
+import { useActivePipeline } from '@/hooks/use-active-pipeline';
 import yaml from 'js-yaml';
 import { createNewPolicy } from '@/lib/policy/utils';
 
@@ -73,25 +73,25 @@ const ConfigEditor = () => {
     updatePolicies,
   } = useConfigState();
 
-  const { activeConfigSet, updateActiveConfig } = useActiveConfigSet();
+  const { activePipeline, updateActiveConfig } = useActivePipeline();
   const initialLoadDone = useRef(false);
 
   useEffect(() => {
-    if (activeConfigSet?.configuration && !initialLoadDone.current) {
-      const cfg = yaml.load(activeConfigSet.configuration) as any;
+    if (activePipeline?.configuration && !initialLoadDone.current) {
+      const cfg = yaml.load(activePipeline.configuration) as any;
       const policies = cfg.processors?.tail_sampling?.policies || [];
       if (Array.isArray(policies)) {
         updatePolicies(policies);
         initialLoadDone.current = true;
       }
     }
-  }, [activeConfigSet])
+  }, [activePipeline])
 
   const handlePolicyAdd = async (policyType: PolicyType) => {
     const policy = createNewPolicy(policyType);
     handleAddPolicy(policy);
     trackSampling.policyBuilderAction('add', policyType);
-    if (activeConfigSet) {
+    if (activePipeline) {
       await updateActiveConfig(toEmptyCollectorConfig([...policies, policy]));
     }
   };
@@ -101,7 +101,7 @@ const ConfigEditor = () => {
     updatedPolicies[index] = updatedPolicy;
     handleUpdatePolicy(index, updatedPolicy);
     trackSampling.policyBuilderAction('update', updatedPolicy.type);
-    if (activeConfigSet) {
+    if (activePipeline) {
       await updateActiveConfig(toEmptyCollectorConfig(updatedPolicies));
     }
   };
@@ -110,7 +110,7 @@ const ConfigEditor = () => {
     const updatedPolicies = policies.filter((_, i) => i !== index);
     handleRemovePolicy(index);
     trackSampling.policyBuilderAction('remove', policy.type);
-    if (activeConfigSet) {
+    if (activePipeline) {
       await updateActiveConfig(toEmptyCollectorConfig(updatedPolicies));
     }
   };
@@ -121,7 +121,7 @@ const ConfigEditor = () => {
     if (Array.isArray(policies)) {
       updatePolicies(policies);
       trackSampling.policyBuilderAction('import_config_set', '');
-      if (activeConfigSet) {
+      if (activePipeline) {
         await updateActiveConfig(toEmptyCollectorConfig(policies));
       }
     }
@@ -138,7 +138,7 @@ const ConfigEditor = () => {
                 <h2 className="text-lg font-medium">Policy Builder</h2>
                 <p className="text-sm text-muted-foreground">Configure your sampling policies</p>
               </div>
-              <ConfigSetActions
+              <PipelineActions
                 getCurrentState={() => toEmptyCollectorConfig(policies)}
                 onImport={handleConfigImport}
               />

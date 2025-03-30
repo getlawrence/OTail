@@ -16,14 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { ConfigSet } from '@/types/configSet';
+import type { Pipeline } from '@/types/pipeline';
 
 interface SaveConfigDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (name: string) => Promise<void>;
-  onUpdate: (configSetId: string) => Promise<void>;
-  availableConfigSets: ConfigSet[];
+  onUpdate: (pipelineId: string) => Promise<void>;
+  availablePipelines: Pipeline[];
 }
 
 export function SaveConfigDialog({ 
@@ -31,20 +31,20 @@ export function SaveConfigDialog({
   onOpenChange, 
   onSave, 
   onUpdate,
-  availableConfigSets 
+  availablePipelines 
 }: SaveConfigDialogProps) {
   const [configName, setConfigName] = useState('');
-  const [selectedConfigSetId, setSelectedConfigSetId] = useState('');
+  const [selectedPipelineId, setSelectedPipelineId] = useState('');
   const [isNewConfig, setIsNewConfig] = useState(true);
 
   const handleSave = async () => {
     if (isNewConfig) {
       await onSave(configName);
     } else {
-      await onUpdate(selectedConfigSetId);
+      await onUpdate(selectedPipelineId);
     }
     setConfigName('');
-    setSelectedConfigSetId('');
+    setSelectedPipelineId('');
     setIsNewConfig(true);
   };
 
@@ -55,7 +55,7 @@ export function SaveConfigDialog({
         onOpenChange(newOpen);
         if (!newOpen) {
           setConfigName('');
-          setSelectedConfigSetId('');
+          setSelectedPipelineId('');
           setIsNewConfig(true);
         }
       }}
@@ -64,7 +64,7 @@ export function SaveConfigDialog({
         <DialogHeader>
           <DialogTitle>Save Configuration</DialogTitle>
           <DialogDescription>
-            Save the current configuration as a reusable config set or update an existing one.
+            Save the current configuration as a reusable pipeline or update an existing one.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -73,7 +73,7 @@ export function SaveConfigDialog({
               variant={isNewConfig ? "default" : "outline"}
               onClick={() => setIsNewConfig(true)}
             >
-              New Config Set
+              New pipeline
             </Button>
             <Button
               variant={!isNewConfig ? "default" : "outline"}
@@ -90,23 +90,23 @@ export function SaveConfigDialog({
                 id="name"
                 value={configName}
                 onChange={(e) => setConfigName(e.target.value)}
-                placeholder="Enter a name for this config set"
+                placeholder="Enter a name for this pipeline"
               />
             </div>
           ) : (
             <div className="space-y-2">
-              <Label htmlFor="configSet">Config Set</Label>
+              <Label htmlFor="pipeline">pipeline</Label>
               <Select
-                value={selectedConfigSetId}
-                onValueChange={setSelectedConfigSetId}
+                value={selectedPipelineId}
+                onValueChange={setSelectedPipelineId}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a config set to update" />
+                  <SelectValue placeholder="Select a pipeline to update" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableConfigSets.map((configSet) => (
-                    <SelectItem key={configSet.id} value={configSet.id}>
-                      {configSet.name}
+                  {availablePipelines.map((pipeline) => (
+                    <SelectItem key={pipeline.id} value={pipeline.id}>
+                      {pipeline.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -120,7 +120,7 @@ export function SaveConfigDialog({
             </Button>
             <Button 
               onClick={handleSave}
-              disabled={isNewConfig ? !configName.trim() : !selectedConfigSetId}
+              disabled={isNewConfig ? !configName.trim() : !selectedPipelineId}
             >
               {isNewConfig ? 'Save' : 'Update'}
             </Button>

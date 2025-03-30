@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { deploymentsApi } from '@/api/deployments';
 import type { Deployment } from '@/types/deployment';
+import { DeploymentForm } from '@/components/deployment/DeploymentForm';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { DeploymentForm } from '@/components/deployment/DeploymentForm';
+import { PipelineForm } from '@/components/config/PipelineForm';
 import {
   Dialog,
   DialogContent,
@@ -15,22 +16,30 @@ import {
 import { Plus, Clock, Pencil, Network } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useActivePipeline } from '@/hooks/use-active-pipeline';
 import { WaveformIcon } from '@/components/icons/WaveformIcon';
+import { pipelinesApi } from '@/api/pipelines';
+import { Pipeline } from '@/types/pipeline';
 
 export default function Dashboard() {
   const [recentDeployments, setRecentDeployments] = useState<Deployment[]>([]);
+  const [recentPipelines, setRecentPipelines] = useState<Pipeline[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+  const [isDeploymentFormOpen, setIsDeploymentFormOpen] = useState(false);
+  const [isPipelineFormOpen, setIsPipelineFormOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { setActive } = useActivePipeline();
 
   useEffect(() => {
-    loadRecentDeployments();
+    Promise.all([
+      loadRecentDeployments(),
+      loadRecentPipelines()
+    ]).finally(() => setLoading(false));
   }, []);
 
   const loadRecentDeployments = async () => {
     try {
-      setLoading(true);
       const response = await deploymentsApi.list();
       const recent = response.deployments
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -41,8 +50,23 @@ export default function Dashboard() {
         description: 'Failed to load recent deployments',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const loadRecentPipelines = async () => {
+    try {
+      const response = await pipelinesApi.list();
+      // Sort by createdAt and take the 5 most recent
+      const recent = response.pipelines
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5);
+      setRecentPipelines(recent);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load recent pipelines',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -70,12 +94,57 @@ export default function Dashboard() {
         description: 'Deployment created successfully',
       });
       loadRecentDeployments();
-      setIsFormDialogOpen(false);
+      const newPipeline = await pipelinesApi.create(createData);
+      await setActive(newPipeline.id);
+      // Dispatch pipeline created event
+      window.dispatchEvent(new Event('pipelineCreated'));
+      toast({
+        title: 'Success',
+        description: 'Pipeline created successfully',
+      });
+      loadRecentPipelines();
+      setIsDeploymentFormOpen(false);
       navigate('/deployments'); // Navigate to the deployments page
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to create deployment',
+        description: 'Failed to create pipeline',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCreatePipeline = async (data: Partial<Pipeline>) => {
+    try {
+      if (!data.name) {
+        toast({
+          title: 'Error',
+          description: 'Name is required',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const createData = {
+        name: data.name,
+        description: data.description,
+        environment: data.environment || 'development',
+        agentGroups: data.agentGroups || [],
+      };
+
+      await pipelinesApi.create(createData);
+      toast({
+        title: 'Success',
+        description: 'Pipeline created successfully',
+      });
+      loadRecentPipelines();
+      setIsPipelineFormOpen(false);
+      navigate('/deployments'); // Navigate to the deployments page
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create pipeline',
         variant: 'destructive',
       });
     }
@@ -85,94 +154,161 @@ export default function Dashboard() {
     navigate(`/deployments/${deployment.id}`);
   };
 
+  const handleSetActive = async (pipeline: Pipeline) => {
+    try {
+      await setActive(pipeline.id);
+      toast({
+        title: 'Success',
+        description: 'Pipeline set as active',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to set pipeline as active',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-6">Welcome to OTail</h1>
 
-      <div className="grid grid-cols-1 gap-6 mb-8">
-        <div className="border rounded-lg p-12">
-          <div className="flex items-center gap-12">
-            <div className="shrink-0">
-              <div className="w-32 h-32 bg-primary/10 rounded-full flex items-center justify-center">
-                <WaveformIcon className="w-16 h-16 text-primary" />
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Deployment Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Network className="h-5 w-5" />
+              Recent Deployments
+            </CardTitle>
+            <CardDescription>Your recently accessed deployments</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <Button
+                id="new-deployment-button"
+                onClick={() => setIsDeploymentFormOpen(true)}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" /> New Deployment
+              </Button>
             </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-semibold mb-3">Create your first deployment</h2>
-              <p className="text-muted-foreground text-lg mb-6">
-                Create and manage OpenTelemetry agent deployments to optimize your observability costs and control data ingestion.
-              </p>
-              <div className="flex gap-4 items-center">
-                <Button
-                  id="new-deployment-button"
-                  onClick={() => setIsFormDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <Plus className="h-4 w-4" /> New Deployment
-                </Button>
+            {loading ? (
+              <div className="text-center py-4">Loading...</div>
+            ) : recentDeployments.length === 0 ? (
+              <div className="text-center py-4 text-muted-foreground">
+                No recent deployments found
               </div>
+            ) : (
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                {recentDeployments.map((deployment) => (
+                  <Card
+                    key={deployment.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
+                    <CardContent className="pt-6">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-medium">{deployment.name}</h3>
+                          <p className="text-sm text-muted-foreground">{deployment.description}</p>
+                          <div className="flex gap-2 mt-2">
+                            <Badge variant="secondary">{deployment.environment}</Badge>
+                            <Badge variant="outline">
+                              {deployment.agentGroups.length} Agent Groups
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="text-sm text-muted-foreground">
+                            {new Date(deployment.createdAt).toLocaleDateString()}
+                          </div>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="flex items-center gap-2"
+                            onClick={() => handleViewDeployment(deployment)}
+                          >
+                            <Network className="w-4 h-4" /> View
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Pipeline Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <WaveformIcon className="h-5 w-5" />
+              Recent Pipelines
+            </CardTitle>
+            <CardDescription>Your recently accessed pipelines</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <Button
+                id="new-pipeline-button"
+                onClick={() => setIsPipelineFormOpen(true)}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" /> New Pipeline
+              </Button>
             </div>
-          </div>
-        </div>
+            {loading ? (
+              <div className="text-center py-4">Loading...</div>
+            ) : recentPipelines.length === 0 ? (
+              <div className="text-center py-4 text-muted-foreground">
+                No recent pipelines found
+              </div>
+            ) : (
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                {recentPipelines.map((pipeline) => (
+                  <Card
+                    key={pipeline.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
+                    <CardContent className="pt-6">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-medium">{pipeline.name}</h3>
+                          <p className="text-sm text-muted-foreground">{pipeline.description}</p>
+                          <div className="flex gap-2 mt-2">
+                            {pipeline.tags?.map((tag) => (
+                              <Badge key={tag} variant="secondary">{tag}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="text-sm text-muted-foreground">
+                            {new Date(pipeline.createdAt).toLocaleDateString()}
+                          </div>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="flex items-center gap-2"
+                            onClick={() => handleSetActive(pipeline)}
+                          >
+                            <Pencil className="w-4 h-4" /> Edit Pipeline
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Recent Deployments
-          </CardTitle>
-          <CardDescription>Your recently accessed deployments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-4">Loading...</div>
-          ) : recentDeployments.length === 0 ? (
-            <div className="text-center py-4 text-muted-foreground">
-              No recent deployments found
-            </div>
-          ) : (
-            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-              {recentDeployments.map((deployment) => (
-                <Card
-                  key={deployment.id}
-                  className="hover:shadow-md transition-shadow"
-                >
-                  <CardContent className="pt-6">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-medium">{deployment.name}</h3>
-                        <p className="text-sm text-muted-foreground">{deployment.description}</p>
-                        <div className="flex gap-2 mt-2">
-                          <Badge variant="secondary">{deployment.environment}</Badge>
-                          <Badge variant="outline">
-                            {deployment.agentGroups.length} Agent Groups
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(deployment.createdAt).toLocaleDateString()}
-                        </div>
-                        <Button
-                          variant="default"
-                          size="sm"
-                          className="flex items-center gap-2"
-                          onClick={() => handleViewDeployment(deployment)}
-                        >
-                          <Network className="w-4 h-4" /> View
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+      {/* Deployment Form Dialog */}
+      <Dialog open={isDeploymentFormOpen} onOpenChange={setIsDeploymentFormOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Create New Deployment</DialogTitle>
@@ -182,7 +318,23 @@ export default function Dashboard() {
           </DialogHeader>
           <DeploymentForm
             onSubmit={handleCreateDeployment}
-            onCancel={() => setIsFormDialogOpen(false)}
+            onCancel={() => setIsDeploymentFormOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Pipeline Form Dialog */}
+      <Dialog open={isPipelineFormOpen} onOpenChange={setIsPipelineFormOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Create New Pipeline</DialogTitle>
+            <DialogDescription>
+              Create a new pipeline that can be reused later.
+            </DialogDescription>
+          </DialogHeader>
+          <PipelineForm
+            onSubmit={handleCreatePipeline}
+            onCancel={() => setIsPipelineFormOpen(false)}
           />
         </DialogContent>
       </Dialog>

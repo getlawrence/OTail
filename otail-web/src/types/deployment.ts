@@ -38,7 +38,7 @@ export interface AgentGroup {
   name: string;
   description?: string;
   role: string;
-  configProfileId: string;
+  pipelineId: string;
   agents: Agent[];
   createdAt: string;
   updatedAt: string;
@@ -74,7 +74,7 @@ export interface CreateAgentGroupRequest {
   name: string;
   description?: string;
   role: string;
-  configProfileId: string;
+  pipelineId: string;
   deploymentId: string;
 }
 

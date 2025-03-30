@@ -10,21 +10,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { AgentGroup } from '@/types/deployment';
-import type { ConfigSet } from '@/types/configSet';
+import type { Pipeline } from '@/types/pipeline';
 
 interface AgentGroupFormProps {
   onSubmit: (data: Partial<AgentGroup>) => void;
   onCancel: () => void;
-  configSets: ConfigSet[];
+  pipelines: Pipeline[];
   agentGroup?: AgentGroup;
 }
 
-export function AgentGroupForm({ onSubmit, onCancel, configSets, agentGroup }: AgentGroupFormProps) {
+export function AgentGroupForm({ onSubmit, onCancel, pipelines, agentGroup }: AgentGroupFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     role: '',
-    configProfileId: '',
+    pipelineId: '',
   });
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export function AgentGroupForm({ onSubmit, onCancel, configSets, agentGroup }: A
         name: agentGroup.name,
         description: agentGroup.description || '',
         role: agentGroup.role,
-        configProfileId: agentGroup.configProfileId,
+        pipelineId: agentGroup.pipelineId,
       });
     }
   }, [agentGroup]);
@@ -41,7 +41,7 @@ export function AgentGroupForm({ onSubmit, onCancel, configSets, agentGroup }: A
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.role || !formData.configProfileId) {
+    if (!formData.name || !formData.role || !formData.pipelineId) {
       return;
     }
 
@@ -121,14 +121,14 @@ export function AgentGroupForm({ onSubmit, onCancel, configSets, agentGroup }: A
         <label htmlFor="configProfileId" className="text-sm font-medium">
           Configuration Set
         </label>
-        <Select onValueChange={(value) => handleSelectChange('configProfileId', value)} value={formData.configProfileId}>
+        <Select onValueChange={(value) => handleSelectChange('pipelineId', value)} value={formData.pipelineId}>
           <SelectTrigger>
-            <SelectValue placeholder="Select configuration set" />
+            <SelectValue placeholder="Select pipeline" />
           </SelectTrigger>
           <SelectContent>
-            {configSets.map((configSet) => (
-              <SelectItem key={configSet.id} value={configSet.id}>
-                {configSet.name} (v{configSet.version})
+            {pipelines.map((pipeline) => (
+              <SelectItem key={pipeline.id} value={pipeline.id}>
+                {pipeline.name}
               </SelectItem>
             ))}
           </SelectContent>

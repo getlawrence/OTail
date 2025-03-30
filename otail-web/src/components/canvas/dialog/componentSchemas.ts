@@ -1,4 +1,3 @@
-
 import { SchemaField } from '@/components/shared/DynamicForm/types';
 
 export interface ComponentSchema {
@@ -794,6 +793,139 @@ export const componentSchemas: Record<string, ComponentSchema> = {
         label: 'Dimensions',
         itemType: 'string',
         placeholder: 'Enter attribute to use as dimension',
+      },
+    },
+  },
+  log_dedup: {
+    fields: {
+      interval: {
+        type: 'string',
+        label: 'Interval',
+        required: true,
+        default: '10s',
+        placeholder: 'Enter interval (e.g., 10s)',
+      },
+      log_count_attribute: {
+        type: 'string',
+        label: 'Log Count Attribute',
+        required: true,
+        default: 'log_count',
+        placeholder: 'Enter log count attribute name',
+      },
+      timezone: {
+        type: 'string',
+        label: 'Timezone',
+        required: true,
+        default: 'UTC',
+        placeholder: 'Enter timezone (e.g., America/New_York)',
+      },
+      conditions: {
+        type: 'array',
+        label: 'Conditions',
+        itemType: 'string',
+        placeholder: 'Enter OTTL expression',
+      },
+      include_fields: {
+        type: 'array',
+        label: 'Include Fields',
+        itemType: 'string',
+        placeholder: 'Enter field name (e.g., body.timestamp)',
+      },
+      exclude_fields: {
+        type: 'array',
+        label: 'Exclude Fields',
+        itemType: 'string',
+        placeholder: 'Enter field name (e.g., body.timestamp)',
+      },
+    },
+  },
+  metricstransform: {
+    fields: {
+      transforms: {
+        type: 'array',
+        label: 'Transforms',
+        itemType: 'object',
+        fields: {
+          include: {
+            type: 'string',
+            label: 'Include',
+            required: true,
+            placeholder: 'Enter metric name pattern',
+          },
+          match_type: {
+            type: 'enum',
+            label: 'Match Type',
+            options: ['strict', 'regexp'],
+            default: 'strict',
+          },
+          action: {
+            type: 'enum',
+            label: 'Action',
+            options: ['update', 'insert', 'combine'],
+            default: 'update',
+          },
+          new_name: {
+            type: 'string',
+            label: 'New Name',
+            placeholder: 'Enter new metric name',
+          },
+          operations: {
+            type: 'array',
+            label: 'Operations',
+            itemType: 'object',
+            fields: {
+              action: {
+                type: 'enum',
+                label: 'Operation Action',
+                options: ['add_label', 'update_label', 'delete_label_value', 'toggle_scalar_data_type', 'experimental_scale_value', 'aggregate_labels', 'aggregate_label_values'],
+                required: true,
+              },
+              label: {
+                type: 'string',
+                label: 'Label',
+                placeholder: 'Enter label name',
+              },
+              new_label: {
+                type: 'string',
+                label: 'New Label',
+                placeholder: 'Enter new label name',
+              },
+              new_value: {
+                type: 'string',
+                label: 'New Value',
+                placeholder: 'Enter new value',
+              },
+              label_value: {
+                type: 'string',
+                label: 'Label Value',
+                placeholder: 'Enter label value',
+              },
+              label_set: {
+                type: 'array',
+                label: 'Label Set',
+                itemType: 'string',
+                placeholder: 'Enter label name',
+              },
+              aggregation_type: {
+                type: 'enum',
+                label: 'Aggregation Type',
+                options: ['sum', 'mean', 'min', 'max', 'count', 'median'],
+                placeholder: 'Select aggregation type',
+              },
+              experimental_scale: {
+                type: 'number',
+                label: 'Scale Value',
+                placeholder: 'Enter scale value',
+              },
+              aggregated_values: {
+                type: 'array',
+                label: 'Aggregated Values',
+                itemType: 'string',
+                placeholder: 'Enter value to aggregate',
+              },
+            },
+          },
+        },
       },
     },
   },
