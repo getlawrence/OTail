@@ -58,6 +58,10 @@ type Agent struct {
 
 	// Channels to notify when this Agent's status is updated next time.
 	statusUpdateWatchers []chan<- struct{}
+
+	// Agent group and deployment
+	GroupID       string
+	DeploymentID  string
 }
 
 func NewAgent(
@@ -102,6 +106,8 @@ func (agent *Agent) CloneReadonly() *Agent {
 		ClientCert:                  agent.ClientCert,
 		ClientCertOfferError:        agent.ClientCertOfferError,
 		ClientCertSha256Fingerprint: agent.ClientCertSha256Fingerprint,
+		GroupID:                     agent.GroupID,
+		DeploymentID:                agent.DeploymentID,
 	}
 }
 
@@ -503,4 +509,12 @@ func (agent *Agent) processConnectionSettingsRequest(
 		response.ConnectionSettings = &protobufs.ConnectionSettingsOffers{}
 	}
 	response.ConnectionSettings.Opamp = &protobufs.OpAMPConnectionSettings{}
+}
+
+func (agent *Agent) SetGroupAndDeployment(groupID, deploymentID string) {
+	agent.mux.Lock()
+	defer agent.mux.Unlock()
+
+	agent.GroupID = groupID
+	agent.DeploymentID = deploymentID
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { deploymentsApi } from '@/api/deployments';
-import type { Deployment } from '@/types/deployment';
+import type { Deployment, CreateDeploymentRequest } from '@/types/deployment';
 import { DeploymentForm } from '@/components/deployment/DeploymentForm';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -45,8 +45,8 @@ export default function Dashboard() {
   const loadRecentDeployments = async () => {
     try {
       const response = await deploymentsApi.list();
-      const recent = response.deployments
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const recent = response
+        .sort((a: Deployment, b: Deployment) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setRecentDeployments(recent);
     } catch (error) {
       toast({
@@ -85,12 +85,8 @@ export default function Dashboard() {
         return;
       }
 
-      const createData = {
+      const createData: CreateDeploymentRequest = {
         name: data.name,
-        description: data.description,
-        environment: data.environment || 'development',
-        agentGroups: data.agentGroups || [],
-        configuration: ''
       };
 
       await deploymentsApi.create(createData);
@@ -99,7 +95,10 @@ export default function Dashboard() {
         description: 'Deployment created successfully',
       });
       loadRecentDeployments();
-      const newPipeline = await pipelinesApi.create(createData);
+      const newPipeline = await pipelinesApi.create({
+        name: data.name,
+        configuration: ''
+      });
       await setActive(newPipeline.id);
       // Dispatch pipeline created event
       window.dispatchEvent(new Event('pipelineCreated'));
@@ -231,11 +230,9 @@ export default function Dashboard() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <h3 className="font-medium">{deployment.name}</h3>
-                          <p className="text-sm text-muted-foreground">{deployment.description}</p>
                           <div className="flex gap-2 mt-2">
-                            <Badge variant="secondary">{deployment.environment}</Badge>
                             <Badge variant="outline">
-                              {deployment.agentGroups.length} Agent Groups
+                              {deployment.groupIds?.length || 0} Agent Groups
                             </Badge>
                           </div>
                         </div>

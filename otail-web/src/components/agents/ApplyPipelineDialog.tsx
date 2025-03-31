@@ -18,9 +18,9 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { usePipelines } from "@/hooks/use-pipelines"
 import { Agent } from "@/api/types"
-import { updateConfig } from "@/api/agent"
 import { load } from "js-yaml"
 import { Pipeline } from "@/types/pipeline"
+import { agentsApi } from "@/api/agent"
 
 interface ApplyPipelineDialogProps {
     open: boolean
@@ -67,7 +67,7 @@ export function ApplyPipelineDialog({ open, onOpenChange, agent }: ApplyPipeline
                 throw new Error("Pipeline not found")
             }
             const parsedConfig = JSON.stringify(load(pipeline.configuration))
-            await updateConfig(agent.InstanceId, parsedConfig)
+            await agentsApi.updateConfig(agent.InstanceId, parsedConfig)
             toast({
                 title: "Success",
                 description: "Pipeline applied successfully",

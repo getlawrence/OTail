@@ -19,6 +19,8 @@ type Server struct {
 	opampServer server.OpAMPServer
 	agents      *Agents
 	verifyToken func(string) (string, error)
+	// Callback for agent group and deployment verification
+	onAgentConnected func(ctx context.Context, deploymentName, groupName string) (string, string, error)
 }
 
 // zapToOpAmpLogger adapts zap.Logger to opamp's logger interface
@@ -34,11 +36,17 @@ func (z *zapToOpAmpLogger) Errorf(ctx context.Context, format string, args ...in
 	z.Sugar().Errorf(format, args...)
 }
 
-func NewServer(agents *Agents, verifyToken func(string) (string, error), logger *zap.Logger) (*Server, error) {
+func NewServer(
+	agents *Agents,
+	verifyToken func(string) (string, error),
+	onAgentConnected func(ctx context.Context, deploymentName, groupName string) (string, string, error),
+	logger *zap.Logger,
+) (*Server, error) {
 	s := &Server{
-		logger:      logger,
-		agents:      agents,
-		verifyToken: verifyToken,
+		logger:           logger,
+		agents:           agents,
+		verifyToken:      verifyToken,
+		onAgentConnected: onAgentConnected,
 	}
 
 	// Create the OPAmp server
@@ -73,11 +81,26 @@ func (s *Server) Start() error {
 						return types.ConnectionResponse{Accept: false, HTTPStatusCode: http.StatusUnauthorized}
 					}
 
+					// Extract agent group and deployment from headers
+					agentGroup := request.Header.Get("Agent-Group")
+					deployment := request.Header.Get("Deployment")
+
+					// Verify agent group and deployment if provided
+					groupID, deploymentID, err := s.onAgentConnected(request.Context(), agentGroup, deployment)
+					if err != nil {
+						s.logger.Error("Invalid agent group or deployment",
+							zap.Error(err),
+							zap.String("group", agentGroup),
+							zap.String("deployment", deployment))
+						return types.ConnectionResponse{Accept: false, HTTPStatusCode: http.StatusUnauthorized}
+					}
+
 					return types.ConnectionResponse{
 						Accept: true,
 						ConnectionCallbacks: server.ConnectionCallbacksStruct{
 							OnConnectedFunc: func(ctx context.Context, conn types.Connection) {
 								s.agents.SetOrganizationID(conn, organizationID)
+								s.agents.SetAgentGroupAndDeployment(conn, groupID, deploymentID)
 							},
 							OnMessageFunc:         s.onMessage,
 							OnConnectionCloseFunc: s.onDisconnect,
@@ -155,4 +178,12 @@ func (s *Server) ListAgents() map[uuid.UUID]*Agent {
 
 func (s *Server) GetAgentsByOrganization(organizationId string) map[uuid.UUID]*Agent {
 	return s.agents.GetAgentsByOrganization(organizationId)
+}
+
+func (s *Server) GetAgentsByGroup(groupId string) map[uuid.UUID]*Agent {
+	return s.agents.GetAgentsByGroup(groupId)
+}
+
+func (s *Server) GetAgentsByDeployment(deploymentId string) map[uuid.UUID]*Agent {
+	return s.agents.GetAgentsByDeployment(deploymentId)
 }

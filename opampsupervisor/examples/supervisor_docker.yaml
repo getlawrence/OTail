@@ -2,6 +2,8 @@ server:
   endpoint: ${OPAMP_SERVER_ENDPOINT}
   headers:
     Authorization: Bearer ${API_TOKEN}
+    Agent-Group: ${AGENT_GROUP}
+    Deployment: ${DEPLOYMENT}
   tls:
     insecure: true
 

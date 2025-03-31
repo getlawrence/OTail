@@ -58,10 +58,9 @@ export interface ConfigurationProfile {
 export interface AgentGroup {
   id: string;
   name: string;
-  description?: string;
-  role: string;
-  pipelineId?: string;  // Optional reference to a pipeline configuration for the group
-  agents: Agent[];
+  config: string;
+  agentIds: string[];
+  deploymentId: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,10 +68,7 @@ export interface AgentGroup {
 export interface Deployment {
   id: string;
   name: string;
-  description?: string;
-  environment: string;
-  pipelineId?: string;  // Optional reference to a pipeline configuration for the entire deployment
-  agentGroups: AgentGroup[];
+  groupIds: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -84,13 +80,10 @@ export interface DeploymentListResponse {
 
 export interface CreateDeploymentRequest {
   name: string;
-  description?: string;
-  environment: string;
-  agentGroups: Omit<AgentGroup, 'id' | 'createdAt' | 'updatedAt'>[];
 }
 
-export interface UpdateDeploymentRequest extends Partial<CreateDeploymentRequest> {
-  id: string;
+export interface UpdateDeploymentRequest {
+  name: string;
 }
 
 export interface CreateAgentGroupRequest {
@@ -113,4 +106,15 @@ export interface CreateConfigurationProfileRequest {
 
 export interface UpdateConfigurationProfileRequest extends Partial<CreateConfigurationProfileRequest> {
   id: string;
+}
+
+export interface AgentGroupFormData {
+  name: string;
+  config: string;
+  deploymentId: string;
+}
+
+export interface DeploymentFormData {
+  name: string;
+  groupIds: string[];
 } 

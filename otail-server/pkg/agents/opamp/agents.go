@@ -16,6 +16,8 @@ type Agents struct {
 	connections      map[types.Connection]map[uuid.UUID]bool
 	orgIDs           map[types.Connection]string
 	orgConnections   map[string][]types.Connection
+	groupAgents      map[string]map[uuid.UUID]bool
+	deploymentAgents map[string]map[uuid.UUID]bool
 }
 
 var logger = log.New(log.Default().Writer(), "[AGENTS] ", log.Default().Flags()|log.Lmsgprefix|log.Lmicroseconds)
@@ -52,7 +54,30 @@ func (agents *Agents) RemoveConnection(conn types.Connection) {
 
 	// Remove the agents
 	for agentId := range agentsToRemove {
-		delete(agents.agentsById, agentId)
+		agent := agents.agentsById[agentId]
+		if agent != nil {
+			// Remove from group map
+			if groupID := agent.GroupID; groupID != "" {
+				if groupAgents, exists := agents.groupAgents[groupID]; exists {
+					delete(groupAgents, agentId)
+					if len(groupAgents) == 0 {
+						delete(agents.groupAgents, groupID)
+					}
+				}
+			}
+
+			// Remove from deployment map
+			if deploymentID := agent.DeploymentID; deploymentID != "" {
+				if deploymentAgents, exists := agents.deploymentAgents[deploymentID]; exists {
+					delete(deploymentAgents, agentId)
+					if len(deploymentAgents) == 0 {
+						delete(agents.deploymentAgents, deploymentID)
+					}
+				}
+			}
+
+			delete(agents.agentsById, agentId)
+		}
 	}
 }
 
@@ -177,6 +202,57 @@ func (agents *Agents) SetOrganizationID(conn types.Connection, orgID string) {
 	agents.orgConnections[orgID] = append(agents.orgConnections[orgID], conn)
 }
 
+func (agents *Agents) SetAgentGroupAndDeployment(conn types.Connection, groupID, deploymentID string) {
+	agents.mux.Lock()
+	defer agents.mux.Unlock()
+
+	// Get all agents for this connection
+	if agentIds, ok := agents.connections[conn]; ok {
+		for agentId := range agentIds {
+			if agent, ok := agents.agentsById[agentId]; ok {
+				// Remove from old group if any
+				if oldGroupID := agent.GroupID; oldGroupID != "" {
+					if groupAgents, exists := agents.groupAgents[oldGroupID]; exists {
+						delete(groupAgents, agentId)
+						if len(groupAgents) == 0 {
+							delete(agents.groupAgents, oldGroupID)
+						}
+					}
+				}
+
+				// Remove from old deployment if any
+				if oldDeploymentID := agent.DeploymentID; oldDeploymentID != "" {
+					if deploymentAgents, exists := agents.deploymentAgents[oldDeploymentID]; exists {
+						delete(deploymentAgents, agentId)
+						if len(deploymentAgents) == 0 {
+							delete(agents.deploymentAgents, oldDeploymentID)
+						}
+					}
+				}
+
+				// Set new group and deployment
+				agent.SetGroupAndDeployment(groupID, deploymentID)
+
+				// Add to new group if specified
+				if groupID != "" {
+					if _, exists := agents.groupAgents[groupID]; !exists {
+						agents.groupAgents[groupID] = map[uuid.UUID]bool{}
+					}
+					agents.groupAgents[groupID][agentId] = true
+				}
+
+				// Add to new deployment if specified
+				if deploymentID != "" {
+					if _, exists := agents.deploymentAgents[deploymentID]; !exists {
+						agents.deploymentAgents[deploymentID] = map[uuid.UUID]bool{}
+					}
+					agents.deploymentAgents[deploymentID][agentId] = true
+				}
+			}
+		}
+	}
+}
+
 func (agents *Agents) GetAgentsByOrganization(orgID string) map[uuid.UUID]*Agent {
 	agents.mux.RLock()
 	defer agents.mux.RUnlock()
@@ -190,15 +266,49 @@ func (agents *Agents) GetAgentsByOrganization(orgID string) map[uuid.UUID]*Agent
 			if agentIds, ok := agents.connections[conn]; ok {
 				for agentId := range agentIds {
 					if agent, ok := agents.agentsById[agentId]; ok {
-						// Create a clone of the agent
-						clone := *agent
-						result[agentId] = &clone
+						// Use CloneReadonly to get a JSON-safe copy of the agent
+						result[agentId] = agent.CloneReadonly()
 					}
 				}
 			}
 		}
 	}
+	return result
+}
 
+func (agents *Agents) GetAgentsByGroup(groupID string) map[uuid.UUID]*Agent {
+	agents.mux.RLock()
+	defer agents.mux.RUnlock()
+
+	result := map[uuid.UUID]*Agent{}
+
+	// Get all agents for this group
+	if agentIds, ok := agents.groupAgents[groupID]; ok {
+		for agentId := range agentIds {
+			if agent, ok := agents.agentsById[agentId]; ok {
+				// Use CloneReadonly to get a JSON-safe copy of the agent
+				result[agentId] = agent.CloneReadonly()
+			}
+		}
+	}
+	return result
+}
+
+func (agents *Agents) GetAgentsByDeployment(deploymentID string) map[uuid.UUID]*Agent {
+	agents.mux.RLock()
+	defer agents.mux.RUnlock()
+
+	result := map[uuid.UUID]*Agent{}
+
+	// Get all agents for this deployment
+	if agentIds, ok := agents.deploymentAgents[deploymentID]; ok {
+		for agentId := range agentIds {
+			if agent, ok := agents.agentsById[agentId]; ok {
+				// Use CloneReadonly to get a JSON-safe copy of the agent
+				result[agentId] = agent.CloneReadonly()
+			}
+		}
+	}
 	return result
 }
 
@@ -207,4 +317,6 @@ var AllAgents = Agents{
 	connections:      map[types.Connection]map[uuid.UUID]bool{},
 	orgIDs:          map[types.Connection]string{},
 	orgConnections:   map[string][]types.Connection{},
+	groupAgents:      map[string]map[uuid.UUID]bool{},
+	deploymentAgents: map[string]map[uuid.UUID]bool{},
 }

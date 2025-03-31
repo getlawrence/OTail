@@ -19,7 +19,7 @@ const OrganizationPage: React.FC = () => {
         }
 
         try {
-            const org = await organizationApi.getOrganization(user.organization_id);
+            const org = await organizationApi.get(user.organization_id);
             setOrganization(org);
         } catch (error) {
             console.error(error);

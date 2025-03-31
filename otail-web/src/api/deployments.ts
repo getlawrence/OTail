@@ -1,69 +1,41 @@
-import { localDeploymentsStorage } from '@/lib/storage/deployments';
+import { apiClient } from './client';
 import type {
   Deployment,
-  DeploymentListResponse,
   CreateDeploymentRequest,
   UpdateDeploymentRequest,
-  AgentGroup,
-  CreateAgentGroupRequest,
-  UpdateAgentGroupRequest,
-  ConfigurationProfile,
-  CreateConfigurationProfileRequest,
-  UpdateConfigurationProfileRequest,
 } from '@/types/deployment';
 
 export const deploymentsApi = {
-  list: async (): Promise<DeploymentListResponse> => {
-    return localDeploymentsStorage.list();
+  list: async (): Promise<Deployment[]> => {
+    const response = await apiClient.get<Deployment[]>('/api/v1/deployments');
+    return response.data;
   },
 
   get: async (id: string): Promise<Deployment> => {
-    return localDeploymentsStorage.get(id);
+    const response = await apiClient.get<Deployment>(`/api/v1/deployments/${id}`);
+    return response.data;
   },
 
   create: async (data: CreateDeploymentRequest): Promise<Deployment> => {
-    return localDeploymentsStorage.create(data);
+    const response = await apiClient.post<Deployment>('/api/v1/deployments', data);
+    return response.data;
   },
 
-  update: async (data: UpdateDeploymentRequest): Promise<Deployment> => {
-    return localDeploymentsStorage.update(data);
+  update: async (id: string, data: UpdateDeploymentRequest): Promise<Deployment> => {
+    const response = await apiClient.put<Deployment>(`/api/v1/deployments/${id}`, data);
+    return response.data;
   },
 
   delete: async (id: string): Promise<void> => {
-    return localDeploymentsStorage.delete(id);
+    const response = await apiClient.delete<void>(`/api/v1/deployments/${id}`);
+    return response.data;
   },
 
-  // Agent Groups
-  createAgentGroup: async (data: CreateAgentGroupRequest): Promise<AgentGroup> => {
-    return localDeploymentsStorage.createAgentGroup(data);
+  addGroup: async (deploymentId: string, groupId: string): Promise<void> => {
+    await apiClient.post(`/api/v1/deployments/${deploymentId}/groups/${groupId}`);
   },
 
-  updateAgentGroup: async (data: UpdateAgentGroupRequest): Promise<AgentGroup> => {
-    return localDeploymentsStorage.updateAgentGroup(data);
-  },
-
-  deleteAgentGroup: async (deploymentId: string, groupId: string): Promise<void> => {
-    return localDeploymentsStorage.deleteAgentGroup(deploymentId, groupId);
-  },
-
-  // Configuration Profiles
-  listConfigurationProfiles: async (): Promise<ConfigurationProfile[]> => {
-    return localDeploymentsStorage.listConfigurationProfiles();
-  },
-
-  getConfigurationProfile: async (id: string): Promise<ConfigurationProfile> => {
-    return localDeploymentsStorage.getConfigurationProfile(id);
-  },
-
-  createConfigurationProfile: async (data: CreateConfigurationProfileRequest): Promise<ConfigurationProfile> => {
-    return localDeploymentsStorage.createConfigurationProfile(data);
-  },
-
-  updateConfigurationProfile: async (data: UpdateConfigurationProfileRequest): Promise<ConfigurationProfile> => {
-    return localDeploymentsStorage.updateConfigurationProfile(data);
-  },
-
-  deleteConfigurationProfile: async (id: string): Promise<void> => {
-    return localDeploymentsStorage.deleteConfigurationProfile(id);
+  removeGroup: async (deploymentId: string, groupId: string): Promise<void> => {
+    await apiClient.delete(`/api/v1/deployments/${deploymentId}/groups/${groupId}`);
   },
 }; 

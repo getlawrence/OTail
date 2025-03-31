@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
-import { getAgents, fetchAgentLogs, updateConfig } from "@/api/agent"
-import { Agent, Log } from "@/api/types"
+import { agentsApi } from "@/api/agent"
+import type { Agent, Log } from "@/api/types"
 import { LogsDialog } from "@/components/agents/LogsDialog"
 import { ConfigDialog } from "@/components/agents/ConfigDialog"
 import { ApplyPipelineDialog } from "@/components/agents/ApplyPipelineDialog"
@@ -29,8 +29,8 @@ const AgentsPage = () => {
 
     const fetchAgents = async () => {
         try {
-            const data = await getAgents()
-            setAgents(Object.values(data))
+            const data = await agentsApi.list()
+            setAgents(data)
         } catch (error) {
             toast({
                 variant: "destructive",
@@ -55,7 +55,7 @@ const AgentsPage = () => {
         setLoading(true)
         setLogsOpen(true)
         try {
-            const logsData = await fetchAgentLogs(agent.InstanceId)
+            const logsData = await agentsApi.getLogs(agent.InstanceId)
             setLogs(logsData)
         } catch (error) {
             console.error('Failed to fetch logs:', error)
@@ -75,7 +75,7 @@ const AgentsPage = () => {
 
         try {
             const parsedConfig = JSON.stringify(load(value))
-            await updateConfig(selectedAgent.InstanceId, parsedConfig)
+            await agentsApi.updateConfig(selectedAgent.InstanceId, parsedConfig)
             toast({
                 variant: "default",
                 title: "Success",

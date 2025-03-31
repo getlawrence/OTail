@@ -10,6 +10,7 @@ import Organization from './pages/organization'
 import Dashboard from './pages/home/Dashboard'
 import Deployments from './pages/deployments/Deployments'
 import DeploymentDetails from './pages/deployments/DeploymentDetails'
+import AgentGroups from './pages/agent-groups'
 import { ThemeProvider } from "@/hooks/use-theme"
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import { Toaster } from "@/components/ui/toaster"
@@ -60,6 +61,7 @@ function App() {
                     <Route path="/canvas" element={<CanvasPage />} />
                     <Route path="/deployments" element={<Deployments />} />
                     <Route path="/deployments/:id" element={<DeploymentDetails />} />
+                    <Route path="/agent-groups" element={<AgentGroups />} />
                     <Route path="/pipelines" element={<Pipelines />} />
                   </Route>
                 ) : (
@@ -71,6 +73,7 @@ function App() {
                     <Route path="/organization" element={<Organization />} />
                     <Route path="/deployments" element={<Deployments />} />
                     <Route path="/deployments/:id" element={<DeploymentDetails />} />
+                    <Route path="/agent-groups" element={<AgentGroups />} />
                     <Route path="/pipelines" element={<Pipelines />} />
                   </Route>
                 )}

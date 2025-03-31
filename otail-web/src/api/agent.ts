@@ -1,18 +1,31 @@
-import { Agents, Log } from "./types";
-import { apiClient } from "./client";
+import { apiClient } from './client';
+import type { Agent, Log } from '@/api/types';
 
-export async function getAgents(): Promise<Agents> {
-    return apiClient.get<Agents>('/api/v1/agents');
-}
+export const agentsApi = {
+  list: async (): Promise<Agent[]> => {
+    const response = await apiClient.get<Record<string, Agent>>('/api/v1/agents');
+    return Object.values(response.data);
+  },
 
-export async function getConfig(agentId: string): Promise<string> {
-    return apiClient.get<string>(`/api/v1/agents/${agentId}/config`);
-}
+  getConfig: async (agentId: string): Promise<string> => {
+    const response = await apiClient.get<string>(`/api/v1/agents/${agentId}/config`);
+    return response.data;
+  },
 
-export async function updateConfig(agentId: string, config: string): Promise<void> {
-    return apiClient.put<void>(`/api/v1/agents/${agentId}/config`, JSON.parse(config));
-}
+  updateConfig: async (agentId: string, config: string): Promise<void> => {
+    const response = await apiClient.put<void>(`/api/v1/agents/${agentId}/config`, JSON.parse(config));
+    return response.data;
+  },
 
-export async function fetchAgentLogs(agentId: string): Promise<Log[]> {
-    return apiClient.get<Log[]>(`/api/v1/agents/${agentId}/logs`);
+  getLogs: async (agentId: string, startTime?: Date, endTime?: Date): Promise<Log[]> => {
+    const params = new URLSearchParams();
+    if (startTime) {
+      params.append('start_time', startTime.toISOString());
+    }
+    if (endTime) {
+      params.append('end_time', endTime.toISOString());
+    }
+    const response = await apiClient.get<Log[]>(`/api/v1/agents/${agentId}/logs?${params.toString()}`);
+    return response.data;
+  },
 };

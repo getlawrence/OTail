@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { deploymentsApi } from '@/api/deployments';
 import { pipelinesApi } from '@/api/pipelines';
-import type { Deployment, AgentGroup } from '@/types/deployment';
+import type { Deployment, AgentGroup, CreateDeploymentRequest, UpdateDeploymentRequest } from '@/types/deployment';
 import type { Pipeline } from '@/types/pipeline';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -37,7 +37,7 @@ export default function Deployments() {
     try {
       setLoading(true);
       const response = await deploymentsApi.list();
-      setDeployments(response.deployments);
+      setDeployments(response);
     } catch (error) {
       toast({
         title: 'Error',
@@ -74,23 +74,25 @@ export default function Deployments() {
       }
 
       if (data.id) {
-        await deploymentsApi.update({
+        const updateData: UpdateDeploymentRequest = {
           id: data.id,
           name: data.name,
           description: data.description,
           environment: data.environment || 'development',
-        });
+        };
+        await deploymentsApi.update(data.id, updateData);
         toast({
           title: 'Success',
           description: 'Deployment updated successfully',
         });
       } else {
-        await deploymentsApi.create({
+        const createData: CreateDeploymentRequest = {
           name: data.name,
           description: data.description,
           environment: data.environment || 'development',
           agentGroups: [],
-        });
+        };
+        await deploymentsApi.create(createData);
         toast({
           title: 'Success',
           description: 'Deployment created successfully',
@@ -122,26 +124,25 @@ export default function Deployments() {
       }
 
       if (data.id) {
-        await deploymentsApi.updateAgentGroup({
-          id: data.id,
-          deploymentId: selectedDeployment.id,
-          name: data.name,
-          description: data.description,
-          role: data.role,
-          pipelineId: data.pipelineId,
-        });
         toast({
-          title: 'Success',
-          description: 'Agent group updated successfully',
+          title: 'Error',
+          description: 'Updating agent groups is not yet supported',
+          variant: 'destructive',
         });
       } else {
-        await deploymentsApi.createAgentGroup({
-          name: data.name,
-          description: data.description,
-          role: data.role,
-          pipelineId: data.pipelineId,
-          deploymentId: selectedDeployment.id,
-        });
+        const createData: CreateDeploymentRequest = {
+          name: selectedDeployment.name,
+          description: selectedDeployment.description,
+          environment: selectedDeployment.environment,
+          agentGroups: [{
+            name: data.name,
+            description: data.description,
+            role: data.role,
+            pipelineId: data.pipelineId,
+            agents: []
+          }],
+        };
+        await deploymentsApi.create(createData);
         toast({
           title: 'Success',
           description: 'Agent group created successfully',
@@ -177,9 +178,9 @@ export default function Deployments() {
     }
   };
 
-  const handleDeleteAgentGroup = async (deploymentId: string, groupId: string) => {
+  const handleDeleteAgentGroup = async (deploymentId: string) => {
     try {
-      await deploymentsApi.deleteAgentGroup(deploymentId, groupId);
+      await deploymentsApi.delete(deploymentId);
       toast({
         title: 'Success',
         description: 'Agent group deleted successfully',
@@ -245,7 +246,7 @@ export default function Deployments() {
                           <div className="flex gap-2 mt-2">
                             <Badge variant="secondary">{deployment.environment}</Badge>
                             <Badge variant="outline">
-                              {deployment.agentGroups.length} Agent Groups
+                              {deployment.group_ids?.length} Agent Groups
                             </Badge>
                           </div>
                         </div>
@@ -280,22 +281,15 @@ export default function Deployments() {
                         </div>
                       </div>
 
-                      {deployment.agentGroups.length > 0 && (
+                      {deployment.group_ids?.length > 0 && (
                         <div className="space-y-4 mt-4">
                           <h4 className="text-sm font-medium">Agent Groups</h4>
-                          {deployment.agentGroups.map((group) => (
-                            <Card key={group.id} className="relative">
+                          {deployment.group_ids.map((group) => (
+                            <Card key={group} className="relative">
                               <CardContent className="pt-6">
                                 <div className="flex justify-between items-start">
                                   <div className="flex-1">
-                                    <h5 className="font-medium">{group.name}</h5>
-                                    <p className="text-sm text-muted-foreground">{group.description}</p>
-                                    <div className="flex gap-2 mt-2">
-                                      <Badge variant="secondary">{group.role}</Badge>
-                                      <Badge variant="outline">
-                                        {group.agents.length} Agents
-                                      </Badge>
-                                    </div>
+                                    <h5 className="font-medium">{group}</h5>
                                   </div>
                                   <div className="flex gap-2">
                                     <Button
@@ -310,7 +304,7 @@ export default function Deployments() {
                                       variant="destructive"
                                       size="sm"
                                       className="flex items-center gap-2"
-                                      onClick={() => handleDeleteAgentGroup(deployment.id, group.id)}
+                                      onClick={() => handleDeleteAgentGroup(deployment.id)}
                                     >
                                       <Trash2 className="w-4 h-4" /> Delete
                                     </Button>

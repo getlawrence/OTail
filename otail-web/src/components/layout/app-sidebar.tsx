@@ -1,4 +1,4 @@
-import { Telescope, LogOut, Users, Wrench, Palette, Share2, Network } from "lucide-react"
+import { Telescope, LogOut, Users, Wrench, Palette, Share2, Network, Layers } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { AnalyticsToggle } from "@/components/layout/analytics-toggle"
 import { Checklist } from "@/components/Checklist"
@@ -39,6 +39,11 @@ const items = !noAuthRequired
       icon: Telescope,
     },
     {
+      title: "Agent Groups",
+      url: "/agent-groups",
+      icon: Layers,
+    },
+    {
       title: "Canvas",
       url: "/canvas",
       icon: Palette,
@@ -70,6 +75,11 @@ const items = !noAuthRequired
       title: "Canvas",
       url: "/canvas",
       icon: Palette,
+    },
+    {
+      title: "Agent Groups",
+      url: "/agent-groups",
+      icon: Layers,
     },
     {
       title: "Pipelines",
