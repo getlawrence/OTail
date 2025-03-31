@@ -10,7 +10,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { AgentGroup } from '@/types/deployment';
-import type { Pipeline } from '@/types/pipeline';
+import type { Pipeline } from '@/types/deployment';
+import { PipelineSelector } from '@/components/pipeline/PipelineSelector';
 
 interface AgentGroupFormProps {
   onSubmit: (data: Partial<AgentGroup>) => void;
@@ -24,7 +25,7 @@ export function AgentGroupForm({ onSubmit, onCancel, pipelines, agentGroup }: Ag
     name: '',
     description: '',
     role: '',
-    pipelineId: '',
+    pipelineId: undefined as string | undefined,
   });
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export function AgentGroupForm({ onSubmit, onCancel, pipelines, agentGroup }: Ag
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.role || !formData.pipelineId) {
+    if (!formData.name || !formData.role) {
       return;
     }
 
@@ -117,26 +118,12 @@ export function AgentGroupForm({ onSubmit, onCancel, pipelines, agentGroup }: Ag
         </p>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="configProfileId" className="text-sm font-medium">
-          Configuration Set
-        </label>
-        <Select onValueChange={(value) => handleSelectChange('pipelineId', value)} value={formData.pipelineId}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select pipeline" />
-          </SelectTrigger>
-          <SelectContent>
-            {pipelines.map((pipeline) => (
-              <SelectItem key={pipeline.id} value={pipeline.id}>
-                {pipeline.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-sm text-muted-foreground">
-          The configuration set to apply to all agents in this group
-        </p>
-      </div>
+      <PipelineSelector
+        pipelines={pipelines}
+        selectedPipelineId={formData.pipelineId}
+        onSelect={(pipelineId) => setFormData(prev => ({ ...prev, pipelineId }))}
+        level="agent-group"
+      />
 
       <div className="flex justify-end gap-4">
         <Button type="button" variant="outline" onClick={onCancel}>

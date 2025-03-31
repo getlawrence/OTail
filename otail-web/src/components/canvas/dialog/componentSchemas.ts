@@ -566,6 +566,230 @@ export const componentSchemas: Record<string, ComponentSchema> = {
       },
     },
   },
+  loadbalancing: {
+    fields: {
+      routing_key: {
+        type: 'enum',
+        label: 'Routing Key',
+        options: ['service', 'traceID', 'metric', 'resource', 'streamID'],
+        default: 'traceID',
+        required: true,
+      },
+      routing_attributes: {
+        type: 'array',
+        label: 'Routing Attributes',
+        itemType: 'string',
+        placeholder: 'Enter attribute name',
+      },
+      protocol: {
+        type: 'object',
+        label: 'Protocol',
+        required: true,
+        fields: {
+          otlp: {
+            type: 'object',
+            label: 'OTLP',
+            fields: {
+              timeout: {
+                type: 'string',
+                label: 'Timeout',
+                default: '1s',
+                placeholder: 'Enter timeout (e.g., 1s)',
+              },
+              tls: {
+                type: 'object',
+                label: 'TLS',
+                fields: {
+                  insecure: {
+                    type: 'boolean',
+                    label: 'Insecure',
+                    default: false,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      resolver: {
+        type: 'object',
+        label: 'Resolver',
+        required: true,
+        fields: {
+          static: {
+            type: 'object',
+            label: 'Static',
+            fields: {
+              hostnames: {
+                type: 'array',
+                label: 'Hostnames',
+                itemType: 'string',
+                placeholder: 'Enter hostname (e.g., backend-1:4317)',
+              },
+            },
+          },
+          dns: {
+            type: 'object',
+            label: 'DNS',
+            fields: {
+              hostname: {
+                type: 'string',
+                label: 'Hostname',
+                placeholder: 'Enter DNS hostname',
+              },
+              port: {
+                type: 'number',
+                label: 'Port',
+                default: 4317,
+                placeholder: 'Enter port number',
+              },
+              interval: {
+                type: 'string',
+                label: 'Interval',
+                default: '5s',
+                placeholder: 'Enter interval (e.g., 5s)',
+              },
+              timeout: {
+                type: 'string',
+                label: 'Timeout',
+                default: '1s',
+                placeholder: 'Enter timeout (e.g., 1s)',
+              },
+            },
+          },
+          k8s: {
+            type: 'object',
+            label: 'Kubernetes',
+            fields: {
+              service: {
+                type: 'string',
+                label: 'Service',
+                placeholder: 'Enter service name (e.g., lb-svc.kube-public)',
+              },
+              ports: {
+                type: 'array',
+                label: 'Ports',
+                itemType: 'number',
+                placeholder: 'Enter port number',
+              },
+              timeout: {
+                type: 'string',
+                label: 'Timeout',
+                default: '1s',
+                placeholder: 'Enter timeout (e.g., 1s)',
+              },
+              return_hostnames: {
+                type: 'boolean',
+                label: 'Return Hostnames',
+                default: false,
+              },
+            },
+          },
+          aws_cloud_map: {
+            type: 'object',
+            label: 'AWS Cloud Map',
+            fields: {
+              namespace: {
+                type: 'string',
+                label: 'Namespace',
+                required: true,
+                placeholder: 'Enter Cloud Map namespace',
+              },
+              service_name: {
+                type: 'string',
+                label: 'Service Name',
+                required: true,
+                placeholder: 'Enter service name',
+              },
+              interval: {
+                type: 'string',
+                label: 'Interval',
+                default: '30s',
+                placeholder: 'Enter interval (e.g., 30s)',
+              },
+              timeout: {
+                type: 'string',
+                label: 'Timeout',
+                default: '5s',
+                placeholder: 'Enter timeout (e.g., 5s)',
+              },
+              port: {
+                type: 'number',
+                label: 'Port',
+                placeholder: 'Enter port number',
+              },
+              health_status: {
+                type: 'enum',
+                label: 'Health Status',
+                options: ['HEALTHY', 'UNHEALTHY', 'ALL', 'HEALTHY_OR_ELSE_ALL'],
+                default: 'HEALTHY',
+              },
+            },
+          },
+        },
+      },
+      timeout: {
+        type: 'string',
+        label: 'Timeout',
+        placeholder: 'Enter timeout (e.g., 10s)',
+      },
+      retry_on_failure: {
+        type: 'object',
+        label: 'Retry on Failure',
+        fields: {
+          enabled: {
+            type: 'boolean',
+            label: 'Enabled',
+            default: false,
+          },
+          initial_interval: {
+            type: 'string',
+            label: 'Initial Interval',
+            default: '5s',
+            placeholder: 'Enter initial interval (e.g., 5s)',
+          },
+          max_interval: {
+            type: 'string',
+            label: 'Max Interval',
+            default: '30s',
+            placeholder: 'Enter max interval (e.g., 30s)',
+          },
+          max_elapsed_time: {
+            type: 'string',
+            label: 'Max Elapsed Time',
+            default: '300s',
+            placeholder: 'Enter max elapsed time (e.g., 300s)',
+          },
+        },
+      },
+      sending_queue: {
+        type: 'object',
+        label: 'Sending Queue',
+        fields: {
+          enabled: {
+            type: 'boolean',
+            label: 'Enabled',
+            default: false,
+          },
+          num_consumers: {
+            type: 'number',
+            label: 'Number of Consumers',
+            default: 2,
+          },
+          queue_size: {
+            type: 'number',
+            label: 'Queue Size',
+            default: 1000,
+          },
+          storage: {
+            type: 'string',
+            label: 'Storage',
+            placeholder: 'Enter storage path',
+          },
+        },
+      },
+    },
+  },
 
   // Connectors
   count: {

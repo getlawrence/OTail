@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 const componentTypes = {
   receiver: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'kafka', 'opencensus', 'fluentforward', 'hostmetrics'],
   processor: ['batch', 'memory_limiter', 'tail_sampling', 'probabilistic_sampling', 'span', 'filter', 'resource', 'transform', 'k8s_attributes', 'log_dedup', 'metricstransform'],
-  exporter: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'logging', 'file', 'kafka', 'elasticsearch', 'awsxray'],
+  exporter: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'logging', 'file', 'kafka', 'elasticsearch', 'awsxray', 'loadbalancing'],
   connector: ['count', 'span_metrics']
 };
 
@@ -68,7 +68,8 @@ const componentDescriptions: Record<string, Record<string, string>> = {
     file: 'Exports data to files',
     kafka: 'Exports data to Kafka topics',
     elasticsearch: 'Exports data to Elasticsearch',
-    awsxray: 'Exports traces to AWS X-Ray'
+    awsxray: 'Exports traces to AWS X-Ray',
+    loadbalancing: 'Load balances data across multiple backends based on routing key'
   },
   connector: {
     count: 'Counts spans, span events, metrics, data points, and log records.',

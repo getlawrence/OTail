@@ -1,10 +1,32 @@
+export interface Pipeline {
+  id: string;
+  name: string;
+  description?: string;
+  configuration: {
+    receivers: Record<string, any>;
+    processors: Record<string, any>;
+    exporters: Record<string, any>;
+    service: {
+      pipelines: Record<string, {
+        receivers: string[];
+        processors: string[];
+        exporters: string[];
+      }>;
+    };
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Agent {
   id: string;
   name: string;
+  description?: string;
   status: 'online' | 'offline' | 'error';
   version: string;
   configVersion: string;
   lastSeen: string;
+  pipelineId?: string;  // Optional reference to a specific pipeline configuration
   metrics?: {
     cpu?: number;
     memory?: number;
@@ -38,7 +60,7 @@ export interface AgentGroup {
   name: string;
   description?: string;
   role: string;
-  pipelineId: string;
+  pipelineId?: string;  // Optional reference to a pipeline configuration for the group
   agents: Agent[];
   createdAt: string;
   updatedAt: string;
@@ -49,6 +71,7 @@ export interface Deployment {
   name: string;
   description?: string;
   environment: string;
+  pipelineId?: string;  // Optional reference to a pipeline configuration for the entire deployment
   agentGroups: AgentGroup[];
   createdAt: string;
   updatedAt: string;

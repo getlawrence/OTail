@@ -10,6 +10,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { Deployment } from '@/types/deployment';
+import { PipelineSelector } from '@/components/pipeline/PipelineSelector';
+import { pipelinesApi } from '@/api/pipelines';
+import type { Pipeline } from '@/types/deployment';
 
 interface DeploymentFormProps {
   onSubmit: (data: Partial<Deployment>) => void;
@@ -21,8 +24,10 @@ export function DeploymentForm({ onSubmit, onCancel, deployment }: DeploymentFor
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    environment: 'development',
+    environment: '',
+    pipelineId: undefined as string | undefined,
   });
+  const [pipelines, setPipelines] = useState<Pipeline[]>([]);
 
   useEffect(() => {
     if (deployment) {
@@ -30,14 +35,25 @@ export function DeploymentForm({ onSubmit, onCancel, deployment }: DeploymentFor
         name: deployment.name,
         description: deployment.description || '',
         environment: deployment.environment,
+        pipelineId: deployment.pipelineId,
       });
     }
+    loadPipelines();
   }, [deployment]);
+
+  const loadPipelines = async () => {
+    try {
+      const response = await pipelinesApi.list();
+      setPipelines(response.pipelines);
+    } catch (error) {
+      console.error('Failed to load pipelines:', error);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name) {
+    if (!formData.name || !formData.environment) {
       return;
     }
 
@@ -52,8 +68,8 @@ export function DeploymentForm({ onSubmit, onCancel, deployment }: DeploymentFor
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (value: string) => {
-    setFormData(prev => ({ ...prev, environment: value }));
+  const handleSelectChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -96,7 +112,7 @@ export function DeploymentForm({ onSubmit, onCancel, deployment }: DeploymentFor
         <label htmlFor="environment" className="text-sm font-medium">
           Environment
         </label>
-        <Select onValueChange={handleSelectChange} value={formData.environment}>
+        <Select onValueChange={(value) => handleSelectChange('environment', value)} value={formData.environment}>
           <SelectTrigger>
             <SelectValue placeholder="Select environment" />
           </SelectTrigger>
@@ -110,6 +126,13 @@ export function DeploymentForm({ onSubmit, onCancel, deployment }: DeploymentFor
           The environment this deployment is for
         </p>
       </div>
+
+      <PipelineSelector
+        pipelines={pipelines}
+        selectedPipelineId={formData.pipelineId}
+        onSelect={(pipelineId) => setFormData(prev => ({ ...prev, pipelineId }))}
+        level="deployment"
+      />
 
       <div className="flex justify-end gap-4">
         <Button type="button" variant="outline" onClick={onCancel}>

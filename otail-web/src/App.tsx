@@ -7,7 +7,7 @@ import Agents from './pages/agents'
 import Login from './pages/auth/login'
 import Register from './pages/auth/register'
 import Organization from './pages/organization'
-import Dashboard from './pages/Dashboard'
+import Dashboard from './pages/home/Dashboard'
 import Deployments from './pages/deployments/Deployments'
 import DeploymentDetails from './pages/deployments/DeploymentDetails'
 import { ThemeProvider } from "@/hooks/use-theme"

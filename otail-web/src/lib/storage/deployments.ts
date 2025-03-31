@@ -113,7 +113,7 @@ class LocalDeploymentsStorage {
       name: data.name,
       description: data.description,
       role: data.role,
-      configProfileId: data.configProfileId,
+      pipelineId: data.pipelineId,
       agents: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -143,7 +143,7 @@ class LocalDeploymentsStorage {
       name: data.name ?? deployments[deploymentIndex].agentGroups[groupIndex].name,
       description: data.description ?? deployments[deploymentIndex].agentGroups[groupIndex].description,
       role: data.role ?? deployments[deploymentIndex].agentGroups[groupIndex].role,
-      configProfileId: data.configProfileId ?? deployments[deploymentIndex].agentGroups[groupIndex].configProfileId,
+      pipelineId: data.pipelineId ?? deployments[deploymentIndex].agentGroups[groupIndex].pipelineId,
       updatedAt: new Date().toISOString(),
     };
 

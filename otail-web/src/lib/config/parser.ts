@@ -108,14 +108,6 @@ const parsePolicyConfig = (config: any): Policy => {
         type: 'and' as const,
         subPolicies: policyConfig.and_sub_policy?.map(parsePolicyConfig) || [],
       };
-    case 'ottl_condition':
-      return {
-        ...basePolicy,
-        type: 'ottl_condition' as const,
-        errorMode: policyConfig.error_mode || 'ignore',
-        spanConditions: policyConfig.span_conditions || [],
-        spanEventConditions: policyConfig.span_event_conditions || [],
-      };
     default:
       throw new Error(`Unsupported policy type: ${type}`);
   }
