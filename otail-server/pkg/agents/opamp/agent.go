@@ -60,8 +60,8 @@ type Agent struct {
 	statusUpdateWatchers []chan<- struct{}
 
 	// Agent group and deployment
-	GroupID       string
-	DeploymentID  string
+	GroupID      string
+	DeploymentID string
 }
 
 func NewAgent(
@@ -457,7 +457,6 @@ func (agent *Agent) OfferConnectionSettings(offers *protobufs.ConnectionSettings
 }
 
 func (agent *Agent) addErrorResponse(errMsg string, response *protobufs.ServerToAgent) {
-	logger.Println(errMsg)
 	if response.ErrorResponse == nil {
 		response.ErrorResponse = &protobufs.ServerErrorResponse{
 			Type:         protobufs.ServerErrorResponseType_ServerErrorResponseType_BadRequest,

@@ -43,8 +43,8 @@ services:
     environment:
       - OPAMP_SERVER_ENDPOINT=ws://backend:4320/v1/opamp
       - API_TOKEN=J3BLTewhup46MHHGKdVBmLV1cQJUD77jwfPB6-eoPuo=
-      - AGENT_GROUP=default
-      - DEPLOYMENT=default
+      - AGENT_GROUP=prd-otail-test-group
+      - DEPLOYMENT=prd-otail-test-deployment
     ports:
       - "14317:4317"  # OTLP gRPC
       - "14318:4318"  # OTLP HTTP

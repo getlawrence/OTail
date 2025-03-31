@@ -98,6 +98,17 @@ func (s *Service) GetAgentsByOrganization(organizationID string) map[uuid.UUID]*
 	return result
 }
 
+// GetAgentsByGroup returns a list of agents associated with the given group
+func (s *Service) GetAgentsByGroup(groupID string) map[uuid.UUID]*opamp.Agent {
+	agents := s.opampServer.GetAgentsByGroup(groupID)
+	// Create a new map with cloned agents
+	result := make(map[uuid.UUID]*opamp.Agent)
+	for id, agent := range agents {
+		result[id] = agent.CloneReadonly()
+	}
+	return result
+}
+
 // convertToStringMap converts map[interface{}]interface{} to map[string]interface{}
 func convertToStringMap(m map[interface{}]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})

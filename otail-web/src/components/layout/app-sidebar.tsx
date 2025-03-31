@@ -58,12 +58,7 @@ const items = !noAuthRequired
       title: "Deployments",
       url: "/deployments",
       icon: Network,
-    },
-    {
-      title: "Organization",
-      url: "/organization",
-      icon: Users,
-    },
+    }
   ]
   : [
     {

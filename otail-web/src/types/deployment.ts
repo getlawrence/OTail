@@ -18,22 +18,6 @@ export interface Pipeline {
   updatedAt: string;
 }
 
-export interface Agent {
-  id: string;
-  name: string;
-  description?: string;
-  status: 'online' | 'offline' | 'error';
-  version: string;
-  configVersion: string;
-  lastSeen: string;
-  pipelineId?: string;  // Optional reference to a specific pipeline configuration
-  metrics?: {
-    cpu?: number;
-    memory?: number;
-    uptime?: number;
-  };
-}
-
 export interface ConfigurationProfile {
   id: string;
   name: string;
@@ -59,10 +43,10 @@ export interface AgentGroup {
   id: string;
   name: string;
   config: string;
-  agentIds: string[];
-  deploymentId: string;
-  createdAt: string;
-  updatedAt: string;
+  agent_ids: string[];
+  deployment_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Deployment {

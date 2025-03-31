@@ -7,6 +7,11 @@ export const agentsApi = {
     return Object.values(response.data);
   },
 
+  getByGroup: async (groupId: string): Promise<Agent[]> => {
+    const response = await apiClient.get<Record<string, Agent>>(`/api/v1/agents/groups/${groupId}`);
+    return Object.values(response.data);
+  },
+
   getConfig: async (agentId: string): Promise<string> => {
     const response = await apiClient.get<string>(`/api/v1/agents/${agentId}/config`);
     return response.data;

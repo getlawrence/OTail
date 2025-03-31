@@ -1,26 +1,42 @@
 package opamp
 
 import (
-	"log"
 	"sync"
 
 	"github.com/google/uuid"
 	"github.com/open-telemetry/opamp-go/protobufs"
 	"github.com/open-telemetry/opamp-go/protobufshelpers"
 	"github.com/open-telemetry/opamp-go/server/types"
+	"go.uber.org/zap"
 )
 
 type Agents struct {
-	mux              sync.RWMutex
-	agentsById       map[uuid.UUID]*Agent
-	connections      map[types.Connection]map[uuid.UUID]bool
-	orgIDs           map[types.Connection]string
-	orgConnections   map[string][]types.Connection
-	groupAgents      map[string]map[uuid.UUID]bool
-	deploymentAgents map[string]map[uuid.UUID]bool
+	mux                   sync.RWMutex
+	agentsById            map[uuid.UUID]*Agent
+	connections           map[types.Connection]map[uuid.UUID]bool
+	orgIDs                map[types.Connection]string
+	orgConnections        map[string][]types.Connection
+	groupIDs              map[types.Connection]string
+	groupConnections      map[string][]types.Connection
+	deploymentIDs         map[types.Connection]string
+	deploymentConnections map[string][]types.Connection
+	logger                *zap.Logger
 }
 
-var logger = log.New(log.Default().Writer(), "[AGENTS] ", log.Default().Flags()|log.Lmsgprefix|log.Lmicroseconds)
+// NewAgents creates a new Agents instance with the given logger
+func NewAgents(logger *zap.Logger) *Agents {
+	return &Agents{
+		agentsById:            map[uuid.UUID]*Agent{},
+		connections:           map[types.Connection]map[uuid.UUID]bool{},
+		orgIDs:                map[types.Connection]string{},
+		orgConnections:        map[string][]types.Connection{},
+		groupIDs:              map[types.Connection]string{},
+		groupConnections:      map[string][]types.Connection{},
+		deploymentIDs:         map[types.Connection]string{},
+		deploymentConnections: map[string][]types.Connection{},
+		logger:                logger,
+	}
+}
 
 // RemoveConnection removes the connection and all Agent instances associated with the
 // connection.
@@ -58,20 +74,34 @@ func (agents *Agents) RemoveConnection(conn types.Connection) {
 		if agent != nil {
 			// Remove from group map
 			if groupID := agent.GroupID; groupID != "" {
-				if groupAgents, exists := agents.groupAgents[groupID]; exists {
-					delete(groupAgents, agentId)
-					if len(groupAgents) == 0 {
-						delete(agents.groupAgents, groupID)
+				if groupAgents, exists := agents.groupConnections[groupID]; exists {
+					newGroupAgents := make([]types.Connection, 0, len(groupAgents)-1)
+					for _, c := range groupAgents {
+						if c != conn {
+							newGroupAgents = append(newGroupAgents, c)
+						}
+					}
+					if len(newGroupAgents) > 0 {
+						agents.groupConnections[groupID] = newGroupAgents
+					} else {
+						delete(agents.groupConnections, groupID)
 					}
 				}
 			}
 
 			// Remove from deployment map
 			if deploymentID := agent.DeploymentID; deploymentID != "" {
-				if deploymentAgents, exists := agents.deploymentAgents[deploymentID]; exists {
-					delete(deploymentAgents, agentId)
-					if len(deploymentAgents) == 0 {
-						delete(agents.deploymentAgents, deploymentID)
+				if deploymentAgents, exists := agents.deploymentConnections[deploymentID]; exists {
+					newDeploymentAgents := make([]types.Connection, 0, len(deploymentAgents)-1)
+					for _, c := range deploymentAgents {
+						if c != conn {
+							newDeploymentAgents = append(newDeploymentAgents, c)
+						}
+					}
+					if len(newDeploymentAgents) > 0 {
+						agents.deploymentConnections[deploymentID] = newDeploymentAgents
+					} else {
+						delete(agents.deploymentConnections, deploymentID)
 					}
 				}
 			}
@@ -174,7 +204,7 @@ func (a *Agents) OfferAgentConnectionSettings(
 	id uuid.UUID,
 	offers *protobufs.ConnectionSettingsOffers,
 ) {
-	logger.Printf("Begin rotate client certificate for %s\n", id)
+	a.logger.Info("Begin rotate client certificate", zap.String("agent_id", id.String()))
 
 	a.mux.Lock()
 	defer a.mux.Unlock()
@@ -182,9 +212,9 @@ func (a *Agents) OfferAgentConnectionSettings(
 	agent, ok := a.agentsById[id]
 	if ok {
 		agent.OfferConnectionSettings(offers)
-		logger.Printf("Client certificate offers sent to %s\n", id)
+		a.logger.Info("Client certificate offers sent", zap.String("agent_id", id.String()))
 	} else {
-		logger.Printf("Agent %s not found\n", id)
+		a.logger.Warn("Agent not found", zap.String("agent_id", id.String()))
 	}
 }
 
@@ -206,48 +236,31 @@ func (agents *Agents) SetAgentGroupAndDeployment(conn types.Connection, groupID,
 	agents.mux.Lock()
 	defer agents.mux.Unlock()
 
-	// Get all agents for this connection
+	// Store the group and deployment IDs for this connection
+	agents.groupIDs[conn] = groupID
+	agents.deploymentIDs[conn] = deploymentID
+
+	// Add the connection to the list of connections for this group
+	if groupID != "" {
+		if _, exists := agents.groupConnections[groupID]; !exists {
+			agents.groupConnections[groupID] = []types.Connection{}
+		}
+		agents.groupConnections[groupID] = append(agents.groupConnections[groupID], conn)
+	}
+
+	// Add the connection to the list of connections for this deployment
+	if deploymentID != "" {
+		if _, exists := agents.deploymentConnections[deploymentID]; !exists {
+			agents.deploymentConnections[deploymentID] = []types.Connection{}
+		}
+		agents.deploymentConnections[deploymentID] = append(agents.deploymentConnections[deploymentID], conn)
+	}
+
+	// Update the agents with the new group and deployment
 	if agentIds, ok := agents.connections[conn]; ok {
 		for agentId := range agentIds {
 			if agent, ok := agents.agentsById[agentId]; ok {
-				// Remove from old group if any
-				if oldGroupID := agent.GroupID; oldGroupID != "" {
-					if groupAgents, exists := agents.groupAgents[oldGroupID]; exists {
-						delete(groupAgents, agentId)
-						if len(groupAgents) == 0 {
-							delete(agents.groupAgents, oldGroupID)
-						}
-					}
-				}
-
-				// Remove from old deployment if any
-				if oldDeploymentID := agent.DeploymentID; oldDeploymentID != "" {
-					if deploymentAgents, exists := agents.deploymentAgents[oldDeploymentID]; exists {
-						delete(deploymentAgents, agentId)
-						if len(deploymentAgents) == 0 {
-							delete(agents.deploymentAgents, oldDeploymentID)
-						}
-					}
-				}
-
-				// Set new group and deployment
 				agent.SetGroupAndDeployment(groupID, deploymentID)
-
-				// Add to new group if specified
-				if groupID != "" {
-					if _, exists := agents.groupAgents[groupID]; !exists {
-						agents.groupAgents[groupID] = map[uuid.UUID]bool{}
-					}
-					agents.groupAgents[groupID][agentId] = true
-				}
-
-				// Add to new deployment if specified
-				if deploymentID != "" {
-					if _, exists := agents.deploymentAgents[deploymentID]; !exists {
-						agents.deploymentAgents[deploymentID] = map[uuid.UUID]bool{}
-					}
-					agents.deploymentAgents[deploymentID][agentId] = true
-				}
 			}
 		}
 	}
@@ -282,12 +295,17 @@ func (agents *Agents) GetAgentsByGroup(groupID string) map[uuid.UUID]*Agent {
 
 	result := map[uuid.UUID]*Agent{}
 
-	// Get all agents for this group
-	if agentIds, ok := agents.groupAgents[groupID]; ok {
-		for agentId := range agentIds {
-			if agent, ok := agents.agentsById[agentId]; ok {
-				// Use CloneReadonly to get a JSON-safe copy of the agent
-				result[agentId] = agent.CloneReadonly()
+	// Get all connections for this group
+	if conns, ok := agents.groupConnections[groupID]; ok {
+		for _, conn := range conns {
+			// Get all agents for this connection
+			if agentIds, ok := agents.connections[conn]; ok {
+				for agentId := range agentIds {
+					if agent, ok := agents.agentsById[agentId]; ok {
+						// Use CloneReadonly to get a JSON-safe copy of the agent
+						result[agentId] = agent.CloneReadonly()
+					}
+				}
 			}
 		}
 	}
@@ -300,23 +318,24 @@ func (agents *Agents) GetAgentsByDeployment(deploymentID string) map[uuid.UUID]*
 
 	result := map[uuid.UUID]*Agent{}
 
-	// Get all agents for this deployment
-	if agentIds, ok := agents.deploymentAgents[deploymentID]; ok {
-		for agentId := range agentIds {
-			if agent, ok := agents.agentsById[agentId]; ok {
-				// Use CloneReadonly to get a JSON-safe copy of the agent
-				result[agentId] = agent.CloneReadonly()
+	// Get all connections for this deployment
+	if conns, ok := agents.deploymentConnections[deploymentID]; ok {
+		for _, conn := range conns {
+			// Get all agents for this connection
+			if agentIds, ok := agents.connections[conn]; ok {
+				for agentId := range agentIds {
+					if agent, ok := agents.agentsById[agentId]; ok {
+						// Use CloneReadonly to get a JSON-safe copy of the agent
+						result[agentId] = agent.CloneReadonly()
+					}
+				}
 			}
 		}
 	}
 	return result
 }
 
-var AllAgents = Agents{
-	agentsById:       map[uuid.UUID]*Agent{},
-	connections:      map[types.Connection]map[uuid.UUID]bool{},
-	orgIDs:          map[types.Connection]string{},
-	orgConnections:   map[string][]types.Connection{},
-	groupAgents:      map[string]map[uuid.UUID]bool{},
-	deploymentAgents: map[string]map[uuid.UUID]bool{},
+// Remove the global AllAgents variable and replace with a function
+func NewDefaultAgents(logger *zap.Logger) *Agents {
+	return NewAgents(logger)
 }

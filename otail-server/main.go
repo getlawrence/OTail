@@ -155,12 +155,18 @@ func main() {
 			}
 		}
 
+		logger.Info("Agent group and deployment verified",
+			zap.String("groupID", groupID),
+			zap.String("deploymentID", deploymentID))
+
 		return groupID, deploymentID, nil
 	}
 
+	allAgents := opamp.NewDefaultAgents(logger)
+
 	// Initialize OPAMP server
 	opampServer, err := opamp.NewServer(
-		&opamp.AllAgents,
+		allAgents,
 		verifyToken,
 		onAgentConnected,
 		logger,
