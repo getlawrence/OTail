@@ -25,8 +25,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
-const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
-const items = !noAuthRequired
+const noBackend = import.meta.env.VITE_NO_BACKEND === 'true'
+const items = !noBackend
   ? [
     {
       title: "Policy Builder",
@@ -72,21 +72,11 @@ const items = !noAuthRequired
       icon: Palette,
     },
     {
-      title: "Agent Groups",
-      url: "/agent-groups",
-      icon: Layers,
-    },
-    {
       title: "Pipelines",
       url: "/pipelines",
       icon: Share2,
       badge: "New"
-    },
-    {
-      title: "Deployments",
-      url: "/deployments",
-      icon: Network,
-    },
+    }
   ];
 
 export function AppSidebar() {

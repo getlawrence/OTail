@@ -3,16 +3,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { deploymentsApi } from '@/api/deployments';
 import { agentGroupsApi } from '@/api/agent-groups';
 import { agentsApi } from '@/api/agent';
+import { pipelinesApi } from '@/api/pipelines';
 import type { Deployment, AgentGroup } from '@/types/deployment';
+import type { Pipeline } from '@/types/pipeline';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Plus, Network, Users, Server, ChevronRight, ChevronDown, Activity } from 'lucide-react';
+import { Plus, Network, Users, Server, ChevronRight, ChevronDown, Activity, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Agent } from '@/api/types';
 
-export default function Dashboard() {
+const noBackend = import.meta.env.VITE_NO_BACKEND === 'true';
+
+function DeploymentsDashboard() {
   const [deployments, setDeployments] = useState<Deployment[]>([]);
   const [agentGroups, setAgentGroups] = useState<Record<string, AgentGroup[]>>({});
   const [agents, setAgents] = useState<Record<string, Agent[]>>({});
@@ -68,13 +72,10 @@ export default function Dashboard() {
         console.warn(`No data received for group ${groupId}`);
         return;
       }
-      
-      // Get actual agents from the backend
-      const agents = response;
-      
+
       setAgents(prev => ({
         ...prev,
-        [groupId]: agents
+        [groupId]: response
       }));
     } catch (error) {
       console.error(`Failed to load agents for group ${groupId}:`, error);
@@ -116,7 +117,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Welcome to OTail</h1>
@@ -174,7 +175,7 @@ export default function Dashboard() {
                       </Badge>
                     </div>
                   </div>
-                  
+
                   {expandedDeployments.has(deployment.id) && (
                     <div className="border-t bg-accent/50">
                       <div className="p-4 space-y-4">
@@ -220,8 +221,8 @@ export default function Dashboard() {
                                       <Activity className={cn(
                                         "h-3 w-3",
                                         agent.status === 'success' ? "text-green-500" :
-                                        agent.status === 'failed' ? "text-red-500" :
-                                        "text-yellow-500"
+                                          agent.status === 'failed' ? "text-red-500" :
+                                            "text-yellow-500"
                                       )} />
                                       <div>
                                         <p className="text-sm font-medium">{agent.InstanceId.slice(0, 8)}</p>
@@ -248,6 +249,95 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
+    </>
+  );
+}
+
+function PipelinesDashboard() {
+  const [pipelines, setPipelines] = useState<Pipeline[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    loadPipelines();
+  }, []);
+
+  const loadPipelines = async () => {
+    try {
+      const response = await pipelinesApi.list();
+      setPipelines(response.pipelines);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load pipelines',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Welcome to OTail</h1>
+          <p className="text-muted-foreground">Manage your OpenTelemetry pipelines</p>
+        </div>
+        <Button id="new-pipeline-button" onClick={() => navigate('/pipelines')} className="gap-2">
+          <Plus className="h-4 w-4" /> New Pipeline
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Share2 className="h-5 w-5" />
+            Pipelines Overview
+          </CardTitle>
+          <CardDescription>View and manage your pipelines</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-4">Loading...</div>
+          ) : pipelines.length === 0 ? (
+            <div className="text-center py-4 text-muted-foreground">
+              No pipelines found. Create your first pipeline to get started.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {pipelines.map((pipeline) => (
+                <div key={pipeline.id} className="border rounded-lg p-4 hover:bg-accent cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">{pipeline.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Created {new Date(pipeline.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/pipelines/${pipeline.id}`)}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <div className="container mx-auto py-6">
+      {noBackend ? <PipelinesDashboard /> : <DeploymentsDashboard />}
     </div>
   );
 } 

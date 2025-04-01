@@ -18,7 +18,7 @@ import { MobileWarning } from '@/components/MobileWarning'
 import { ActivePipelineProvider } from '@/hooks/use-active-pipeline'
 import { ChecklistProvider } from '@/contexts/ChecklistContext'
 
-const noAuthRequired = import.meta.env.VITE_NO_AUTH_REQUIRED === 'true'
+const noBackend = import.meta.env.VITE_NO_BACKEND === 'true'
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -54,14 +54,11 @@ function App() {
                     <Register />
                   </div>
                 } />
-                {noAuthRequired ? (
+                {noBackend ? (
                   <Route element={<Layout />}>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/sampling" element={<Sampling />} />
                     <Route path="/canvas" element={<CanvasPage />} />
-                    <Route path="/deployments" element={<Deployments />} />
-                    <Route path="/deployments/:id" element={<DeploymentDetails />} />
-                    <Route path="/agent-groups" element={<AgentGroups />} />
                     <Route path="/pipelines" element={<Pipelines />} />
                   </Route>
                 ) : (
