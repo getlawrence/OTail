@@ -1,3 +1,5 @@
+import { Agent } from "./agent";
+
 export interface Pipeline {
   id: string;
   name: string;
@@ -42,6 +44,10 @@ export interface ConfigurationProfile {
 export interface AgentGroup {
   id: string;
   name: string;
+  role: string;
+  description?: string;
+  pipelineId: string;
+  agents: Agent[];
   config: string;
   agent_ids: string[];
   deployment_id: string;
@@ -53,8 +59,12 @@ export interface Deployment {
   id: string;
   name: string;
   groupIds: string[];
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
+  description: string;
+  environment: string;
+  pipelineId: string;
+  agentGroups: AgentGroup[];
 }
 
 export interface DeploymentListResponse {
@@ -62,12 +72,29 @@ export interface DeploymentListResponse {
   total: number;
 }
 
+export interface NewAgentGroup {
+  name: string;
+  description?: string;
+  role: string;
+  pipelineId: string;
+  agents: Agent[];
+}
+
 export interface CreateDeploymentRequest {
   name: string;
+  description: string;
+  environment: string;
+  pipelineId: string;
+  agentGroups: NewAgentGroup[];
 }
 
 export interface UpdateDeploymentRequest {
+  id: string;
   name: string;
+  description: string;
+  environment: string;
+  pipelineId: string;
+  agentGroups: AgentGroup[];
 }
 
 export interface CreateAgentGroupRequest {
@@ -76,6 +103,7 @@ export interface CreateAgentGroupRequest {
   role: string;
   pipelineId: string;
   deploymentId: string;
+  config: string;
 }
 
 export interface UpdateAgentGroupRequest extends Partial<CreateAgentGroupRequest> {

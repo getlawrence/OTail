@@ -34,8 +34,8 @@ export function AgentGroupList({ groups, onDelete }: AgentGroupListProps) {
             <TableCell>{group.name}</TableCell>
             <TableCell>{group.agents.length} agents</TableCell>
             <TableCell>{group.id || 'None'}</TableCell>
-            <TableCell>{new Date(group.createdAt).toLocaleString()}</TableCell>
-            <TableCell>{new Date(group.updatedAt).toLocaleString()}</TableCell>
+            <TableCell>{new Date(group.created_at).toLocaleString()}</TableCell>
+            <TableCell>{new Date(group.updated_at).toLocaleString()}</TableCell>
             <TableCell>
               <Button
                 variant="ghost"

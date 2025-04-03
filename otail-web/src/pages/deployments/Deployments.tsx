@@ -77,8 +77,10 @@ export default function Deployments() {
         const updateData: UpdateDeploymentRequest = {
           id: data.id,
           name: data.name,
-          description: data.description,
+          description: data.description || '',
           environment: data.environment || 'development',
+          pipelineId: data.pipelineId || '',
+          agentGroups: data.agentGroups || [],
         };
         await deploymentsApi.update(data.id, updateData);
         toast({
@@ -88,8 +90,9 @@ export default function Deployments() {
       } else {
         const createData: CreateDeploymentRequest = {
           name: data.name,
-          description: data.description,
+          description: data.description || '',
           environment: data.environment || 'development',
+          pipelineId: data.pipelineId || '',
           agentGroups: [],
         };
         await deploymentsApi.create(createData);
@@ -134,6 +137,7 @@ export default function Deployments() {
           name: selectedDeployment.name,
           description: selectedDeployment.description,
           environment: selectedDeployment.environment,
+          pipelineId: selectedDeployment.pipelineId,
           agentGroups: [{
             name: data.name,
             description: data.description,
@@ -246,7 +250,7 @@ export default function Deployments() {
                           <div className="flex gap-2 mt-2">
                             <Badge variant="secondary">{deployment.environment}</Badge>
                             <Badge variant="outline">
-                              {deployment.group_ids?.length} Agent Groups
+                              {deployment.agentGroups?.length} Agent Groups
                             </Badge>
                           </div>
                         </div>
@@ -281,15 +285,15 @@ export default function Deployments() {
                         </div>
                       </div>
 
-                      {deployment.group_ids?.length > 0 && (
+                      {deployment.agentGroups?.length > 0 && (
                         <div className="space-y-4 mt-4">
                           <h4 className="text-sm font-medium">Agent Groups</h4>
-                          {deployment.group_ids.map((group) => (
-                            <Card key={group} className="relative">
+                          {deployment.agentGroups.map((group) => (
+                            <Card key={group.id} className="relative">
                               <CardContent className="pt-6">
                                 <div className="flex justify-between items-start">
                                   <div className="flex-1">
-                                    <h5 className="font-medium">{group}</h5>
+                                    <h5 className="font-medium">{group.name}</h5>
                                   </div>
                                   <div className="flex gap-2">
                                     <Button
@@ -304,7 +308,7 @@ export default function Deployments() {
                                       variant="destructive"
                                       size="sm"
                                       className="flex items-center gap-2"
-                                      onClick={() => handleDeleteAgentGroup(deployment.id)}
+                                      onClick={() => handleDeleteAgentGroup(group.id)}
                                     >
                                       <Trash2 className="w-4 h-4" /> Delete
                                     </Button>

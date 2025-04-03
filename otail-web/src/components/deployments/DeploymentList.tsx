@@ -32,8 +32,8 @@ export function DeploymentList({ deployments, onDelete }: DeploymentListProps) {
           <TableRow key={deployment.id}>
             <TableCell>{deployment.name}</TableCell>
             <TableCell>{deployment.agentGroups.length} groups</TableCell>
-            <TableCell>{new Date(deployment.createdAt).toLocaleString()}</TableCell>
-            <TableCell>{new Date(deployment.updatedAt).toLocaleString()}</TableCell>
+            <TableCell>{new Date(deployment.created_at).toLocaleString()}</TableCell>
+            <TableCell>{new Date(deployment.updated_at).toLocaleString()}</TableCell>
             <TableCell>
               <Button
                 variant="ghost"

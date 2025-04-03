@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import type { Agent } from '@/types/deployment';
+import type { Agent } from '@/types/agent';
 import type { Pipeline } from '@/types/deployment';
 import { PipelineSelector } from '@/components/pipeline/PipelineSelector';
 
@@ -23,9 +23,9 @@ export function AgentForm({ onSubmit, onCancel, pipelines, agent }: AgentFormPro
   useEffect(() => {
     if (agent) {
       setFormData({
-        name: agent.name,
-        description: agent.description || '',
-        pipelineId: agent.pipelineId,
+        name: agent.instanceIdStr,
+        description: agent.instanceIdStr || '',
+        pipelineId: agent.deploymentId,
       });
     }
   }, [agent]);
@@ -39,7 +39,7 @@ export function AgentForm({ onSubmit, onCancel, pipelines, agent }: AgentFormPro
 
     onSubmit({
       ...formData,
-      id: agent?.id,
+      instanceId: agent?.instanceId,
     });
   };
 

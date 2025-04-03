@@ -111,13 +111,13 @@ export default function DeploymentDetails() {
               <div>
                 <h3 className="text-sm font-medium">Created</h3>
                 <p className="text-sm text-muted-foreground">
-                  {new Date(deployment.createdAt).toLocaleString()}
+                  {new Date(deployment.created_at).toLocaleString()}
                 </p>
               </div>
               <div>
                 <h3 className="text-sm font-medium">Last Updated</h3>
                 <p className="text-sm text-muted-foreground">
-                  {new Date(deployment.updatedAt).toLocaleString()}
+                  {new Date(deployment.updated_at).toLocaleString()}
                 </p>
               </div>
               <div>

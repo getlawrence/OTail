@@ -186,20 +186,19 @@ function createDeploymentFlow(deployment: Deployment) {
     group.agents.forEach((agent, agentIndex) => {
       const agentX = groupX - 50 + agentIndex * 100;
       nodes.push({
-        id: `agent-${agent.id}`,
+        id: `agent-${agent.instanceIdStr}`,
         type: 'agent',
         data: {
-          label: agent.name,
+          label: agent.instanceIdStr,
           status: agent.status,
-          metrics: agent.metrics,
         },
         position: { x: agentX, y: 300 },
       });
 
       edges.push({
-        id: `edge-group-${agent.id}`,
+        id: `edge-group-${agent.instanceIdStr}`,
         source: `group-${group.id}`,
-        target: `agent-${agent.id}`,
+        target: `agent-${agent.instanceIdStr}`,
         markerEnd: { type: MarkerType.ArrowClosed },
       });
     });

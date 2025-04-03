@@ -59,8 +59,10 @@ class LocalDeploymentsStorage {
       description: data.description,
       environment: data.environment,
       agentGroups: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      groupIds: [],
+      pipelineId: data.pipelineId,
     };
     deployments.push(newDeployment);
     this.saveDeployments(deployments);
@@ -82,11 +84,11 @@ class LocalDeploymentsStorage {
       agentGroups: data.agentGroups ? data.agentGroups.map(group => ({
         ...group,
         id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         agents: [],
       })) : deployments[index].agentGroups,
-      updatedAt: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     deployments[index] = updatedDeployment;
@@ -115,8 +117,11 @@ class LocalDeploymentsStorage {
       role: data.role,
       pipelineId: data.pipelineId,
       agents: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      config: data.config,
+      agent_ids: [],
+      deployment_id: data.deploymentId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     deployments[deploymentIndex].agentGroups.push(newGroup);
@@ -144,7 +149,7 @@ class LocalDeploymentsStorage {
       description: data.description ?? deployments[deploymentIndex].agentGroups[groupIndex].description,
       role: data.role ?? deployments[deploymentIndex].agentGroups[groupIndex].role,
       pipelineId: data.pipelineId ?? deployments[deploymentIndex].agentGroups[groupIndex].pipelineId,
-      updatedAt: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     deployments[deploymentIndex].agentGroups[groupIndex] = updatedGroup;

@@ -160,7 +160,7 @@ function DeploymentsDashboard() {
                       <div>
                         <h3 className="font-medium">{deployment.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          Created {new Date(deployment.createdAt).toLocaleDateString()}
+                          Created {new Date(deployment.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </div>

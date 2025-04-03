@@ -28,7 +28,8 @@ export default function AgentGroupsPage() {
     try {
       const newGroup = await agentGroupsApi.create({ 
         name, 
-        deploymentId: deploymentId || undefined 
+        deploymentId: deploymentId || '',
+        config: ''
       });
       setGroups([...groups, newGroup]);
       setIsCreateDialogOpen(false);
