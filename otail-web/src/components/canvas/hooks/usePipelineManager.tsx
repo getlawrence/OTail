@@ -113,14 +113,42 @@ export function usePipelineManager({
         let pipelineEdges: Edge[] = [];
         
         if (receiverNodes.length && processorNodes.length) {
-          const edges = createEdges(receiverNodes, processorNodes);
-          pipelineEdges.push(...edges);
-        }
-        if (processorNodes.length && exporterNodes.length) {
-          const edges = createEdges(processorNodes, exporterNodes);
-          pipelineEdges.push(...edges);
-        }
-        if (receiverNodes.length && exporterNodes.length && processorNodes.length === 0) {
+          // Connect receivers only to the first processor
+          const firstProcessor = processorNodes[0];
+          const receiverEdges = receiverNodes.map(receiver => ({
+            id: `edge-${receiver.id}-${firstProcessor.id}`,
+            source: receiver.id,
+            target: firstProcessor.id,
+            style: styles.validConnectionStyle,
+            animated: true,
+          }));
+          pipelineEdges.push(...receiverEdges);
+
+          // Create a chain of processors
+          for (let i = 0; i < processorNodes.length - 1; i++) {
+            pipelineEdges.push({
+              id: `edge-${processorNodes[i].id}-${processorNodes[i + 1].id}`,
+              source: processorNodes[i].id,
+              target: processorNodes[i + 1].id,
+              style: styles.validConnectionStyle,
+              animated: true,
+            });
+          }
+
+          // Connect last processor to all exporters
+          if (exporterNodes.length > 0) {
+            const lastProcessor = processorNodes[processorNodes.length - 1];
+            const exporterEdges = exporterNodes.map(exporter => ({
+              id: `edge-${lastProcessor.id}-${exporter.id}`,
+              source: lastProcessor.id,
+              target: exporter.id,
+              style: styles.validConnectionStyle,
+              animated: true,
+            }));
+            pipelineEdges.push(...exporterEdges);
+          }
+        } else if (receiverNodes.length && exporterNodes.length && processorNodes.length === 0) {
+          // If there are no processors, connect receivers directly to exporters
           const edges = createEdges(receiverNodes, exporterNodes);
           pipelineEdges.push(...edges);
         }
