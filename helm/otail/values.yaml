@@ -10,7 +10,7 @@ frontend:
     pullPolicy: Always
     buildArgs:
       VITE_API_BASE_URL: "http://otail.local/api"
-      VITE_NO_AUTH_REQUIRED: "false"
+      VITE_NO_BACKEND: "false"
       VITE_POSTHOG_KEY: "phc_I35cAhURhANsxly4E2IbYkrvsdc09DpkPCeIi3uMRNv"
       VITE_POSTHOG_HOST: "https://us.i.posthog.com"
       VITE_FORCE_POSTHOG: "false"
@@ -27,7 +27,7 @@ frontend:
   env:
     - name: NODE_ENV
       value: "production"
-    - name: VITE_NO_AUTH_REQUIRED
+    - name: VITE_NO_BACKEND
       value: "false"
     - name: VITE_API_BASE_URL
       value: "http://otail.local/api"

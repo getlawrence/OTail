@@ -21,6 +21,12 @@ type Server struct {
 	verifyToken func(string) (string, error)
 	// Callback for agent group and deployment verification
 	onAgentConnected func(ctx context.Context, deploymentName, groupName string) (string, string, error)
+	// Map to store connection metadata
+	connectionMetadata map[types.Connection]struct {
+		OrgID        string
+		GroupID      string
+		DeploymentID string
+	}
 }
 
 // zapToOpAmpLogger adapts zap.Logger to opamp's logger interface
@@ -47,6 +53,11 @@ func NewServer(
 		agents:           agents,
 		verifyToken:      verifyToken,
 		onAgentConnected: onAgentConnected,
+		connectionMetadata: make(map[types.Connection]struct {
+			OrgID        string
+			GroupID      string
+			DeploymentID string
+		}),
 	}
 
 	// Create the OPAmp server
@@ -99,8 +110,20 @@ func (s *Server) Start() error {
 						Accept: true,
 						ConnectionCallbacks: server.ConnectionCallbacksStruct{
 							OnConnectedFunc: func(ctx context.Context, conn types.Connection) {
-								s.agents.SetOrganizationID(conn, organizationID)
-								s.agents.SetAgentGroupAndDeployment(conn, groupID, deploymentID)
+								// Create a new agent for this connection
+								agentId := uuid.New()
+								agent := s.agents.FindOrCreateAgent(agentId, conn)
+								if agent == nil {
+									s.logger.Warn("Failed to create agent",
+										zap.String("agent_id", agentId.String()))
+									return
+								}
+
+								s.logger.Info("Created new agent",
+									zap.String("agent_id", agentId.String()))
+
+								// Set all connection metadata at once
+								s.agents.SetConnection(conn, organizationID, groupID, deploymentID)
 							},
 							OnMessageFunc:         s.onMessage,
 							OnConnectionCloseFunc: s.onDisconnect,
@@ -127,19 +150,48 @@ func (s *Server) Stop(ctx context.Context) error {
 }
 
 func (s *Server) onDisconnect(conn types.Connection) {
+	// Get agent info for this connection
+	agentIds := s.agents.GetAgentIdsByConnection(conn)
+	if len(agentIds) == 0 {
+		s.logger.Warn("No agents found for connection",
+			zap.Any("connection", conn))
+		return
+	}
+
+	// Get the first agent's info
+	agentId := agentIds[0]
+	agentInfo := s.agents.GetAgentInfo(agentId)
+	if agentInfo == nil {
+		s.logger.Warn("No agent info found",
+			zap.String("agent_id", agentId.String()))
+		return
+	}
+
+	// Remove the connection
 	s.agents.RemoveConnection(conn)
 }
 
-func (s *Server) onMessage(ctx context.Context, conn types.Connection, msg *protobufs.AgentToServer) *protobufs.ServerToAgent {
-	response := &protobufs.ServerToAgent{}
-	instanceId := uuid.UUID(msg.InstanceUid)
-
-	// Process the message with the verified user context
-	agent := s.agents.FindOrCreateAgent(instanceId, conn)
-	if agent == nil {
-		return response
+func (s *Server) onMessage(ctx context.Context, conn types.Connection, message *protobufs.AgentToServer) *protobufs.ServerToAgent {
+	// Get agent info for this connection
+	agentIds := s.agents.GetAgentIdsByConnection(conn)
+	if len(agentIds) == 0 {
+		s.logger.Warn("No agents found for connection",
+			zap.Any("connection", conn))
+		return nil
 	}
-	agent.UpdateStatus(msg, response)
+
+	// Get the first agent's info
+	agentId := agentIds[0]
+	agentInfo := s.agents.GetAgentInfo(agentId)
+	if agentInfo == nil {
+		s.logger.Warn("No agent info found",
+			zap.String("agent_id", agentId.String()))
+		return nil
+	}
+
+	// Process the message
+	response := &protobufs.ServerToAgent{}
+	agentInfo.Agent.UpdateStatus(message, response)
 	return response
 }
 
