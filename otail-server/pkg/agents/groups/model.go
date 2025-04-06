@@ -64,7 +64,11 @@ func (s *MongoStore) Get(ctx context.Context, name string) (*AgentGroup, error) 
 }
 
 func (s *MongoStore) List(ctx context.Context, deploymentID string) ([]*AgentGroup, error) {
-	cursor, err := s.collection.Find(ctx, bson.M{"deployment_id": deploymentID})
+	filter := bson.M{}
+	if deploymentID != "" {
+		filter = bson.M{"deployment_id": deploymentID}
+	}
+	cursor, err := s.collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}

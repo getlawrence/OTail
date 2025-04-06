@@ -32,11 +32,6 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 
 func (h *Handler) ListGroups(w http.ResponseWriter, r *http.Request) {
 	deploymentID := r.URL.Query().Get("deployment_id")
-	if deploymentID == "" {
-		h.writeError(w, http.StatusBadRequest, "deployment_id is required")
-		return
-	}
-
 	groups, err := h.store.List(r.Context(), deploymentID)
 	if err != nil {
 		h.logger.Error("Failed to list groups", zap.Error(err))
@@ -142,4 +137,4 @@ func (h *Handler) writeError(w http.ResponseWriter, status int, message string) 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]string{"error": message})
-} 
+}

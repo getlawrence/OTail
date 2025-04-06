@@ -2,7 +2,7 @@ import { AgentGroup, AgentGroupFormData } from '@/types/deployment';
 import { apiClient } from './client';
 
 export const agentGroupsApi = {
-  list: async (deploymentId: string): Promise<AgentGroup[]> => {
+  list: async (deploymentId?: string): Promise<AgentGroup[]> => {
     const response = await apiClient.get<AgentGroup[]>(`/api/v1/agent-groups?deployment_id=${deploymentId}`);
     return response.data;
   },

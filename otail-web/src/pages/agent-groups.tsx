@@ -17,7 +17,7 @@ export default function AgentGroupsPage() {
 
   const loadGroups = async () => {
     try {
-      const data = await agentGroupsApi.list('');
+      const data = await agentGroupsApi.list();
       setGroups(data);
     } catch (error) {
       console.error('Failed to load agent groups:', error);
