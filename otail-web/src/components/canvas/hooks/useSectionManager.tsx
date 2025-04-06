@@ -29,8 +29,8 @@ export function useSectionManager({
     const viewportWidth = window.innerWidth;
     
     // Calculate section dimensions
-    const sectionWidth = viewportWidth - 320; // Account for sidebar
-    const sectionHeight = 200; // Fixed height for each section
+    const sectionWidth = viewportWidth; // Account for sidebar
+    const sectionHeight = 500; // Fixed height for each section
     const gapBetweenSections = 50; // Fixed gap between sections
     
     // Calculate positions for each section in three rows
@@ -73,7 +73,7 @@ export function useSectionManager({
           pointerEvents: isHidden ? 'none' as const : 'all' as const,
           visibility: isHidden ? 'hidden' as const : 'visible' as const
         },
-        className: `z-10 transform scale-100 origin-top-left transition-all duration-300 ${colorScheme.background} border-${colorScheme.color}-200 rounded-lg shadow-sm`,
+        className: `z-10 transform scale-100 origin-top-left transition-all duration-300 ${colorScheme.background} border-${colorScheme.color}-${sectionWidth} rounded-lg shadow-sm`,
         // Ensure parent node is set to undefined to prevent hierarchy issues
         parentNode: undefined,
         extent: 'parent' as const,

@@ -211,10 +211,10 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
         mb-[50px] z-10
         ${data.isFullScreen ? 'h-[calc(100vh-80px)] max-h-[calc(100vh-80px)]' : ''}`}
       style={{
-        width: data.width ? `${data.width}px` : 'calc(100vw-320px)',
-        height: data.height ? `${data.height}px` : '200px',
+        width: `${data.width}px`,
+        height: `${data.height}px`,
         maxWidth: 'calc(100vw-320px)',
-        maxHeight: data.isFullScreen ? 'calc(100vh-80px)' : '200px'
+        maxHeight: data.isFullScreen ? 'calc(100vh-80px)' : '500px'
       }}
     >
       {/* Section header */}
