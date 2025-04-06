@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
-import { Node, Edge, useEdges } from 'reactflow';
+import { Node } from 'reactflow';
 import { PIPELINE_SECTIONS, COLOR_SCHEME } from '../constants';
 import type { PipelineType, SectionType } from '../types';
-import { calculateNodeLayout } from '../utils/layoutCalculator';
 
 interface UseSectionManagerProps {
   fullScreenSection: SectionType | null;
@@ -18,10 +17,8 @@ export function useSectionManager({
   collapsedSections = [],
   onToggleExpand,
   onToggleCollapse,
-  setNodes,
   nodes
 }: UseSectionManagerProps) {
-  const edges = useEdges(); // Use the dedicated useEdges hook
 
   // Create section nodes - always create all sections
   const createSectionNodes = useCallback(() => {

@@ -78,7 +78,7 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   // Use the section manager hook
-  const { updateSections, determineSection, getPositionInSection, createSectionNodes } = useSectionManager({
+  const { determineSection, getPositionInSection, createSectionNodes } = useSectionManager({
     fullScreenSection,
     collapsedSections,
     onToggleExpand: handleToggleFullScreen,

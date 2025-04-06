@@ -8,7 +8,6 @@ interface ConnectorNodeProps {
     label: string;
     config: any;
     isSource: boolean;
-    connectorName: string;
     sourcePipelineType: string;
     targetPipelineType: string;
   };
@@ -16,7 +15,7 @@ interface ConnectorNodeProps {
 }
 
 export const ConnectorNode = ({ data, handleStyle }: ConnectorNodeProps) => {
-  const { sourcePipelineType, targetPipelineType, label, isSource, connectorName } = data;
+  const { sourcePipelineType, targetPipelineType, label, isSource } = data;
   const nodeStyle = {
     zIndex: 10,
   };

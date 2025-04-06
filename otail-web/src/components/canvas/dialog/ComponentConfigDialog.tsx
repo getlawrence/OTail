@@ -5,7 +5,7 @@ import { PolicyBuilder } from '@/components/policy/policy-builder';
 import { usePolicyState } from '@/hooks/use-policy-state';
 import { useState } from 'react';
 import { ReceiverConfig, ProcessorConfig } from '../types';
-import { componentSchemas, ComponentType } from './componentSchemas';
+import { componentSchemas } from './componentSchemas';
 import { DynamicForm } from '@/components/shared/DynamicForm';
 import { createNewPolicy } from '@/lib/policy/utils';
 

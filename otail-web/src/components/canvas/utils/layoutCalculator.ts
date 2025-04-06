@@ -10,23 +10,8 @@ export const PIPELINE_HEIGHT = 400;
 export const PIPELINE_SPACING = 500;
 export const COMPONENT_GAP = 500; // Gap between receivers and exporters in the same pipeline
 
-interface LayoutOptions {
-  direction?: 'LR' | 'TB';
-  marginX?: number;
-  marginY?: number;
-  fitWithinBounds?: boolean;
-  bounds?: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  headerHeight?: number;
-  nodeSpacing?: number;
-  rankSpacing?: number;
-}
 
-function getLayoutedElements(nodes: Node[], edges: Edge[], options: LayoutOptions = {}) {
+function getLayoutedElements(nodes: Node[], edges: Edge[]) {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
@@ -99,8 +84,7 @@ function groupNodesByType(nodes: Node[]) {
 
 export function calculateNodeLayout<T extends Node>(
   nodes: T[],
-  edges: Edge[],
-  _options: LayoutOptions = {}
+  edges: Edge[]
 ): T[] {
   if (nodes.length === 0) return nodes;
 
@@ -113,7 +97,7 @@ export function calculateNodeLayout<T extends Node>(
   }
 
   // First, get a basic layout using dagre
-  let layoutedNodes = getLayoutedElements(nodes, edges, _options);
+  let layoutedNodes = getLayoutedElements(nodes, edges);
 
   const pipelineGroups = groupNodesByPipeline(layoutedNodes, edges);
 
@@ -138,7 +122,7 @@ export function calculateNodeLayout<T extends Node>(
   });
 
   // Position nodes by pipeline type
-  Array.from(pipelineGroups.entries()).forEach(([pipelineType, pipelineNodes], index) => {
+  Array.from(pipelineGroups.entries()).forEach(([_pipelineType, pipelineNodes], index) => {
     const pipelineY = index * (PIPELINE_HEIGHT + PIPELINE_SPACING * 1.5);
 
     // Position nodes within the pipeline
@@ -236,7 +220,7 @@ export function calculateNodeLayout<T extends Node>(
   return layoutedNodes as T[];
 }
 
-function groupNodesByPipeline(nodes: Node[], edges: Edge[]): Map<string, Node[]> {
+function groupNodesByPipeline(nodes: Node[], _edges: Edge[]): Map<string, Node[]> {
   const pipelineGroups = new Map<string, Node[]>();
 
   // First, group by pipeline type

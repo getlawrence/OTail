@@ -24,7 +24,6 @@ export function usePipelineManager({
     try {
       const config: OtelConfig = load(yamlString) as OtelConfig;
       const newNodes: Node[] = [];
-      const connectorNodes: Node[] = [];
       const connectorMap = new Map<string, { sourcePipelines: string[], targetPipelines: string[] }>();
       const connectorNames = new Set<string>();
 
@@ -314,24 +313,9 @@ export function usePipelineManager({
         const pipelineEdges = edgesByPipelineType[pipelineType];
         
         if (pipelineNodes.length === 0) return;
-        
-        // Default section bounds - these could be retrieved from your section nodes
-        const sectionBounds = {
-          x: 100,
-          y: 50, // This would ideally be dynamically determined based on the section's position
-          width: window.innerWidth - 320,
-          height: window.innerHeight / 4
-        };
-        
+      
         // Apply layout
-        const layoutedNodes = calculateNodeLayout(pipelineNodes, pipelineEdges, {
-          direction: 'LR',
-          nodeSpacing: LAYOUT_CONFIG.NODE_SPACING || 50,
-          rankSpacing: 50,
-          fitWithinBounds: true,
-          bounds: sectionBounds,
-          headerHeight: 40
-        });
+        const layoutedNodes = calculateNodeLayout(pipelineNodes, pipelineEdges);
         
         layoutedNodesByType[pipelineType] = layoutedNodes;
         newNodes.push(...layoutedNodes);

@@ -1,8 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from 'reactflow';
 import { useSectionManager } from '../useSectionManager';
-import { PIPELINE_SECTIONS } from '../../constants';
-import type { SectionType } from '../../types';
 
 // Mock window dimensions
 const mockWindowDimensions = {

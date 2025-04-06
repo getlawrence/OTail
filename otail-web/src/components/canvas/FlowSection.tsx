@@ -198,10 +198,6 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
     }
   };
 
-  // Prevent click events on the section from propagating
-  const handleSectionClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
 
 
   return (
