@@ -4,17 +4,19 @@ import { ArrowLeftRight, Grip } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ConnectorNodeProps {
-  data: { 
-    label: string; 
+  data: {
+    label: string;
     config: any;
-    sourcePipelineType?: string;
-    targetPipelineType?: string;
+    isSource: boolean;
+    connectorName: string;
+    sourcePipelineType: string;
+    targetPipelineType: string;
   };
   handleStyle?: React.CSSProperties;
 }
 
 export const ConnectorNode = ({ data, handleStyle }: ConnectorNodeProps) => {
-  // Ensure the node has a high z-index to prevent it from being hidden behind sections
+  const { sourcePipelineType, targetPipelineType, label, isSource, connectorName } = data;
   const nodeStyle = {
     zIndex: 10,
   };
@@ -34,15 +36,17 @@ export const ConnectorNode = ({ data, handleStyle }: ConnectorNodeProps) => {
           <div className="p-1 rounded-full bg-amber-100 dark:bg-amber-900/40">
             <ArrowLeftRight size={14} className="text-amber-600 dark:text-amber-400" />
           </div>
-          <div className="font-medium text-sm">{data.label}</div>
+          <span className="text-sm font-medium">{label}</span>
+          <Badge variant={isSource ? "default" : "secondary"} className="ml-auto">
+            {isSource ? "Source" : "Target"}
+          </Badge>
+          {sourcePipelineType && targetPipelineType && (
+            <div className="text-xs text-muted-foreground mt-2 pl-7 truncate max-w-40">
+              {sourcePipelineType} → {targetPipelineType}
+            </div>
+          )}
         </div>
-        {data.sourcePipelineType && data.targetPipelineType && (
-          <div className="text-xs text-muted-foreground mt-2 pl-7 truncate max-w-40">
-            {data.sourcePipelineType} → {data.targetPipelineType}
-          </div>
-        )}
       </CardContent>
-      {/* Left handle (target) */}
       <Handle
         type="target"
         position={Position.Left}
@@ -55,9 +59,8 @@ export const ConnectorNode = ({ data, handleStyle }: ConnectorNodeProps) => {
           width: '14px',
           height: '14px',
         }}
-        id="left"
+        id='target-handle'
       />
-      {/* Right handle (source) */}
       <Handle
         type="source"
         position={Position.Right}
@@ -70,7 +73,7 @@ export const ConnectorNode = ({ data, handleStyle }: ConnectorNodeProps) => {
           width: '14px',
           height: '14px',
         }}
-        id="right"
+        id='source-handle'
       />
     </Card>
   );

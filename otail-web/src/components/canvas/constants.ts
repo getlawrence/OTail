@@ -12,10 +12,10 @@ export const LAYOUT_CONFIG = {
 };
 
 export const VALID_CONNECTIONS: Record<string, string[]> = {
-  'receivers': ['processors', 'exporters', 'connectors'],
-  'processors': ['receivers', 'exporters', 'connectors'],
-  'exporters': ['receivers', 'processors', 'connectors'],
-  'connectors': ['receivers', 'processors', 'exporters']
+  'receivers': ['processors', 'exporters'],
+  'processors': ['receivers', 'exporters'],
+  'exporters': ['receivers', 'processors'],
+  'connectors': ['connectors'] // Connectors can only connect to other connectors
 };
 
 

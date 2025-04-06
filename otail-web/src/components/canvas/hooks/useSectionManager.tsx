@@ -41,7 +41,7 @@ export function useSectionManager({
     };
 
     // Create section nodes
-    const sectionNodes = Object.keys(PIPELINE_SECTIONS).map((type, index) => {
+    const sectionNodes: Node[] = Object.keys(PIPELINE_SECTIONS).map((type, index) => {
       const sectionType = type as PipelineType;
       const isHidden = fullScreenSection !== null && fullScreenSection !== sectionType;
       const isCollapsed = collapsedSections.includes(sectionType);
@@ -74,7 +74,10 @@ export function useSectionManager({
           visibility: isHidden ? 'hidden' as const : 'visible' as const
         },
         className: `z-10 transform scale-100 origin-top-left transition-all duration-300 ${colorScheme.background} border-${colorScheme.color}-200 rounded-lg shadow-sm`,
-      };
+        // Ensure parent node is set to undefined to prevent hierarchy issues
+        parentNode: undefined,
+        extent: 'parent' as const,
+      } as Node;
     });
 
     console.log('Created section nodes:', sectionNodes);
@@ -142,64 +145,10 @@ export function useSectionManager({
 
   // Update section nodes when relevant state changes
   const updateSections = useCallback(() => {
-    // Get current non-section nodes
-    const nonSectionNodes = nodes.filter(node => node.type !== 'section');
-
     // Create new section nodes with updated properties
     const updatedSectionNodes = createSectionNodes();
-
-    // Only update if there are actual changes
-    const currentSectionNodes = nodes.filter(node => node.type === 'section');
-    const hasChanges = JSON.stringify(currentSectionNodes) !== JSON.stringify(updatedSectionNodes);
-
-    if (hasChanges) {
-      // Update nodes state with both section nodes and non-section nodes
-      setNodes(() => [...updatedSectionNodes, ...nonSectionNodes]);
-
-      // Group nodes by section
-      const nodesBySection: Record<SectionType, Node[]> = {
-        logs: [],
-        metrics: [],
-        traces: [],
-      };
-      const edgesBySection: Record<SectionType, Edge[]> = {
-        logs: [],
-        metrics: [],
-        traces: [],
-      };
-
-      // Initialize empty arrays for each section
-      Object.keys(PIPELINE_SECTIONS).forEach((type) => {
-        const sectionType = type as SectionType;
-        nodesBySection[sectionType] = [];
-        edgesBySection[sectionType] = [];
-      });
-
-      // Group nodes by section
-      nonSectionNodes.forEach(node => {
-        // Determine which section this node belongs to
-        const sectionType = node.data?.sectionType as SectionType ||
-          determineSection(node.position.x, node.position.y);
-
-        if (nodesBySection[sectionType]) {
-          nodesBySection[sectionType].push(node);
-        }
-      });
-
-      // Group edges by section (based on source node's section)
-      edges.forEach((edge: Edge) => {
-        const sourceNode = nonSectionNodes.find(node => node.id === edge.source);
-        if (sourceNode) {
-          const sectionType = sourceNode.data?.sectionType as SectionType ||
-            determineSection(sourceNode.position.x, sourceNode.position.y);
-
-          if (edgesBySection[sectionType]) {
-            edgesBySection[sectionType].push(edge);
-          }
-        }
-      });
-    }
-  }, [nodes, edges, createSectionNodes, determineSection, setNodes]);
+    return updatedSectionNodes;
+  }, [createSectionNodes]);
 
   // Calculate position relative to a section
   const getPositionInSection = useCallback((absolutePosition: { x: number, y: number }, sectionType: SectionType) => {

@@ -65,13 +65,20 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   }, []);
 
 
+  const hasParsedYaml = useRef(false);
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isUpdatingRef = useRef(false);
+  const lastUpdateRef = useRef<{ fullScreenSection: SectionType | null, collapsedSections: SectionType[] }>({
+    fullScreenSection: null,
+    collapsedSections: []
+  });
+
   // Initialize nodes and edges state
-  const initialNodes = useMemo(() => [], []);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  
+
   // Use the section manager hook
-  const { updateSections, determineSection, getPositionInSection } = useSectionManager({
+  const { updateSections, determineSection, getPositionInSection, createSectionNodes } = useSectionManager({
     fullScreenSection,
     collapsedSections,
     onToggleExpand: handleToggleFullScreen,
@@ -100,21 +107,73 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   const { generateConfig } = useFlowConfig(nodes, edges, onChange);
   const { screenToFlowPosition } = useReactFlow();
 
-  const hasParsedYaml = useRef(false); // Keeps track of whether the YAML has been parsed.
-
-  // Initialize sections on mount and update when relevant state changes
+  // Initialize sections on mount
   useEffect(() => {
-    console.log('Updating sections...');
-    const timeoutId = setTimeout(() => {
-      updateSections();
-    }, 0);
-    return () => clearTimeout(timeoutId);
-  }, [fullScreenSection, collapsedSections, updateSections]);
+    const sectionNodes = createSectionNodes();
+    setNodes(sectionNodes);
+  }, [createSectionNodes, setNodes]);
 
+  // Update sections when relevant state changes
+  useEffect(() => {
+    // Check if we actually need to update
+    const needsUpdate = 
+      fullScreenSection !== lastUpdateRef.current.fullScreenSection ||
+      JSON.stringify(collapsedSections) !== JSON.stringify(lastUpdateRef.current.collapsedSections);
+
+    if (!needsUpdate) {
+      return;
+    }
+
+    // Clear any pending updates
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+
+    // Skip if we're already updating
+    if (isUpdatingRef.current) {
+      return;
+    }
+
+    console.log('Updating sections...');
+    isUpdatingRef.current = true;
+
+    // Schedule the update
+    updateTimeoutRef.current = setTimeout(() => {
+      try {
+        // Get current non-section nodes
+        const nonSectionNodes = nodes.filter(node => node.type !== 'section');
+        
+        // Create new section nodes
+        const sectionNodes = createSectionNodes();
+        
+        // Update nodes state, ensuring section nodes are first
+        setNodes(() => [...sectionNodes, ...nonSectionNodes]);
+        
+        // Update last update ref
+        lastUpdateRef.current = {
+          fullScreenSection,
+          collapsedSections
+        };
+      } finally {
+        isUpdatingRef.current = false;
+      }
+    }, 0);
+
+    // Cleanup function
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+        updateTimeoutRef.current = null;
+      }
+      isUpdatingRef.current = false;
+    };
+  }, [fullScreenSection, collapsedSections, createSectionNodes, setNodes, nodes]);
+
+  // Parse YAML when it changes
   useEffect(() => {
     if (initialYaml && !hasParsedYaml.current) {
       parseInitialYaml(initialYaml);
-      hasParsedYaml.current = true; // Mark that the YAML has been parsed.
+      hasParsedYaml.current = true;
     }
   }, [initialYaml, parseInitialYaml]);
 
