@@ -12,10 +12,10 @@ export const LAYOUT_CONFIG = {
 };
 
 export const VALID_CONNECTIONS: Record<string, string[]> = {
-  'receiver': ['processor', 'exporter', 'connector'],
-  'processor': ['processor', 'exporter', 'connector'],
-  'exporter': [],
-  'connector': ['processor', 'exporter']
+  'receivers': ['processors', 'exporters'],
+  'processors': ['receivers', 'exporters'],
+  'exporters': ['receivers', 'processors'],
+  'connectors': ['connectors'] // Connectors can only connect to other connectors
 };
 
 
@@ -25,44 +25,37 @@ export const COLOR_SCHEME = {
     color: 'blue',
     label: 'Traces',
     background: 'rgba(59, 130, 246, 0.05)', // Blue-500 background
-    isSideSection: false
   },
   metrics: {
     color: 'green',
     label: 'Metrics',
     background: 'rgba(34, 197, 94, 0.05)', // Green-500 background
-    isSideSection: false
   },
   logs: {
     color: 'purple',
     label: 'Logs',
     background: 'rgba(168, 85, 247, 0.05)', // Purple-500 background
-    isSideSection: false
   },
 
   connectors: {
     color: 'amber',
     label: 'Connectors',
     background: 'rgba(217, 119, 6, 0.05)', // Amber-600 background
-    isSideSection: false
   },
   exporters: {
     color: 'purple',
     label: 'Exporters',
     background: 'rgba(168, 85, 247, 0.05)', // Purple-500 background
-    isSideSection: false
   },
   processors: {
     color: 'green',
     label: 'Processors',
     background: 'rgba(34, 197, 94, 0.05)', // Green-500 background
-    isSideSection: false
   },
   receivers: {
     color: 'blue',
     label: 'Receivers',
     background: 'rgba(59, 130, 246, 0.05)', // Blue-500 background
-    isSideSection: false
   }
 };
 
@@ -71,7 +64,6 @@ export const PIPELINE_SECTIONS: Record<SectionType, {
   label: string;
   background: string;
   isHorizontal?: boolean;
-  isSideSection?: boolean;
 }> = {
   traces: COLOR_SCHEME.traces,
   metrics: COLOR_SCHEME.metrics,
@@ -102,7 +94,7 @@ export const styles = {
     zIndex: 1000, // Very high z-index to ensure edges are always visible
     type: 'smoothstep', // Consistent curved edge type
   },
-  
+
   // Use the same style for connector edges to maintain consistency
   connectorEdgeStyle: {
     stroke: '#ff9800', // Orange color for better visibility

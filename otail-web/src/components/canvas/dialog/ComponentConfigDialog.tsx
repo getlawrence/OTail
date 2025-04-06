@@ -5,7 +5,7 @@ import { PolicyBuilder } from '@/components/policy/policy-builder';
 import { usePolicyState } from '@/hooks/use-policy-state';
 import { useState } from 'react';
 import { ReceiverConfig, ProcessorConfig } from '../types';
-import { componentSchemas, ComponentType } from './componentSchemas';
+import { componentSchemas } from './componentSchemas';
 import { DynamicForm } from '@/components/shared/DynamicForm';
 import { createNewPolicy } from '@/lib/policy/utils';
 
@@ -30,8 +30,9 @@ export const ComponentConfigDialog = ({
   const [config, setConfig] = useState<Record<string, any>>(node.data.config || {});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const componentType = node.data.label.toLowerCase() as ComponentType;
-  const schema = componentSchemas[componentType];
+  const componentName = node.data.label.toLowerCase();
+  const componentType = node.data.type;
+  const schema = componentSchemas[componentType][componentName];
   const isTailSampling = componentType === 'tail_sampling';
 
   const handleFieldChange = (field: string, value: any) => {

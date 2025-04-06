@@ -65,13 +65,20 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   }, []);
 
 
+  const hasParsedYaml = useRef(false);
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isUpdatingRef = useRef(false);
+  const lastUpdateRef = useRef<{ fullScreenSection: SectionType | null, collapsedSections: SectionType[] }>({
+    fullScreenSection: null,
+    collapsedSections: []
+  });
+
   // Initialize nodes and edges state
-  const initialNodes = useMemo(() => [], []);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  
+
   // Use the section manager hook
-  const { updateSections, determineSection, getPositionInSection } = useSectionManager({
+  const { determineSection, getPositionInSection, createSectionNodes } = useSectionManager({
     fullScreenSection,
     collapsedSections,
     onToggleExpand: handleToggleFullScreen,
@@ -89,10 +96,10 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   
   // Define node types - cast as any to work around type issues
   const nodeTypes = useMemo(() => ({
-    receiver: ReceiverNode as any,
-    processor: ProcessorNode as any,
-    exporter: ExporterNode as any,
-    connector: ConnectorNode as any,
+    receivers: ReceiverNode as any,
+    processors: ProcessorNode as any,
+    exporters: ExporterNode as any,
+    connectors: ConnectorNode as any,
 
     section: FlowSectionComponent as any, // Add FlowSection as a custom node type
   }), []);
@@ -100,21 +107,73 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   const { generateConfig } = useFlowConfig(nodes, edges, onChange);
   const { screenToFlowPosition } = useReactFlow();
 
-  const hasParsedYaml = useRef(false); // Keeps track of whether the YAML has been parsed.
-
-  // Update sections when fullScreenSection or collapsedSections changes
+  // Initialize sections on mount
   useEffect(() => {
-    // Using a ref to avoid the circular dependency
-    const timeoutId = setTimeout(() => {
-      updateSections();
-    }, 0);
-    return () => clearTimeout(timeoutId);
-  }, [fullScreenSection, collapsedSections]);
+    const sectionNodes = createSectionNodes();
+    setNodes(sectionNodes);
+  }, [createSectionNodes, setNodes]);
 
+  // Update sections when relevant state changes
+  useEffect(() => {
+    // Check if we actually need to update
+    const needsUpdate = 
+      fullScreenSection !== lastUpdateRef.current.fullScreenSection ||
+      JSON.stringify(collapsedSections) !== JSON.stringify(lastUpdateRef.current.collapsedSections);
+
+    if (!needsUpdate) {
+      return;
+    }
+
+    // Clear any pending updates
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+
+    // Skip if we're already updating
+    if (isUpdatingRef.current) {
+      return;
+    }
+
+    console.log('Updating sections...');
+    isUpdatingRef.current = true;
+
+    // Schedule the update
+    updateTimeoutRef.current = setTimeout(() => {
+      try {
+        // Get current non-section nodes
+        const nonSectionNodes = nodes.filter(node => node.type !== 'section');
+        
+        // Create new section nodes
+        const sectionNodes = createSectionNodes();
+        
+        // Update nodes state, ensuring section nodes are first
+        setNodes(() => [...sectionNodes, ...nonSectionNodes]);
+        
+        // Update last update ref
+        lastUpdateRef.current = {
+          fullScreenSection,
+          collapsedSections
+        };
+      } finally {
+        isUpdatingRef.current = false;
+      }
+    }, 0);
+
+    // Cleanup function
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+        updateTimeoutRef.current = null;
+      }
+      isUpdatingRef.current = false;
+    };
+  }, [fullScreenSection, collapsedSections, createSectionNodes, setNodes, nodes]);
+
+  // Parse YAML when it changes
   useEffect(() => {
     if (initialYaml && !hasParsedYaml.current) {
       parseInitialYaml(initialYaml);
-      hasParsedYaml.current = true; // Mark that the YAML has been parsed.
+      hasParsedYaml.current = true;
     }
   }, [initialYaml, parseInitialYaml]);
 
@@ -122,13 +181,22 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     const sourceNode = nodes.find(n => n.id === connection.source);
     const targetNode = nodes.find(n => n.id === connection.target);
 
-    if (!sourceNode?.type || !targetNode?.type) return;
-    if (!VALID_CONNECTIONS[sourceNode.type]?.includes(targetNode.type)) return;
+    if (!sourceNode?.type || !targetNode?.type) {
+      console.warn('Invalid connection: source or target node not found');
+      return;
+    }
+    if (!VALID_CONNECTIONS[sourceNode.type]?.includes(targetNode.type)){
+      console.warn(`Invalid connection: ${sourceNode.type} -> ${targetNode.type}`);
+      return;
+    }
     
     // Allow connectors to connect between different pipeline types
     // For non-connector nodes, ensure they're in the same pipeline
-    const isConnector = sourceNode.type === 'connector' || targetNode.type === 'connector';
-    if (!isConnector && sourceNode.data.pipelineType !== targetNode.data.pipelineType) return;
+    const isConnector = sourceNode.type === 'connectors' || targetNode.type === 'connectors';
+    if (!isConnector && sourceNode.data.pipelineType !== targetNode.data.pipelineType) {
+      console.warn(`Invalid connection: ${sourceNode.type} -> ${targetNode.type}`);
+      return;
+    }
 
     // Track connection creation
     trackCanvas.connection.create(
@@ -241,11 +309,11 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
           defaultEdgeOptions={{ 
             type: 'smoothstep', 
             animated: true, 
-            zIndex: 1000, // Ensure edges are always on top
+            zIndex: 1000,
             style: {
               strokeWidth: 2,
               stroke: '#222',
-              zIndex: 1000, // Ensure edges are always on top
+              zIndex: 1000,
             }
           }}
           onNodeClick={(_event, node) => {
@@ -264,7 +332,8 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
           panOnScroll={true}
           panOnDrag={true}
           selectionOnDrag={true}
-          fitView={false}
+          fitView={true}
+          fitViewOptions={{ padding: 0.2 }}
           proOptions={{ hideAttribution: true }}
         >
           <Background />
