@@ -102,14 +102,14 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
 
   const hasParsedYaml = useRef(false); // Keeps track of whether the YAML has been parsed.
 
-  // Update sections when fullScreenSection or collapsedSections changes
+  // Initialize sections on mount and update when relevant state changes
   useEffect(() => {
-    // Using a ref to avoid the circular dependency
+    console.log('Updating sections...');
     const timeoutId = setTimeout(() => {
       updateSections();
     }, 0);
     return () => clearTimeout(timeoutId);
-  }, [fullScreenSection, collapsedSections]);
+  }, [fullScreenSection, collapsedSections, updateSections]);
 
   useEffect(() => {
     if (initialYaml && !hasParsedYaml.current) {
@@ -250,11 +250,11 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
           defaultEdgeOptions={{ 
             type: 'smoothstep', 
             animated: true, 
-            zIndex: 1000, // Ensure edges are always on top
+            zIndex: 1000,
             style: {
               strokeWidth: 2,
               stroke: '#222',
-              zIndex: 1000, // Ensure edges are always on top
+              zIndex: 1000,
             }
           }}
           onNodeClick={(_event, node) => {
@@ -273,7 +273,8 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
           panOnScroll={true}
           panOnDrag={true}
           selectionOnDrag={true}
-          fitView={false}
+          fitView={true}
+          fitViewOptions={{ padding: 0.2 }}
           proOptions={{ hideAttribution: true }}
         >
           <Background />

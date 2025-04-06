@@ -117,7 +117,8 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
         config.service.pipelines[pipelineKey] = {
           receivers: [],
           processors: [],
-          exporters: []
+          exporters: [],
+          connectors: []
         };
       }
       

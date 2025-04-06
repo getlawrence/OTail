@@ -237,6 +237,7 @@ export function usePipelineManager({
               y: 50
             },
             data: {
+              type: 'connectors',
               label: connectorName,
               config: connectorConfig,
               pipelineType: sourceType,

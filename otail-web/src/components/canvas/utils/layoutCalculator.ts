@@ -1,10 +1,14 @@
 import * as dagre from '@dagrejs/dagre';
 import { Node, Edge } from 'reactflow';
-import { LAYOUT_CONFIG } from '../constants';
 
 const NODE_WIDTH = 150;
 const NODE_HEIGHT = 40;
-const COLUMN_SPACING = 300;
+
+export const COLUMN_WIDTH = 180;
+export const COLUMN_GAP = 80; // Gap between columns
+export const PIPELINE_HEIGHT = 400;
+export const PIPELINE_SPACING = 500;
+export const COMPONENT_GAP = 500; // Gap between receivers and exporters in the same pipeline
 
 interface LayoutOptions {
   direction?: 'LR' | 'TB';
@@ -111,8 +115,6 @@ export function calculateNodeLayout<T extends Node>(
   // First, get a basic layout using dagre
   let layoutedNodes = getLayoutedElements(nodes, edges, _options);
 
-  // Group nodes by type and pipeline type
-  const nodeGroups = groupNodesByType(layoutedNodes);
   const pipelineGroups = groupNodesByPipeline(layoutedNodes, edges);
 
   // Get the x positions for each column
@@ -138,10 +140,10 @@ export function calculateNodeLayout<T extends Node>(
   // Position nodes by pipeline type
   Array.from(pipelineGroups.entries()).forEach(([pipelineType, pipelineNodes], index) => {
     const pipelineY = index * (PIPELINE_HEIGHT + PIPELINE_SPACING * 1.5);
-    
+
     // Position nodes within the pipeline
     const pipelineNodesByType = groupNodesByType(pipelineNodes);
-    
+
     // Position receivers
     const receivers = pipelineNodesByType.receiver || [];
     const receiverSpacing = PIPELINE_HEIGHT / (receivers.length + 1);
@@ -149,7 +151,7 @@ export function calculateNodeLayout<T extends Node>(
       const nodeToAdjust = layoutedNodes.find(n => n.id === node.id);
       if (nodeToAdjust) {
         nodeToAdjust.position.x = columnPositions.receiver;
-        nodeToAdjust.position.y = pipelineY + ((idx + 1) * receiverSpacing);
+        nodeToAdjust.position.y = pipelineY + ((idx + 1) * (receiverSpacing + COMPONENT_GAP));
       }
     });
 
@@ -160,7 +162,7 @@ export function calculateNodeLayout<T extends Node>(
       const nodeToAdjust = layoutedNodes.find(n => n.id === node.id);
       if (nodeToAdjust) {
         nodeToAdjust.position.x = columnPositions.exporter;
-        nodeToAdjust.position.y = pipelineY + ((idx + 1) * exporterSpacing);
+        nodeToAdjust.position.y = pipelineY + PIPELINE_HEIGHT + ((idx + 1) * (exporterSpacing + COMPONENT_GAP));
       }
     });
 
@@ -226,7 +228,7 @@ export function calculateNodeLayout<T extends Node>(
         // Calculate fade effect - nodes closer to center have more spacing
         const distanceFromCenter = Math.abs((idx + 1) - (exporters.length + 1) / 2);
         const spacingMultiplier = 1 + (distanceFromCenter * 0.2); // 20% more spacing for outer nodes
-        nodeToAdjust.position.y = pipelineY + ((idx + 1) * exporterSpacing * spacingMultiplier);
+        nodeToAdjust.position.y = pipelineY + ((idx + 1) * (exporterSpacing + COMPONENT_GAP) * spacingMultiplier);
       }
     });
   });
@@ -236,7 +238,7 @@ export function calculateNodeLayout<T extends Node>(
 
 function groupNodesByPipeline(nodes: Node[], edges: Edge[]): Map<string, Node[]> {
   const pipelineGroups = new Map<string, Node[]>();
-  
+
   // First, group by pipeline type
   nodes.forEach(node => {
     const pipelineType = node.data?.pipelineType;
@@ -251,8 +253,3 @@ function groupNodesByPipeline(nodes: Node[], edges: Edge[]): Map<string, Node[]>
   return pipelineGroups;
 }
 
-// Layout constants
-export const COLUMN_WIDTH = 180;
-export const COLUMN_GAP = 80; // Gap between columns
-export const PIPELINE_HEIGHT = 400;
-export const PIPELINE_SPACING = 500; 

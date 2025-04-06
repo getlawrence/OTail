@@ -957,7 +957,7 @@ export const componentSchemas: Record<string, Record<string, ComponentSchema>> =
         },
       },
     },
-    span_metrics: {
+    spanmetrics: {
       type: 'connector',
       displayName: 'Span Metrics',
       fields: {
