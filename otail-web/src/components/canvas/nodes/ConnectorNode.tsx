@@ -4,17 +4,18 @@ import { ArrowLeftRight, Grip } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ConnectorNodeProps {
-  data: { 
-    label: string; 
+  data: {
+    label: string;
     config: any;
-    sourcePipelineType?: string;
-    targetPipelineType?: string;
+    isSource: boolean;
+    sourcePipelineType: string;
+    targetPipelineType: string;
   };
   handleStyle?: React.CSSProperties;
 }
 
 export const ConnectorNode = ({ data, handleStyle }: ConnectorNodeProps) => {
-  // Ensure the node has a high z-index to prevent it from being hidden behind sections
+  const { sourcePipelineType, targetPipelineType, label, isSource } = data;
   const nodeStyle = {
     zIndex: 10,
   };
@@ -30,19 +31,25 @@ export const ConnectorNode = ({ data, handleStyle }: ConnectorNodeProps) => {
         </div>
       </div>
       <CardContent className="p-2 pt-3">
-        <div className="flex items-center gap-2">
-          <div className="p-1 rounded-full bg-amber-100 dark:bg-amber-900/40">
-            <ArrowLeftRight size={14} className="text-amber-600 dark:text-amber-400" />
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <div className="p-1 rounded-full bg-amber-100 dark:bg-amber-900/40">
+              <ArrowLeftRight size={14} className="text-amber-600 dark:text-amber-400" />
+            </div>
+            <span className="text-sm font-medium">{label}</span>
           </div>
-          <div className="font-medium text-sm">{data.label}</div>
+          <div className="flex items-center gap-2 pl-7">
+            <Badge variant="outline" className="text-[10px] py-0 h-4 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700">
+              {isSource ? "Source" : "Target"}
+            </Badge>
+          </div>
+          {sourcePipelineType && targetPipelineType && (
+            <div className="text-xs text-muted-foreground pl-7 truncate">
+              {sourcePipelineType} → {targetPipelineType}
+            </div>
+          )}
         </div>
-        {data.sourcePipelineType && data.targetPipelineType && (
-          <div className="text-xs text-muted-foreground mt-2 pl-7 truncate max-w-40">
-            {data.sourcePipelineType} → {data.targetPipelineType}
-          </div>
-        )}
       </CardContent>
-      {/* Left handle (target) */}
       <Handle
         type="target"
         position={Position.Left}
@@ -55,9 +62,8 @@ export const ConnectorNode = ({ data, handleStyle }: ConnectorNodeProps) => {
           width: '14px',
           height: '14px',
         }}
-        id="left"
+        id='target-handle'
       />
-      {/* Right handle (source) */}
       <Handle
         type="source"
         position={Position.Right}
@@ -70,7 +76,7 @@ export const ConnectorNode = ({ data, handleStyle }: ConnectorNodeProps) => {
           width: '14px',
           height: '14px',
         }}
-        id="right"
+        id='source-handle'
       />
     </Card>
   );

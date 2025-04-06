@@ -117,7 +117,8 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
         config.service.pipelines[pipelineKey] = {
           receivers: [],
           processors: [],
-          exporters: []
+          exporters: [],
+          connectors: []
         };
       }
       
@@ -163,93 +164,57 @@ export const useFlowConfig = (nodes: Node[], edges: Edge[], onChange?: (yaml: st
     // This ensures that we can correctly identify source and target pipelines
     const allConnectorNodes = nodes.filter(node => node.type === 'connector');
     
+    // Group connector nodes by their connectorName
+    const connectorGroups = new Map<string, { source: Node | null, target: Node | null }>();
+    
     allConnectorNodes.forEach(node => {
-      // Add connector config if it doesn't exist
-      if (!config.connectors[node.data.label]) {
-        config.connectors[node.data.label] = node.data.config || {};
+      const connectorName = node.data.connectorName;
+      if (!connectorName) return;
+      
+      if (!connectorGroups.has(connectorName)) {
+        connectorGroups.set(connectorName, { source: null, target: null });
       }
-            
-      // Find incoming edges to this connector
-      const incomingEdges = edges.filter(edge => edge.target === node.id);
       
-      // Find outgoing edges from this connector
-      const outgoingEdges = edges.filter(edge => edge.source === node.id);
+      const group = connectorGroups.get(connectorName)!;
+      if (node.data.isSource) {
+        group.source = node;
+      } else {
+        group.target = node;
+      }
+    });
+    
+    // Process each connector group
+    connectorGroups.forEach((group, connectorName) => {
+      if (!group.source || !group.target) return;
       
-      // Find the source nodes (nodes that have edges pointing to this connector)
-      const sourceNodes = incomingEdges.map(edge => 
-        nodes.find(n => n.id === edge.source)
-      ).filter(Boolean);
+      // Add connector config if it doesn't exist
+      if (!config.connectors[connectorName]) {
+        config.connectors[connectorName] = group.source.data.config || {};
+      }
       
-      // Find the target nodes (nodes that this connector points to)
-      const targetNodes = outgoingEdges.map(edge => 
-        nodes.find(n => n.id === edge.target)
-      ).filter(Boolean);
+      // Find the source pipeline for this connector
+      const sourcePipeline = Object.keys(config.service.pipelines).find(pipelineKey => {
+        const [pipelineType] = pipelineKey.split('/');
+        return pipelineType === group.source?.data.pipelineType;
+      });
       
-      // Get the source and target pipeline types
-      const sourcePipelineType = sourceNodes.length > 0 ? sourceNodes[0]?.data.pipelineType : node.data.pipelineType;
-      const targetPipelineType = targetNodes.length > 0 ? targetNodes[0]?.data.pipelineType : null;
+      // Find the target pipeline for this connector
+      const targetPipeline = Object.keys(config.service.pipelines).find(pipelineKey => {
+        const [pipelineType] = pipelineKey.split('/');
+        return pipelineType === group.target?.data.pipelineType;
+      });
       
-      if (sourcePipelineType && targetPipelineType) {
-        // Find all pipelines of the source and target types
-        const sourcePipelineKeys = Object.keys(config.service.pipelines)
-          .filter(key => key.startsWith(`${sourcePipelineType}/`));
-        
-        const targetPipelineKeys = Object.keys(config.service.pipelines)
-          .filter(key => key.startsWith(`${targetPipelineType}/`));
-        
-        // Find the best matching source and target pipelines
-        let bestSourcePipeline = sourcePipelineKeys[0];
-        let bestTargetPipeline = targetPipelineKeys[0];
-        
-        // Try to find better matches based on connected nodes
-        if (sourceNodes.length > 0) {
-          for (const key of sourcePipelineKeys) {
-            const pipeline = config.service.pipelines[key];
-            const sourceNodeLabels = sourceNodes.map(n => n?.data.label).filter(Boolean) as string[];
-            
-            const isSourceInPipeline = sourceNodeLabels.some(label => 
-              pipeline.receivers.includes(label) || 
-              pipeline.processors.includes(label) || 
-              pipeline.exporters.includes(label)
-            );
-            
-            if (isSourceInPipeline) {
-              bestSourcePipeline = key;
-              break;
-            }
-          }
+      if (sourcePipeline && config.service.pipelines[sourcePipeline]) {
+        // Add connector to source pipeline as an exporter
+        if (!config.service.pipelines[sourcePipeline].exporters.includes(connectorName)) {
+          config.service.pipelines[sourcePipeline].exporters.push(connectorName);
         }
-        
-        if (targetNodes.length > 0) {
-          for (const key of targetPipelineKeys) {
-            const pipeline = config.service.pipelines[key];
-            const targetNodeLabels = targetNodes.map(n => n?.data.label).filter(Boolean) as string[];
-            
-            const isTargetInPipeline = targetNodeLabels.some(label => 
-              pipeline.receivers.includes(label) || 
-              pipeline.processors.includes(label) || 
-              pipeline.exporters.includes(label)
-            );
-            
-            if (isTargetInPipeline) {
-              bestTargetPipeline = key;
-              break;
-            }
-          }
-        }
-        
-        // Add connector to the source pipeline as an exporter
-        if (bestSourcePipeline && config.service.pipelines[bestSourcePipeline]) {
-          if (!config.service.pipelines[bestSourcePipeline].exporters.includes(node.data.label)) {
-            config.service.pipelines[bestSourcePipeline].exporters.push(node.data.label);
-          }
-        }
-        
-        // Add connector to the target pipeline as a receiver
-        if (bestTargetPipeline && config.service.pipelines[bestTargetPipeline]) {
-          if (!config.service.pipelines[bestTargetPipeline].receivers.includes(node.data.label)) {
-            config.service.pipelines[bestTargetPipeline].receivers.push(node.data.label);
-          }
+      }
+      
+      if (targetPipeline && config.service.pipelines[targetPipeline]) {
+        // Add connector to target pipeline as a receiver
+        if (!config.service.pipelines[targetPipeline].receivers.includes(connectorName)) {
+          config.service.pipelines[targetPipeline].receivers.push(connectorName);
         }
       }
     });

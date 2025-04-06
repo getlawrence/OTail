@@ -1,0 +1,109 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  
+  jaeger:
+    protocols:
+      thrift_http:
+        endpoint: 0.0.0.0:14268
+      grpc:
+        endpoint: 0.0.0.0:14250
+  
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['0.0.0.0:8888']
+  
+  filelog:
+
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 4000
+    spike_limit_mib: 500
+
+  resource:
+    attributes:
+      - key: environment
+        value: production
+        action: upsert
+      - key: service.namespace
+        value: example-namespace
+        action: upsert
+
+  filter:
+    metrics:
+      include:
+        match_type: strict
+        metric_names:
+          - system.cpu.usage
+          - system.memory.usage
+          - http.server.duration
+
+  attributes:
+    actions:
+      - key: db.statement
+        action: hash
+      - key: http.request.header.authorization
+        action: delete
+
+connectors:
+  spanmetrics:
+    namespace: span.metrics
+    dimensions:
+      - service.name
+      - operation
+      - span.kind
+    dimensions_cache_size: 1000
+    aggregation_temporality: "AGGREGATION_TEMPORALITY_CUMULATIVE"
+    metrics_flush_interval: 15s
+
+exporters:
+  otlp:
+    endpoint: otelcollector:4317
+    tls:
+      insecure: true
+  
+  prometheus:
+    endpoint: 0.0.0.0:8889
+  
+  jaeger:
+    endpoint: jaeger-all-in-one:14250
+    tls:
+      insecure: true
+  
+  file:
+    path: /var/log/otel-collector.json
+  
+  logging:
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp, jaeger]
+      processors: [memory_limiter, batch, resource, attributes]
+      exporters: [otlp, jaeger, logging, spanmetrics]
+    
+    metrics:
+      receivers: [otlp, prometheus, sqlquery, spanmetrics]
+      processors: [memory_limiter, batch, filter, resource]
+      exporters: [otlp, prometheus, logging]
+    
+    logs:
+      receivers: [otlp, filelog]
+      processors: [memory_limiter, batch, resource]
+      exporters: [otlp, file, logging]
