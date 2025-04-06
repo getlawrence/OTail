@@ -6,33 +6,35 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { componentSchemas } from './dialog/componentSchemas';
 
-const componentTypes = {
-  receiver: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'kafka', 'opencensus', 'fluentforward', 'hostmetrics'],
-  processor: ['batch', 'memory_limiter', 'tail_sampling', 'probabilistic_sampling', 'span', 'filter', 'resource', 'transform', 'k8s_attributes', 'log_dedup', 'metricstransform'],
-  exporter: ['otlp', 'jaeger', 'zipkin', 'prometheus', 'logging', 'file', 'kafka', 'elasticsearch', 'awsxray'],
-  connector: ['count', 'span_metrics']
-};
+// Create an optimized lookup object for component types
+const componentTypes = Object.entries(componentSchemas).reduce((acc, [type, schema]) => {
+  return {
+    ...acc,
+    [type]: Object.keys(schema)
+  }
+}, {} as Record<string, string[]>);
 
 const componentIcons = {
-  receiver: <ArrowDown size={20} />,
-  processor: <Bolt size={20} />,
-  exporter: <ArrowUp size={20} />,
-  connector: <ArrowLeftRight size={20} />
+  receivers: <ArrowDown size={20} />,
+  processors: <Bolt size={20} />,
+  exporters: <ArrowUp size={20} />,
+  connectors: <ArrowLeftRight size={20} />
 };
 
 const typeLabels = {
-  receiver: 'Receivers',
-  processor: 'Processors',
-  exporter: 'Exporters',
-  connector: 'Connectors'
+  receivers: 'Receivers',
+  processors: 'Processors',
+  exporters: 'Exporters',
+  connectors: 'Connectors'
 };
 
 const typeDescriptions = {
-  receiver: 'Components that receive data from external sources',
-  processor: 'Components that process and transform data',
-  exporter: 'Components that send data to external destinations',
-  connector: 'Components that connect pipelines and convert data types'
+  receivers: 'Components that receive data from external sources',
+  processors: 'Components that process and transform data',
+  exporters: 'Components that send data to external destinations',
+  connectors: 'Components that connect pipelines and convert data types'
 };
 
 const componentDescriptions: Record<string, Record<string, string>> = {
@@ -74,7 +76,6 @@ const componentDescriptions: Record<string, Record<string, string>> = {
     count: 'Counts spans, span events, metrics, data points, and log records.',
     span_metrics: 'Aggregates Request, Error and Duration (R.E.D) OpenTelemetry metrics from span data.'
   },
-
 };
 
 export const Sidebar = () => {
@@ -82,17 +83,17 @@ export const Sidebar = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [draggedItem, setDraggedItem] = useState<{type: string, name: string} | null>(null);
-  const [hoveredItem, setHoveredItem] = useState<{type: string, name: string} | null>(null);
+  const [draggedItem, setDraggedItem] = useState<{ type: string, name: string } | null>(null);
+  const [hoveredItem, setHoveredItem] = useState<{ type: string, name: string } | null>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   const onDragStart = (event: DragEvent, nodeType: string, name: string) => {
     setIsDragging(true);
-    setDraggedItem({type: nodeType, name});
-    
+    setDraggedItem({ type: nodeType, name });
+
     // Track component drag start
     trackCanvas.component.drag(nodeType, name);
-    
+
     // Create a custom drag image
     const dragPreview = document.createElement('div');
     const colorMap: Record<string, keyof typeof COLOR_SCHEME> = {
@@ -105,34 +106,34 @@ export const Sidebar = () => {
     const schemeKey = colorMap[nodeType] || 'receivers';
     const scheme = COLOR_SCHEME[schemeKey];
     const baseColor = scheme.color;
-    
+
     dragPreview.className = `p-3 rounded-lg shadow-xl border-2 border-${baseColor}-500 bg-${baseColor}-50 dark:bg-${baseColor}-900/30`;
-    
+
     const content = document.createElement('div');
     content.className = 'flex items-center gap-2';
-    
+
     const iconContainer = document.createElement('div');
     iconContainer.className = `flex items-center justify-center h-8 w-8 rounded-full bg-${baseColor}-500 text-white`;
     iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-${nodeType === 'receiver' ? 'arrow-down' : nodeType === 'processor' ? 'bolt' : 'arrow-up'}"><path d="${nodeType === 'receiver' ? 'M12 5v14M19 12l-7 7-7-7' : nodeType === 'processor' ? 'M13 3v18M7 16l6-6 6 6' : 'M12 19V5M5 12l7-7 7 7'}"></path></svg>`;
-    
+
     const label = document.createElement('span');
     label.className = 'font-medium text-sm';
     label.textContent = name;
-    
+
     content.appendChild(iconContainer);
     content.appendChild(label);
     dragPreview.appendChild(content);
-    
+
     document.body.appendChild(dragPreview);
-    
+
     // Set the drag image
     event.dataTransfer.setDragImage(dragPreview, 20, 20);
-    
+
     // Set the data
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.setData('component/name', name);
     event.dataTransfer.effectAllowed = 'move';
-    
+
     // Remove the drag preview after a short delay
     setTimeout(() => {
       document.body.removeChild(dragPreview);
@@ -153,16 +154,16 @@ export const Sidebar = () => {
       setIsExpanded(true);
     }
     setActiveType(type);
-    
+
     // Track component type selection
     trackCanvas.sidebar.selectComponentType(type);
   };
-  
+
   const toggleType = (type: string) => {
     if (isExpanded) {
       const newActiveType = activeType === type ? null : type;
       setActiveType(newActiveType);
-      
+
       // Track component type selection
       if (newActiveType) {
         trackCanvas.sidebar.selectComponentType(newActiveType);
@@ -170,7 +171,7 @@ export const Sidebar = () => {
     } else {
       setIsExpanded(true);
       setActiveType(type);
-      
+
       // Track component type selection
       trackCanvas.sidebar.selectComponentType(type);
     }
@@ -179,10 +180,10 @@ export const Sidebar = () => {
   const toggleExpanded = () => {
     const newExpandedState = !isExpanded;
     setIsExpanded(newExpandedState);
-    
+
     // Track sidebar expansion toggle
     trackCanvas.sidebar.toggleExpand(newExpandedState);
-    
+
     if (!isExpanded) {
       setActiveType(null);
     }
@@ -206,7 +207,7 @@ export const Sidebar = () => {
 
   const filteredComponents = (type: string) => {
     if (!searchTerm) return componentTypes[type as keyof typeof componentTypes];
-    return componentTypes[type as keyof typeof componentTypes].filter(name => 
+    return componentTypes[type as keyof typeof componentTypes].filter(name =>
       name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
@@ -215,19 +216,22 @@ export const Sidebar = () => {
     // Map component types to their corresponding color scheme keys
     const colorMap: Record<string, keyof typeof COLOR_SCHEME> = {
       'receiver': 'receivers',
+      'receivers': 'receivers',
       'processor': 'processors',
+      'processors': 'processors',
       'exporter': 'exporters',
+      'exporters': 'exporters',
       'connector': 'connectors',
-
+      'connectors': 'connectors',
     };
-    
+
     // Get the color scheme for this component type
     const schemeKey = colorMap[type] as keyof typeof COLOR_SCHEME;
-    
+
     if (schemeKey && COLOR_SCHEME[schemeKey]) {
       const scheme = COLOR_SCHEME[schemeKey];
       const baseColor = scheme.color;
-      
+
       // Use explicit Tailwind classes based on the color
       switch (baseColor) {
         case 'blue':
@@ -281,7 +285,7 @@ export const Sidebar = () => {
           };
       }
     }
-    
+
     // Fallback for unknown types
     return {
       bg: 'bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700',
@@ -294,8 +298,8 @@ export const Sidebar = () => {
 
   return (
     <TooltipProvider>
-      <div 
-        ref={sidebarRef} 
+      <div
+        ref={sidebarRef}
         className={`absolute left-4 top-4 flex items-start transition-all duration-300 z-[1000] ${isDragging ? 'opacity-90' : 'opacity-100'}`}
         onMouseLeave={() => {
           if (!isDragging && !draggedItem) {
@@ -304,7 +308,7 @@ export const Sidebar = () => {
         }}
       >
         {/* Expanded sidebar */}
-        <div 
+        <div
           className={`bg-white dark:bg-slate-900 shadow-xl border rounded-lg transition-all duration-300 overflow-hidden flex ${isExpanded ? 'w-[320px]' : 'w-14'}`}
           style={{ maxHeight: 'calc(100vh - 32px)' }}
         >
@@ -330,9 +334,9 @@ export const Sidebar = () => {
                 </TooltipContent>
               </Tooltip>
             ))}
-            
+
             <div className="flex-1"></div>
-            
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -349,7 +353,7 @@ export const Sidebar = () => {
               </TooltipContent>
             </Tooltip>
           </div>
-          
+
           {/* Expanded content area */}
           <div className={`flex-1 transition-all duration-300 bg-white dark:bg-slate-900 rounded-r-lg ${isExpanded ? 'opacity-100' : 'opacity-0 w-0 p-0 overflow-hidden'}`}>
             {activeType && (
@@ -371,7 +375,7 @@ export const Sidebar = () => {
                     </Tooltip>
                   </div>
                 </div>
-                
+
                 <div className="relative mb-3">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -381,7 +385,7 @@ export const Sidebar = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                
+
                 <div className="space-y-2 max-h-[calc(100vh-320px)] overflow-y-auto pr-1" style={{ overflowY: 'auto' }}>
                   {filteredComponents(activeType).length > 0 ? (
                     filteredComponents(activeType).map((name) => (
@@ -392,7 +396,7 @@ export const Sidebar = () => {
                         draggable
                         onDragStart={(e) => onDragStart(e, activeType, name)}
                         onDragEnd={onDragEnd}
-                        onMouseEnter={() => setHoveredItem({type: activeType, name})}
+                        onMouseEnter={() => setHoveredItem({ type: activeType, name })}
                         onMouseLeave={() => setHoveredItem(null)}
                       >
                         <div className="flex items-center gap-3">
@@ -400,7 +404,9 @@ export const Sidebar = () => {
                             {componentIcons[activeType as keyof typeof componentIcons]}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm truncate">{name}</div>
+                            <div className="font-medium text-sm truncate">
+                                {componentSchemas[activeType][name].displayName}
+                            </div>
                             <div className="text-xs text-muted-foreground line-clamp-2">
                               {componentDescriptions[activeType]?.[name] || `${activeType} component`}
                             </div>
@@ -417,12 +423,12 @@ export const Sidebar = () => {
                 </div>
               </div>
             )}
-            
+
             {!activeType && isExpanded && (
               <div className="p-4 flex flex-col items-center justify-center h-full">
                 <h3 className="font-semibold text-sm mb-2">Component Library</h3>
                 <p className="text-xs text-center text-muted-foreground mb-4">Select a component type from the sidebar to get started</p>
-                
+
                 <div className="space-y-3 w-full">
                   {Object.entries(componentTypes).map(([type]) => (
                     <Button
@@ -442,7 +448,7 @@ export const Sidebar = () => {
             )}
           </div>
         </div>
-        
+
         {/* Floating drag preview */}
         {isDragging && draggedItem && (
           <div className="fixed top-4 left-20 p-3 rounded-lg bg-white dark:bg-slate-900 shadow-xl border z-[1001] pointer-events-none">

@@ -89,10 +89,10 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   
   // Define node types - cast as any to work around type issues
   const nodeTypes = useMemo(() => ({
-    receiver: ReceiverNode as any,
-    processor: ProcessorNode as any,
-    exporter: ExporterNode as any,
-    connector: ConnectorNode as any,
+    receivers: ReceiverNode as any,
+    processors: ProcessorNode as any,
+    exporters: ExporterNode as any,
+    connectors: ConnectorNode as any,
 
     section: FlowSectionComponent as any, // Add FlowSection as a custom node type
   }), []);

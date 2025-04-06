@@ -12,10 +12,10 @@ export const LAYOUT_CONFIG = {
 };
 
 export const VALID_CONNECTIONS: Record<string, string[]> = {
-  'receiver': ['processor', 'exporter', 'connector'],
-  'processor': ['processor', 'exporter', 'connector'],
-  'exporter': [],
-  'connector': ['processor', 'exporter']
+  'receivers': ['processors', 'exporters', 'connectors'],
+  'processors': ['receivers', 'exporters', 'connectors'],
+  'exporters': ['receivers', 'processors', 'connectors'],
+  'connectors': ['receivers', 'processors', 'exporters']
 };
 
 
