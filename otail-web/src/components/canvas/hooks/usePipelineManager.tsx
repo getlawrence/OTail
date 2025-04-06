@@ -56,7 +56,7 @@ export function usePipelineManager({
 
         const createNodes = (
           components: string[],
-          type: 'receivers' | 'processors' | 'exporters',
+          type: 'receivers' | 'processors' | 'exporters' | 'connectors',
         ) => {
           return components
             .filter(label => !connectorNames.has(label)) // Skip connectors, we'll create them separately
@@ -231,7 +231,7 @@ export function usePipelineManager({
           // This could be improved to use layout calculations
           const connectorNode: Node = {
             id: `connector-${connectorName}`,
-            type: 'connector',
+            type: 'connectors',
             position: {
               x: 425, // Position between processors and exporters
               y: 50

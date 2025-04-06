@@ -5,6 +5,7 @@ export interface PipelineConfig {
   receivers: string[];
   processors: string[];
   exporters: string[];
+  connectors: string[];
 }
 
 export interface ServiceConfig {

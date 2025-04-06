@@ -122,13 +122,22 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     const sourceNode = nodes.find(n => n.id === connection.source);
     const targetNode = nodes.find(n => n.id === connection.target);
 
-    if (!sourceNode?.type || !targetNode?.type) return;
-    if (!VALID_CONNECTIONS[sourceNode.type]?.includes(targetNode.type)) return;
+    if (!sourceNode?.type || !targetNode?.type) {
+      console.warn('Invalid connection: source or target node not found');
+      return;
+    }
+    if (!VALID_CONNECTIONS[sourceNode.type]?.includes(targetNode.type)){
+      console.warn(`Invalid connection: ${sourceNode.type} -> ${targetNode.type}`);
+      return;
+    }
     
     // Allow connectors to connect between different pipeline types
     // For non-connector nodes, ensure they're in the same pipeline
-    const isConnector = sourceNode.type === 'connector' || targetNode.type === 'connector';
-    if (!isConnector && sourceNode.data.pipelineType !== targetNode.data.pipelineType) return;
+    const isConnector = sourceNode.type === 'connectors' || targetNode.type === 'connectors';
+    if (!isConnector && sourceNode.data.pipelineType !== targetNode.data.pipelineType) {
+      console.warn(`Invalid connection: ${sourceNode.type} -> ${targetNode.type}`);
+      return;
+    }
 
     // Track connection creation
     trackCanvas.connection.create(
