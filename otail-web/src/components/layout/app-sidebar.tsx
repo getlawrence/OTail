@@ -25,58 +25,61 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
-const noBackend = import.meta.env.VITE_NO_BACKEND === 'true'
-const items = !noBackend
-  ? [
-    {
-      title: "Policy Builder",
-      url: "/sampling",
-      icon: Wrench,
-    },
-    {
-      title: "Agents",
-      url: "/agents",
-      icon: Telescope,
-    },
-    {
-      title: "Canvas",
-      url: "/canvas",
-      icon: Palette,
-    },
-    {
-      title: "Pipelines",
-      url: "/pipelines",
-      icon: Share2,
-      badge: "New"
-    },
-    {
-      title: "Organization",
-      url: "/organization",
-      icon: Users,
-    },
-  ]
-  : [
-    {
-      title: "Policy Builder",
-      url: "/sampling",
-      icon: Wrench,
-    },
-    {
-      title: "Canvas",
-      url: "/canvas",
-      icon: Palette,
-    },
-    {
-      title: "Pipelines",
-      url: "/pipelines",
-      icon: Share2,
-      badge: "New"
-    },
-  ];
+interface AppSidebarProps {
+  noBackend?: boolean;
+}
 
-export function AppSidebar() {
+export function AppSidebar({ noBackend = false }: AppSidebarProps) {
   const { logout, user } = useAuth()
   const location = useLocation()
+
+  const items = !noBackend
+    ? [
+      {
+        title: "Policy Builder",
+        url: "/sampling",
+        icon: Wrench,
+      },
+      {
+        title: "Agents",
+        url: "/agents",
+        icon: Telescope,
+      },
+      {
+        title: "Canvas",
+        url: "/canvas",
+        icon: Palette,
+      },
+      {
+        title: "Pipelines",
+        url: "/pipelines",
+        icon: Share2,
+        badge: "New"
+      },
+      {
+        title: "Organization",
+        url: "/organization",
+        icon: Users,
+      },
+    ]
+    : [
+      {
+        title: "Policy Builder",
+        url: "/sampling",
+        icon: Wrench,
+      },
+      {
+        title: "Canvas",
+        url: "/canvas",
+        icon: Palette,
+      },
+      {
+        title: "Pipelines",
+        url: "/pipelines",
+        icon: Share2,
+        badge: "New"
+      },
+    ];
 
   return (
     <Sidebar className="border-r border-border">

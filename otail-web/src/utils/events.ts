@@ -7,15 +7,6 @@ export const trackAuth = {
   logout: () => trackEvent('auth_logout')
 }
 
-// Recipe Events
-export const trackRecipe = {
-  create: (name: string) => trackEvent('recipe_created', { name }),
-  delete: (name: string) => trackEvent('recipe_deleted', { name }),
-  apply: (name: string) => trackEvent('recipe_applied', { name }),
-  pin: (name: string) => trackEvent('recipe_pinned', { name }),
-  unpin: (name: string) => trackEvent('recipe_unpinned', { name })
-}
-
 // Policy Events
 export const trackPolicy = {
   create: (policyType: string) => trackEvent('policy_created', { type: policyType }),
@@ -55,7 +46,7 @@ export const trackSampling = {
     trackEvent('sampling_config_changed', { type: changeType }),
   simulationRun: () => trackEvent('sampling_simulation_run'),
   policyBuilderAction: (
-    action: 'add' | 'update' | 'remove' | 'add_popular_recipe' | 'add_recipe' | 'import_config_set' | 'save_config',
+    action: 'add' | 'update' | 'remove' | 'import_config_set' | 'save_config',
     policyType: string
   ) => trackEvent('sampling_policy_builder_action', { action, policyType })
 } 

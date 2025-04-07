@@ -124,10 +124,3 @@ export interface BasePolicy {
     | SpanCountPolicy
     | TraceStatePolicy
     | AndPolicy;
-  
-  export interface Recipe {
-    id: string;
-    name: string;
-    policies: Policy[];
-    createdAt: string;
-  }

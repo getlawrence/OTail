@@ -1,15 +1,15 @@
 import * as Sentry from "@sentry/react";
 import { analyticsManager } from './analytics';
-const { PROD, VITE_SENTRY_DSN } = import.meta.env
+import { config } from '@/config';
 
 // Register Sentry callback
 analyticsManager.onToggle((enabled) => {
-    if (PROD) {
+    if (config.PROD) {
         if (enabled) {
             Sentry.init({
-                dsn: VITE_SENTRY_DSN,
+                dsn: config.sentryDsn,
                 tracesSampleRate: 1.0,
-                environment: import.meta.env.MODE,
+                environment: config.MODE,
             });
         } else {
             Sentry.close();
@@ -18,11 +18,11 @@ analyticsManager.onToggle((enabled) => {
 });
 
 export function initSentry() {
-    if (PROD && analyticsManager.isEnabled()) {
+    if (config.PROD && analyticsManager.isEnabled()) {
         Sentry.init({
-            dsn: VITE_SENTRY_DSN,
+            dsn: config.sentryDsn,
             tracesSampleRate: 1.0,
-            environment: import.meta.env.MODE,
+            environment: config.MODE,
         });
     }
 }
@@ -31,9 +31,9 @@ export function initSentry() {
 export function toggleSentry(enabled: boolean) {
     if (enabled) {
         Sentry.init({
-            dsn: VITE_SENTRY_DSN,
+            dsn: config.sentryDsn,
             tracesSampleRate: 1.0,
-            environment: import.meta.env.MODE,
+            environment: config.MODE,
         });
     } else {
         Sentry.close();

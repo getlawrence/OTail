@@ -1,3 +1,5 @@
+import { config } from '@/config';
+
 interface RequestOptions extends RequestInit {
     requiresAuth?: boolean;
     requiresOrg?: boolean;
@@ -14,7 +16,7 @@ class ApiClient {
     private baseUrl: string;
 
     constructor() {
-        this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+        this.baseUrl = config.apiBaseUrl;
     }
 
     private getAuthHeaders(): HeadersInit {

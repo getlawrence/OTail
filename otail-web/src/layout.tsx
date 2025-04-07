@@ -9,6 +9,7 @@ import {
 import { trackNavigation } from './utils/events';
 import { useEffect } from 'react';
 import { ActivePipelineBanner } from '@/components/config/ActivePipelineBanner';
+import { config } from '@/config';
 
 export default function Layout() {
   const location = useLocation();
@@ -19,7 +20,7 @@ export default function Layout() {
 
   return (
     <SidebarProvider className="flex h-screen w-screen overflow-hidden">
-      <AppSidebar />
+      <AppSidebar noBackend={config.noBackend} />
       <SidebarInset className="flex-1">
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
