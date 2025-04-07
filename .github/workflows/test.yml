@@ -34,6 +34,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        working-directory: otail-web/
 
       - name: Run E2E tests
         run: pnpm test:e2e
+        working-directory: otail-web/
