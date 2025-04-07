@@ -10,7 +10,7 @@ const StoryChecklistProvider: React.FC<{
   initialCompletedSteps?: Set<number>;
 }> = ({ children, initialMinimized = false, initialCompletedSteps = new Set() }) => {
   const [isMinimized, setIsMinimized] = useState(initialMinimized);
-  const [completedSteps, setCompletedSteps] = useState(initialCompletedSteps);
+  const [completedSteps] = useState(initialCompletedSteps);
   const [currentStep, setCurrentStep] = useState(0);
 
   const toggleMinimize = () => setIsMinimized(prev => !prev);
