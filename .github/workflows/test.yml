@@ -32,9 +32,23 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Check for lockfile
+        id: check-lockfile
+        run: |
+          if [ -f "otail-web/pnpm-lock.yaml" ]; then
+            echo "lockfile=true" >> $GITHUB_OUTPUT
+          else
+            echo "lockfile=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        working-directory: otail-web/
+        run: |
+          cd otail-web/
+          if [ "${{ steps.check-lockfile.outputs.lockfile }}" == "true" ]; then
+            pnpm install --frozen-lockfile
+          else
+            pnpm install
+          fi
 
       - name: Run E2E tests
         run: pnpm test:e2e
