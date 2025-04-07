@@ -27,7 +27,14 @@ const preview: Preview = {
   },
   decorators: [
     (Story) => (
-      <div className="p-4">
+      <div 
+        className="p-4" 
+        style={{ 
+          height: '100vh', 
+          width: '100%',
+          backgroundColor: '#f5f5f5'
+        }}
+      >
         <Story />
       </div>
     ),
