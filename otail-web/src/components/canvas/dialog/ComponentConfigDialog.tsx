@@ -30,7 +30,7 @@ export const ComponentConfigDialog = ({
   const [config, setConfig] = useState<Record<string, any>>(node.data.config || {});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const componentName = node.data.label.toLowerCase();
+  const [componentName] = node.data.label.toLowerCase().split('/');
   const componentType = node.data.type;
   const schema = componentSchemas[componentType][componentName];
   const isTailSampling = componentType === 'tail_sampling';

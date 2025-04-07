@@ -68,6 +68,7 @@ export function usePipelineManager({
               },
               data: {
                 label,
+                type,
                 config: config[type][label] || {},
                 pipelineType,
               },

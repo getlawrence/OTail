@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Recipe } from '@/types/policy';
 import { PREDEFINED_RECIPES } from '@/data/predefined-recipes';
-import { trackRecipe } from '@/utils/analytics';
+import { trackRecipe } from '@/utils/events';
 
 const RECIPES_KEY = 'recipes';
 const PINNED_RECIPES_KEY = 'pinned_recipes';
