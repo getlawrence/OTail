@@ -6,7 +6,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { trackNavigation } from './utils/analytics';
+import { trackNavigation } from './utils/events';
 import { useEffect } from 'react';
 import { ActivePipelineBanner } from '@/components/config/ActivePipelineBanner';
 

@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Pin } from 'lucide-react';
 import { Policy, Recipe } from '@/types/policy'
 import { useRecipes } from '@/contexts/recipes-context';
-import { trackRecipe } from '../../utils/analytics';
+import { trackRecipe } from '../../utils/events';
 import { PinnedRecipes } from './pinned-recipes'
 
 interface RecipeManagerProps {

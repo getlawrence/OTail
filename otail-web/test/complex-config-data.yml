@@ -24,7 +24,7 @@ receivers:
   filelog:
 
 processors:
-  batch:
+  batch/test:
     send_batch_size: 1000
     timeout: 10s
 
@@ -95,15 +95,15 @@ service:
   pipelines:
     traces:
       receivers: [otlp, jaeger]
-      processors: [memory_limiter, batch, resource, attributes]
+      processors: [memory_limiter, batch/test, resource, attributes]
       exporters: [otlp, jaeger, logging, spanmetrics]
     
     metrics:
       receivers: [otlp, prometheus, sqlquery, spanmetrics]
-      processors: [memory_limiter, batch, filter, resource]
+      processors: [memory_limiter, batch/test, filter, resource]
       exporters: [otlp, prometheus, logging]
     
     logs:
       receivers: [otlp, filelog]
-      processors: [memory_limiter, batch, resource]
+      processors: [memory_limiter, batch/test, resource]
       exporters: [otlp, file, logging]

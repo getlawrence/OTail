@@ -13,7 +13,7 @@ import { SimulationViewer } from '@/components/simulation/simulation-viewer'
 import { PolicyBuilder } from '@/components/policy/policy-builder'
 import { Policy, PolicyType } from '@/types/policy'
 import { useConfigState } from '@/hooks/use-config-state';
-import { trackSampling } from '@/utils/analytics';
+import { trackSampling } from '@/utils/events';
 import { MoreHorizontal, Pencil, PlayCircle } from "lucide-react";
 import { PipelineActions } from '@/components/config/PipelineActions';
 import { toEmptyCollectorConfig } from './utils';

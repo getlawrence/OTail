@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
-import { trackAuth } from '../../utils/analytics';
+import { trackAuth } from '../../utils/events';
 
 export default function Login() {
   const [email, setEmail] = useState('');
