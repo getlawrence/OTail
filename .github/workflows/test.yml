@@ -1,0 +1,47 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      clickhouse:
+        image: clickhouse/clickhouse-server
+        ports:
+          - 9000:9000
+        env:
+          CLICKHOUSE_DB: test
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: ""
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: |
+          npm run test
+          npm run test:coverage
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: true 
