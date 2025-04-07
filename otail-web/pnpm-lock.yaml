@@ -153,6 +153,9 @@ importers:
       '@storybook/addon-links':
         specifier: ^8.0.0
         version: 8.6.12(react@18.3.1)(storybook@8.6.12)
+      '@storybook/addon-onboarding':
+        specifier: ^8.6.12
+        version: 8.6.12(storybook@8.6.12)
       '@storybook/blocks':
         specifier: ^8.0.0
         version: 8.6.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.12)
@@ -201,6 +204,9 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.14
         version: 0.4.19(eslint@9.24.0(jiti@1.21.7))
+      eslint-plugin-storybook:
+        specifier: ^0.12.0
+        version: 0.12.0(eslint@9.24.0(jiti@1.21.7))(typescript@5.6.3)
       globals:
         specifier: ^15.12.0
         version: 15.15.0
@@ -216,6 +222,9 @@ importers:
       postcss:
         specifier: ^8.4.49
         version: 8.5.3
+      storybook:
+        specifier: ^8.6.12
+        version: 8.6.12
       tailwindcss:
         specifier: ^3.4.16
         version: 3.4.17
@@ -1616,6 +1625,11 @@ packages:
     peerDependencies:
       storybook: ^8.6.12
 
+  '@storybook/addon-onboarding@8.6.12':
+    resolution: {integrity: sha512-/cgxaLy6tr6xO0+QO+qV5rPZS5/c15Daywvg/F03lifLGkMuyn/JDuhu0J5i1LbFsL1RYdf4sjrTOmLXbOT6+Q==}
+    peerDependencies:
+      storybook: ^8.6.12
+
   '@storybook/addon-outline@8.6.12':
     resolution: {integrity: sha512-1ylwm+n1s40S91No0v9T4tCjZORu3GbnjINlyjYTDLLhQHyBQd3nWR1Y1eewU4xH4cW9SnSLcMQFS/82xHqU6A==}
     peerDependencies:
@@ -1666,6 +1680,9 @@ packages:
     resolution: {integrity: sha512-6s8CnP1aoKPb3XtC0jRLUp8M5vTA8RhGAwQDKUsFpCC7g89JR9CaKs9FY2ZSzsNbjR15uASi7b3K8BzeYumYQg==}
     peerDependencies:
       storybook: ^8.6.12
+
+  '@storybook/csf@0.1.13':
+    resolution: {integrity: sha512-7xOOwCLGB3ebM87eemep89MYRFTko+D8qE7EdAAq74lgdqRR5cOUtYWJLjO2dLtP94nqoOdHJo6MdLLKzg412Q==}
 
   '@storybook/global@5.0.0':
     resolution: {integrity: sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==}
@@ -2698,6 +2715,12 @@ packages:
     resolution: {integrity: sha512-eyy8pcr/YxSYjBoqIFSrlbn9i/xvxUFa8CjzAYo9cFjgGXqq1hyjihcpZvxRLalpaWmueWR81xn7vuKmAFijDQ==}
     peerDependencies:
       eslint: '>=8.40'
+
+  eslint-plugin-storybook@0.12.0:
+    resolution: {integrity: sha512-Lg5I0+npTgiYgZ4KSvGWGDFZi3eOCNJPaWX0c9rTEEXC5wvooOClsP9ZtbI4hhFKyKgYR877KiJxbRTSJq9gWA==}
+    engines: {node: '>= 18'}
+    peerDependencies:
+      eslint: '>=8'
 
   eslint-scope@8.3.0:
     resolution: {integrity: sha512-pUNxi75F8MJ/GdeKtVLSbYg4ZI34J6C0C7sbL4YOp2exGwen7ZsuBqKzUhXd0qMQ362yET3z+uPwKeg/0C2XCQ==}
@@ -4147,6 +4170,10 @@ packages:
   type-fest@0.21.3:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
+
+  type-fest@2.19.0:
+    resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
+    engines: {node: '>=12.20'}
 
   type-fest@4.39.1:
     resolution: {integrity: sha512-uW9qzd66uyHYxwyVBYiwS4Oi0qZyUqwjU+Oevr6ZogYiXt99EOYtwvzMSLw1c3lYo2HzJsep/NB23iEVEgjG/w==}
@@ -5921,6 +5948,10 @@ snapshots:
       storybook: 8.6.12
       tiny-invariant: 1.3.3
 
+  '@storybook/addon-onboarding@8.6.12(storybook@8.6.12)':
+    dependencies:
+      storybook: 8.6.12
+
   '@storybook/addon-outline@8.6.12(storybook@8.6.12)':
     dependencies:
       '@storybook/global': 5.0.0
@@ -5980,6 +6011,10 @@ snapshots:
     dependencies:
       storybook: 8.6.12
       unplugin: 1.16.1
+
+  '@storybook/csf@0.1.13':
+    dependencies:
+      type-fest: 2.19.0
 
   '@storybook/global@5.0.0': {}
 
@@ -7056,6 +7091,16 @@ snapshots:
   eslint-plugin-react-refresh@0.4.19(eslint@9.24.0(jiti@1.21.7)):
     dependencies:
       eslint: 9.24.0(jiti@1.21.7)
+
+  eslint-plugin-storybook@0.12.0(eslint@9.24.0(jiti@1.21.7))(typescript@5.6.3):
+    dependencies:
+      '@storybook/csf': 0.1.13
+      '@typescript-eslint/utils': 8.29.0(eslint@9.24.0(jiti@1.21.7))(typescript@5.6.3)
+      eslint: 9.24.0(jiti@1.21.7)
+      ts-dedent: 2.2.0
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
 
   eslint-scope@8.3.0:
     dependencies:
@@ -8711,6 +8756,8 @@ snapshots:
   type-detect@4.0.8: {}
 
   type-fest@0.21.3: {}
+
+  type-fest@2.19.0: {}
 
   type-fest@4.39.1: {}
 
