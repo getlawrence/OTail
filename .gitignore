@@ -268,3 +268,5 @@ vendor/
 # Build output
 dist/
 build/
+
+storybook-static

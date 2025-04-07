@@ -1,7 +1,7 @@
 import { Telescope, LogOut, Users, Wrench, Palette, Share2 } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { AnalyticsToggle } from "@/components/layout/analytics-toggle"
-import { Checklist } from "@/components/Checklist"
+import { Checklist } from "@/components/checklist/Checklist"
 import {
   Sidebar,
   SidebarContent,
@@ -126,7 +126,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <div className="px-4 pb-4 border-border">
-          <Checklist />
+          <Checklist/>
         </div>
 
         <div className="mt-auto border-t border-border">

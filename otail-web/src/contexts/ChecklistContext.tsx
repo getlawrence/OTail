@@ -9,7 +9,7 @@ interface ChecklistContextType {
     completedSteps: Set<number>;
 }
 
-const ChecklistContext = createContext<ChecklistContextType | undefined>(undefined);
+export const ChecklistContext = createContext<ChecklistContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'checklist_state';
 
