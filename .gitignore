@@ -269,4 +269,6 @@ vendor/
 dist/
 build/
 
-storybook-static
+storybook-static/
+test-results/
+playwright-report/

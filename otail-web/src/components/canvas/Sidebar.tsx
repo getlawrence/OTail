@@ -398,6 +398,7 @@ export const Sidebar = () => {
                         onDragEnd={onDragEnd}
                         onMouseEnter={() => setHoveredItem({ type: activeType, name })}
                         onMouseLeave={() => setHoveredItem(null)}
+                        data-id={`${activeType}-${name}`}
                       >
                         <div className="flex items-center gap-3">
                           <div className={`flex items-center justify-center h-6 w-6 rounded-full ${typeColor(activeType).icon} shrink-0`}>
