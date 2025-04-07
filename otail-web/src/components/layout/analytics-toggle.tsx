@@ -1,6 +1,6 @@
 import { BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { toggleAnalytics, isAnalyticsEnabled } from "@/utils/posthog"
+import { toggleAnalytics } from "@/utils/analytics"
 import { useState, useEffect } from "react"
 import {
   Tooltip,
@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { isAnalyticsEnabled } from "@/utils/analytics"
 
 export function AnalyticsToggle() {
   const [enabled, setEnabled] = useState(true)
