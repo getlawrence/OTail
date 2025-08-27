@@ -1,5 +1,6 @@
 export type Agent = {
     InstanceId: string;
+    StartedAt?: string;
     status: "pending" | "processing" | "success" | "failed";
     Status: {
         health: {

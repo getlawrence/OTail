@@ -48,7 +48,7 @@ export default function AgentGroupsPage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Agent Groups</h1>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
@@ -74,6 +74,6 @@ export default function AgentGroupsPage() {
         onOpenChange={setIsCreateDialogOpen}
         onCreate={handleCreateGroup}
       />
-    </div>
+    </>
   );
 } 

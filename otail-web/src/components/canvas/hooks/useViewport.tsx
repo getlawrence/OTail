@@ -24,14 +24,8 @@ export function useViewport(): ViewportInfo {
     const availableWidth = width - sidebarWidth - (margin * 2);
     const availableHeight = height - headerHeight - (margin * 2);
     
-    let layoutStrategy: 'horizontal' | 'vertical' | 'grid';
-    if (availableWidth >= LAYOUT_CONFIG.BREAKPOINTS.DESKTOP) {
-      layoutStrategy = 'horizontal';
-    } else if (availableWidth >= LAYOUT_CONFIG.BREAKPOINTS.TABLET) {
-      layoutStrategy = 'grid';
-    } else {
-      layoutStrategy = 'vertical';
-    }
+    // Always use vertical layout for row-based pipeline design
+    const layoutStrategy: 'horizontal' | 'vertical' | 'grid' = 'vertical';
     
     return {
       width,
@@ -56,14 +50,8 @@ export function useViewport(): ViewportInfo {
     const availableWidth = width - sidebarWidth - (margin * 2);
     const availableHeight = height - headerHeight - (margin * 2);
     
-    let layoutStrategy: 'horizontal' | 'vertical' | 'grid';
-    if (availableWidth >= LAYOUT_CONFIG.BREAKPOINTS.DESKTOP) {
-      layoutStrategy = 'horizontal';
-    } else if (availableWidth >= LAYOUT_CONFIG.BREAKPOINTS.TABLET) {
-      layoutStrategy = 'grid';
-    } else {
-      layoutStrategy = 'vertical';
-    }
+    // Always use vertical layout for row-based pipeline design
+    const layoutStrategy: 'horizontal' | 'vertical' | 'grid' = 'vertical';
     
     setViewportInfo({
       width,

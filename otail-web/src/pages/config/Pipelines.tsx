@@ -158,7 +158,7 @@ export default function PipelinesPage() {
   );
 
   return (
-    <div className="container mx-auto py-6">
+    <>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Pipelines</h1>
         <Button onClick={() => setIsFormDialogOpen(true)}>
@@ -307,6 +307,6 @@ export default function PipelinesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 } 

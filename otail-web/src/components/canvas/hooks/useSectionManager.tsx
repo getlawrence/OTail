@@ -27,98 +27,39 @@ export function useSectionManager({
 
   // Create section nodes - always create all sections
   const createSectionNodes = useCallback(() => {
-    const { availableWidth, availableHeight, layoutStrategy } = viewport;
+    const { availableWidth, availableHeight } = viewport;
     
     // Determine layout strategy based on available space
     const sectionCount = Object.keys(PIPELINE_SECTIONS).length;
     
-    // Calculate section dimensions based on layout strategy
+    // Calculate section dimensions - use vertical stacking for pipeline flow
     let sectionWidth: number;
     let sectionHeight: number;
-    let gapBetweenSections: number;
     
-    switch (layoutStrategy) {
-      case 'horizontal':
-        // For horizontal layout, we want each section to have enough width for long pipelines
-        // but we'll still arrange them side by side if there's enough space
-        if (availableWidth >= sectionCount * 600) {
-          // Enough space for each section to be at least 600px wide
-          sectionWidth = Math.max(600, availableWidth / sectionCount - LAYOUT_CONFIG.MARGIN);
-          sectionHeight = Math.max(LAYOUT_CONFIG.SECTION_MIN_HEIGHT, availableHeight - (LAYOUT_CONFIG.MARGIN * 2));
-          gapBetweenSections = LAYOUT_CONFIG.SECTION_GAP;
-        } else {
-          // Not enough space for side-by-side, fall back to vertical stacking
-          sectionWidth = Math.max(LAYOUT_CONFIG.SECTION_MIN_WIDTH * 2, availableWidth - (LAYOUT_CONFIG.MARGIN * 2));
-          sectionHeight = Math.max(LAYOUT_CONFIG.SECTION_MIN_HEIGHT, (availableHeight - (LAYOUT_CONFIG.MARGIN * 2)) / sectionCount);
-          gapBetweenSections = LAYOUT_CONFIG.SECTION_GAP;
-        }
-        break;
-      case 'grid':
-        // For grid layout, ensure sections are wide enough for pipelines
-        const columns = 2;
-        const rows = Math.ceil(sectionCount / columns);
-        sectionWidth = Math.max(500, (availableWidth - LAYOUT_CONFIG.MARGIN) / columns); // Min 500px for pipelines
-        sectionHeight = Math.max(LAYOUT_CONFIG.SECTION_MIN_HEIGHT, (availableHeight - LAYOUT_CONFIG.MARGIN) / rows);
-        gapBetweenSections = LAYOUT_CONFIG.SECTION_GAP;
-        break;
-      case 'vertical':
-      default:
-        // For vertical layout, maximize width for long pipelines
-        sectionWidth = Math.max(LAYOUT_CONFIG.SECTION_MIN_WIDTH * 3, availableWidth - (LAYOUT_CONFIG.MARGIN * 2));
-        sectionHeight = Math.max(LAYOUT_CONFIG.SECTION_MIN_HEIGHT, (availableHeight - (LAYOUT_CONFIG.MARGIN * 2)) / sectionCount);
-        gapBetweenSections = LAYOUT_CONFIG.SECTION_GAP;
-        break;
-    }
+    // Maximize width for better pipeline visualization while keeping vertical flow
+    sectionWidth = Math.max(
+      LAYOUT_CONFIG.SECTION_MIN_WIDTH, 
+      availableWidth - (LAYOUT_CONFIG.MARGIN * 2)
+    );
     
-    // Calculate positions for each section based on layout strategy
+    // Distribute height more efficiently among sections
+    sectionHeight = Math.max(
+      LAYOUT_CONFIG.SECTION_MIN_HEIGHT,
+      (availableHeight - (LAYOUT_CONFIG.MARGIN * (sectionCount + 1))) / sectionCount
+    );
+    
+    // Calculate positions for each section - vertical stacking for pipeline flow
     const sectionTypes = Object.keys(PIPELINE_SECTIONS) as SectionType[];
     
     const positions: Record<SectionType, { x: number, y: number }> = {} as Record<SectionType, { x: number, y: number }>;
     
-    switch (layoutStrategy) {
-      case 'horizontal':
-        if (availableWidth >= sectionCount * 600) {
-          // Side by side horizontal layout
-          sectionTypes.forEach((type, index) => {
-            positions[type] = {
-              x: LAYOUT_CONFIG.SIDEBAR_WIDTH + LAYOUT_CONFIG.MARGIN + (index * (sectionWidth + gapBetweenSections)),
-              y: LAYOUT_CONFIG.HEADER_HEIGHT + LAYOUT_CONFIG.MARGIN
-            };
-          });
-        } else {
-          // Vertical stacking when not enough horizontal space
-          sectionTypes.forEach((type, index) => {
-            positions[type] = {
-              x: LAYOUT_CONFIG.SIDEBAR_WIDTH + LAYOUT_CONFIG.MARGIN,
-              y: LAYOUT_CONFIG.HEADER_HEIGHT + LAYOUT_CONFIG.MARGIN + (index * (sectionHeight + gapBetweenSections))
-            };
-          });
-        }
-        break;
-        
-      case 'grid':
-        // Position sections in a 2x2 grid, ensuring good width for pipelines
-        sectionTypes.forEach((type, index) => {
-          const row = Math.floor(index / 2);
-          const col = index % 2;
-          positions[type] = {
-            x: LAYOUT_CONFIG.SIDEBAR_WIDTH + LAYOUT_CONFIG.MARGIN + (col * (sectionWidth + gapBetweenSections)),
-            y: LAYOUT_CONFIG.HEADER_HEIGHT + LAYOUT_CONFIG.MARGIN + (row * (sectionHeight + gapBetweenSections))
-          };
-        });
-        break;
-        
-      case 'vertical':
-      default:
-        // Position sections vertically stacked, maximizing width for pipelines
-        sectionTypes.forEach((type, index) => {
-          positions[type] = {
-            x: LAYOUT_CONFIG.SIDEBAR_WIDTH + LAYOUT_CONFIG.MARGIN,
-            y: LAYOUT_CONFIG.HEADER_HEIGHT + LAYOUT_CONFIG.MARGIN + (index * (sectionHeight + gapBetweenSections))
-          };
-        });
-        break;
-    }
+    // Each section gets its own row, positioned vertically for pipeline flow
+    sectionTypes.forEach((type, index) => {
+      positions[type] = {
+        x: LAYOUT_CONFIG.SIDEBAR_WIDTH + LAYOUT_CONFIG.MARGIN,
+        y: LAYOUT_CONFIG.HEADER_HEIGHT + LAYOUT_CONFIG.MARGIN + (index * (sectionHeight + LAYOUT_CONFIG.MARGIN))
+      };
+    });
 
     // Create section nodes
     const sectionNodes: Node[] = Object.keys(PIPELINE_SECTIONS).map((type, index) => {
@@ -160,11 +101,11 @@ export function useSectionManager({
       } as Node;
     });
 
-    console.log('Created section nodes with layout strategy:', layoutStrategy, 'section width:', sectionWidth, 'section height:', sectionHeight);
+    console.log('Created section nodes with optimized vertical layout - each section gets its own row with better space utilization. Section dimensions:', sectionWidth, 'x', sectionHeight);
     return sectionNodes;
   }, [fullScreenSection, collapsedSections, onToggleExpand, onToggleCollapse, viewport]);
 
-  // Update sections when viewport changes
+  // Update sections when viewport changes (but layout is always vertical)
   useEffect(() => {
     const updatedSectionNodes = createSectionNodes();
     setNodes(prevNodes => {
@@ -172,7 +113,7 @@ export function useSectionManager({
       const nonSectionNodes = prevNodes.filter(node => node.type !== 'section');
       return [...nonSectionNodes, ...updatedSectionNodes];
     });
-  }, [createSectionNodes, setNodes, viewport.layoutStrategy]);
+  }, [createSectionNodes, setNodes, viewport.width, viewport.height]);
 
   // Function to determine which section a position belongs to
   const determineSection = useCallback((x: number, y: number): SectionType => {

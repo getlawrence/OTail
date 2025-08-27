@@ -360,8 +360,8 @@ function PipelinesDashboard() {
 
 export default function Dashboard() {
   return (
-    <div className="container mx-auto py-6">
+    <>
       {noBackend ? <PipelinesDashboard /> : <DeploymentsDashboard />}
-    </div>
+    </>
   );
 } 

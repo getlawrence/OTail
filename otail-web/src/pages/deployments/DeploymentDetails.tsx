@@ -35,22 +35,18 @@ export default function DeploymentDetails() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-6">
-        <div className="text-center">Loading...</div>
-      </div>
+      <div className="text-center">Loading...</div>
     );
   }
 
   if (!deployment) {
     return (
-      <div className="container mx-auto py-6">
-        <div className="text-center text-muted-foreground">Deployment not found</div>
-      </div>
+      <div className="text-center text-muted-foreground">Deployment not found</div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">{deployment.name}</h1>
@@ -130,6 +126,6 @@ export default function DeploymentDetails() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </>
   );
 } 

@@ -2,8 +2,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import Layout from './layout'
 import Sampling from './pages/sampling'
 import { CanvasPage } from './pages/canvas'
+import AgentConfigPage from './pages/canvas/agent-config'
 import Pipelines from './pages/config/Pipelines'
 import Agents from './pages/agents'
+import AgentDetails from './pages/agents/AgentDetails'
 import Login from './pages/auth/login'
 import Register from './pages/auth/register'
 import Organization from './pages/organization'
@@ -66,6 +68,8 @@ function App() {
                     <Route path="/sampling" element={<Sampling />} />
                     <Route path="/canvas" element={<CanvasPage />} />
                     <Route path="/agents" element={<Agents />} />
+                    <Route path="/agents/:agentId" element={<AgentDetails />} />
+                    <Route path="/agents/:agentId/config" element={<AgentConfigPage />} />
                     <Route path="/organization" element={<Organization />} />
                     <Route path="/deployments" element={<Deployments />} />
                     <Route path="/deployments/:id" element={<DeploymentDetails />} />

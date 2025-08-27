@@ -1,10 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { useActivePipeline } from '@/hooks/use-active-pipeline';
+import { useLocation } from 'react-router-dom';
 
 export function ActivePipelineBanner() {
   const { activePipeline, clearActive } = useActivePipeline();
+  const location = useLocation();
 
-  if (!activePipeline) {
+  // Don't show pipeline banner when on agent config page
+  if (!activePipeline || location.pathname.match(/^\/agents\/([^\/]+)\/config$/)) {
     return null;
   }
 

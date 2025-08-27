@@ -1,17 +1,28 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import OtelConfigCanvas from '@/components/canvas/OtelConfigCanvas';
 import Editor, { OnChange } from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { createDebounce } from '@/lib/utils'; 
 import { Eye, EyeOff, Send, RefreshCw } from 'lucide-react'; 
 import { PipelineActions } from '@/components/config/PipelineActions';
+import { agentsApi } from '@/api/agent';
+import type { Agent } from '@/api/types';
+import { useToast } from '@/hooks/use-toast';
 
-interface CanvasPageProps {
+interface AgentConfigPageProps {
   config?: string;
-  onUpdate?: (value: string) => void
 }
 
-export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
+export const AgentConfigPage = ({ config }: AgentConfigPageProps) => {
+  const { agentId } = useParams<{ agentId: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Agent state
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [loading, setLoading] = useState(true);
+  
   // Main YAML state that drives both the editor and canvas
   const [yaml, setYaml] = useState<string>(() => config || '');
   
@@ -36,6 +47,46 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
   
   // Timeout reference for sync indicator
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Load agent data
+  useEffect(() => {
+    if (agentId) {
+      loadAgent();
+    }
+  }, [agentId]);
+  
+  const loadAgent = async () => {
+    try {
+      setLoading(true);
+      const agents = await agentsApi.list();
+      const foundAgent = agents.find(a => a.InstanceId === agentId);
+      if (foundAgent) {
+        setAgent(foundAgent);
+        // Set initial config if available
+        if (foundAgent.EffectiveConfig) {
+          setYaml(foundAgent.EffectiveConfig);
+          setEditorValue(foundAgent.EffectiveConfig);
+          initialYamlRef.current = foundAgent.EffectiveConfig;
+        }
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Agent not found',
+          variant: 'destructive',
+        });
+        navigate('/agents');
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load agent',
+        variant: 'destructive',
+      });
+      navigate('/agents');
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Apply editor changes to canvas after delay
   const applyEditorChanges = useCallback(
@@ -101,6 +152,24 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
     });
   };
 
+  const handleUpdateConfig = async () => {
+    if (!agent || !editorValue) return;
+    
+    try {
+      await agentsApi.updateConfig(agent.InstanceId, editorValue);
+      toast({
+        title: 'Success',
+        description: 'Configuration updated successfully',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update configuration',
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Cleanup debounced function and timeouts
   useEffect(() => {
     return () => {
@@ -111,10 +180,28 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
     };
   }, [applyEditorChanges]);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center gap-2">
+          <RefreshCw className="w-4 h-4 animate-spin" />
+          <span>Loading agent...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!agent) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] gap-3 p-3">
+      {/* Page Title and Actions */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Canvas</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Agent Configuration</h1>
+        </div>
         <div className="flex space-x-2 items-center">
           {isSyncing && !viewYaml && (
             <div className="flex items-center text-yellow-500 mr-2">
@@ -123,9 +210,9 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
             </div>
           )}
           <PipelineActions
-              getCurrentState={() => editorValue}
-              onImport={handleConfigImport}
-            />
+            getCurrentState={() => editorValue}
+            onImport={handleConfigImport}
+          />
           <Button 
             onClick={() => setViewYaml(!viewYaml)} 
             variant="outline" 
@@ -134,16 +221,15 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
             {viewYaml ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             {viewYaml ? 'Hide YAML' : 'Show YAML'}
           </Button>
-          {config && (
-            <Button 
-              onClick={() => onUpdate?.(editorValue)} 
-              className="flex items-center gap-2 send-button"
-            >
-              <Send className="w-4 h-4" /> Send to Agent
-            </Button>
-          )}
+          <Button 
+            onClick={handleUpdateConfig} 
+            className="flex items-center gap-2 send-button"
+          >
+            <Send className="w-4 h-4" /> Update Agent
+          </Button>
         </div>
       </div>
+      
       <div className={`grid ${viewYaml ? 'grid-cols-2' : 'grid-cols-1'} gap-3 flex-grow min-h-0`}>
         <div className="canvas-container min-h-0">
           <OtelConfigCanvas
@@ -176,4 +262,4 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
   );
 }
 
-export default CanvasPage;
+export default AgentConfigPage;

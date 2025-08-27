@@ -217,11 +217,11 @@ export default function Deployments() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Deployments</h1>
-          <p className="text-muted-foreground">Manage your OpenTelemetry deployments and agent groups</p>
+          <p className="text-muted-foreground">Manage your OpenTelemetry deployments</p>
         </div>
         <Button onClick={() => setIsDeploymentFormOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" /> New Deployment
@@ -380,6 +380,6 @@ export default function Deployments() {
           />
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 } 
