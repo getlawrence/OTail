@@ -92,7 +92,7 @@ export function AppSidebar({ noBackend = false }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="border-b border-border h-16 flex items-center justify-center relative">
+      <SidebarHeader className="border-b border-border h-14 flex items-center justify-center relative">
         <SidebarMenu>
           <SidebarMenuItem>
             {state === "collapsed" ? (
@@ -159,6 +159,34 @@ export function AppSidebar({ noBackend = false }: AppSidebarProps) {
 
         <div className="px-4 pb-4 border-border">
           <Checklist mode={state === "expanded" ? "full" : "compact"} />
+        </div>
+
+        {/* Lawrence attribution */}
+        <div className="px-4 pb-2">
+          <a
+            href="https://getlawrence.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "flex items-center justify-center transition-opacity hover:opacity-80",
+              state === "expanded" ? "gap-2" : "justify-center"
+            )}
+            title="Brought to you by Lawrence"
+          >
+            <img 
+              src="/lawrence.svg" 
+              alt="Lawrence" 
+              className={cn(
+                "transition-all",
+                state === "expanded" ? "w-5 h-5" : "w-4 h-4"
+              )}
+            />
+            {state === "expanded" && (
+              <span className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                Brought to you by Lawrence
+              </span>
+            )}
+          </a>
         </div>
 
         <div className="mt-auto border-t border-border">
