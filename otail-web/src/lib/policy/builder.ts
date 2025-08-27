@@ -1,5 +1,6 @@
 import { AlwaysSampleEvaluator } from "../evaluators/AlwaysSample";
 import { AndEvaluator } from "../evaluators/And";
+import { DropEvaluator } from "../evaluators/Drop";
 import { PolicyEvaluator } from "../evaluators/BaseEvaluator";
 import { BooleanAttributeFilterEvaluator } from "../evaluators/BooleanAttributeFilter";
 import { CompositeEvaluator } from "../evaluators/Composite";
@@ -11,7 +12,7 @@ import { StatusCodeFilterEvaluator } from "../evaluators/StatusCodeFilter";
 import { StringAttributeEvaluator } from "../evaluators/StringAttribute";
 import { ProbabilisticEvaluator } from "../evaluators/Probabilistic";
 import { OttlEvaluator } from "../evaluators/Ottl";
-import { AndPolicy, CompositePolicy, Policy } from "@/types/policy";
+import { AndPolicy, CompositePolicy, Policy, DropPolicy } from "@/types/policy";
 import { TraceStateEvaluator } from "../evaluators/TraceState";
 
 const getSharedPolicyEvaluator = (policy: Policy): PolicyEvaluator => {
@@ -38,6 +39,8 @@ const getSharedPolicyEvaluator = (policy: Policy): PolicyEvaluator => {
             return new OttlEvaluator(policy.name, policy.errorMode || 'ignore', policy.spanConditions || [], policy.spanEventConditions || []);
         case 'and':
             return getNewAndPolicy(policy);
+        case 'drop':
+            return getNewDropPolicy(policy);
         case 'composite':
             return getNewCompositePolicy(policy);
         default:
@@ -49,6 +52,11 @@ const getSharedPolicyEvaluator = (policy: Policy): PolicyEvaluator => {
 export const getNewAndPolicy = (policy: AndPolicy) => {
     const subPolicies = policy.subPolicies.map(getSharedPolicyEvaluator);
     return new AndEvaluator(policy.name, subPolicies);
+}
+
+const getNewDropPolicy = (policy: DropPolicy) => {
+    const subPolicies = policy.drop.drop_sub_policy.map(getSharedPolicyEvaluator);
+    return new DropEvaluator(policy.name, subPolicies);
 }
 
 const getNewCompositePolicy = (policy: CompositePolicy) => {
