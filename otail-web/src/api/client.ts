@@ -1,4 +1,7 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import { config } from '@/config';
+
+// RequestOptions interface removed as it's not currently used
 
 export interface ApiResponse<T> {
   data: T;
@@ -11,7 +14,7 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+      baseURL: config.apiBaseUrl,
       headers: {
         'Content-Type': 'application/json',
       },

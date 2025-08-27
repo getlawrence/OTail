@@ -5,6 +5,7 @@ export const POLICY_TYPES = [
   'and',
   'boolean_attribute',
   'composite',
+  'drop',
   'latency',
   'numeric_attribute',
   'ottl_condition',
@@ -108,6 +109,13 @@ export interface BasePolicy {
     type: 'and';
     subPolicies: Policy[];
   }
+
+  export interface DropPolicy extends BasePolicy {
+    type: 'drop';
+    drop: {
+      drop_sub_policy: Policy[];
+    };
+  }
   
   export type Policy = 
     | NumericTagPolicy 
@@ -123,11 +131,5 @@ export interface BasePolicy {
     | OttlPolicy
     | SpanCountPolicy
     | TraceStatePolicy
-    | AndPolicy;
-  
-  export interface Recipe {
-    id: string;
-    name: string;
-    policies: Policy[];
-    createdAt: string;
-  }
+    | AndPolicy
+    | DropPolicy;

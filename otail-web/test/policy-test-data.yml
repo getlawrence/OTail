@@ -115,3 +115,12 @@ tail_sampling:
       boolean_attribute:
         key: app.do_not_sample
         value: true
+    - name: drop-it-like-its-hot
+      type: drop
+      drop:
+        drop_sub_policy:
+          - name: do-not-sample
+            type: boolean_attribute
+            boolean_attribute:
+              key: app.do_not_sample
+              value: true

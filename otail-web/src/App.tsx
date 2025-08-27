@@ -17,8 +17,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { MobileWarning } from '@/components/MobileWarning'
 import { ActivePipelineProvider } from '@/hooks/use-active-pipeline'
 import { ChecklistProvider } from '@/contexts/ChecklistContext'
-
-const noBackend = import.meta.env.VITE_NO_BACKEND === 'true'
+import { config } from '@/config';
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -54,7 +53,7 @@ function App() {
                     <Register />
                   </div>
                 } />
-                {noBackend ? (
+                {config.noBackend ? (
                   <Route element={<Layout />}>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/sampling" element={<Sampling />} />

@@ -4,10 +4,28 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Circle, Minimize2, Maximize2, Trophy } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import Confetti from './Confetti';
-import { useNavigate, useLocation } from 'react-router-dom';
 
-const steps = [
+export interface ChecklistStep {
+    title: string;
+    description: string;
+    path: string;
+    targetComponent: string;
+}
+
+export interface ChecklistProps {
+    onStepClick?: (step: ChecklistStep) => void;
+    currentPath?: string;
+    mode?: 'full' | 'compact';
+}
+
+const defaultSteps: ChecklistStep[] = [
     {
         title: 'Create a new pipeline',
         description: 'Start by creating a new pipeline to manage your sampling policies',
@@ -28,14 +46,16 @@ const steps = [
     }
 ];
 
-export const Checklist: React.FC = () => {
+export const Checklist: React.FC<ChecklistProps> = ({ 
+    onStepClick,
+    currentPath = '/',
+    mode = 'full'
+}) => {
     const { currentStep, isMinimized, toggleMinimize, completedSteps } = useChecklist();
     const [showConfetti, setShowConfetti] = useState(false);
-    const navigate = useNavigate();
-    const location = useLocation();
 
-    const progress = (completedSteps.size / steps.length) * 100;
-    const remainingSteps = steps.length - completedSteps.size;
+    const progress = (completedSteps.size / defaultSteps.length) * 100;
+    const remainingSteps = defaultSteps.length - completedSteps.size;
 
     const highlightComponent = (componentId: string) => {
         const targetElement = document.getElementById(componentId);
@@ -48,28 +68,89 @@ export const Checklist: React.FC = () => {
         }
     };
 
-    const handleStepClick = (step: typeof steps[0]) => {
-        if (location.pathname !== step.path) {
-            // If we need to navigate, wait for navigation to complete
-            navigate(step.path, {
-                state: { highlightComponent: step.targetComponent }
-            });
+    const handleStepClick = (step: ChecklistStep) => {
+        if (onStepClick) {
+            onStepClick(step);
+        } else if (currentPath !== step.path) {
+            // Default navigation behavior if no onStepClick provided
+            window.location.href = step.path;
         } else {
-            // If we're already on the page, highlight immediately
             highlightComponent(step.targetComponent);
         }
     };
 
-    // Listen for navigation state changes
-    React.useEffect(() => {
-        const state = location.state as { highlightComponent?: string } | null;
-        if (state?.highlightComponent) {
-            // Wait a short moment for the component to be mounted
-            setTimeout(() => {
-                highlightComponent(state.highlightComponent as string);
-            }, 100);
-        }
-    }, [location]);
+    // Compact mode - shows circular progress indicator
+    if (mode === 'compact') {
+        const tooltipContent = (
+            <div className="text-center">
+                <div className="font-medium mb-2">Getting Started</div>
+                <div className="space-y-2">
+                    {defaultSteps.map((step, index) => (
+                        <div 
+                            key={index} 
+                            className="flex items-center gap-2 text-left cursor-pointer hover:bg-muted/50 p-1.5 rounded transition-colors"
+                            onClick={() => handleStepClick(step)}
+                        >
+                            {completedSteps.has(index) ? (
+                                <CheckCircle2 className="h-3 w-3 text-green-500 flex-shrink-0" />
+                            ) : (
+                                <Circle className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                                <div className="text-xs font-medium truncate">{step.title}</div>
+                                <div className="text-xs text-muted-foreground truncate">{step.description}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+            </div>
+        );
+
+        return (
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div className="flex justify-center">
+                            <div className="relative">
+                                <svg className="w-8 h-8 transform -rotate-90" viewBox="0 0 32 32">
+                                    {/* Background circle */}
+                                    <circle
+                                        cx="16"
+                                        cy="16"
+                                        r="14"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        fill="none"
+                                        className="text-muted-foreground/20"
+                                    />
+                                    {/* Progress circle */}
+                                    <circle
+                                        cx="16"
+                                        cy="16"
+                                        r="14"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        fill="none"
+                                        className="text-primary"
+                                        strokeDasharray={`${2 * Math.PI * 14}`}
+                                        strokeDashoffset={`${2 * Math.PI * 14 * (1 - progress / 100)}`}
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <Trophy className="h-3 w-3 text-primary" />
+                                </div>
+                            </div>
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-48">
+                        {tooltipContent}
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        );
+    }
 
     if (isMinimized) {
         return (
@@ -93,9 +174,9 @@ export const Checklist: React.FC = () => {
                     <span>
                         {remainingSteps === 0 
                             ? "🎉 All steps completed!" 
-                            : `${remainingSteps} step${remainingSteps === 1 ? '' : 's'} remaining`}
+                            : `${remainingSteps} step${remainingSteps === 1 ? '' : ''} remaining`}
                     </span>
-                    <span>{completedSteps.size}/{steps.length}</span>
+                    <span>{completedSteps.size}/{defaultSteps.length}</span>
                 </div>
             </div>
         );
@@ -121,7 +202,7 @@ export const Checklist: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                    {steps.map((step, index) => (
+                    {defaultSteps.map((step, index) => (
                         <div
                             key={index}
                             onClick={() => handleStepClick(step)}

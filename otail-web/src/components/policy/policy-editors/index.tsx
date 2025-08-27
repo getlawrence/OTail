@@ -2,6 +2,7 @@ export * from './always-sample'
 export * from './and';
 export * from './bool-attribute';
 export * from './composite';
+export * from './drop';
 export * from './latency';
 export * from './numeric-attribute';
 export * from './ottl';

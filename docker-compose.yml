@@ -41,7 +41,7 @@ services:
       context: ./opampsupervisor
       dockerfile: Dockerfile
     environment:
-      - OPAMP_SERVER_ENDPOINT=ws://backend:4320/v1/opamp
+      - OPAMP_SERVER_ENDPOINT=ws://host.docker.internal:4320/v1/opamp
       - API_TOKEN=J3BLTewhup46MHHGKdVBmLV1cQJUD77jwfPB6-eoPuo=
       - AGENT_GROUP=prd-otail-test-group
       - DEPLOYMENT=prd-otail-test-deployment
@@ -52,8 +52,7 @@ services:
       - ./opampsupervisor/storage:/var/lib/opamp
     networks:
       - otail-network
-    depends_on:
-      - backend
+
 
   collector:
     image: otel/opentelemetry-collector-contrib:latest

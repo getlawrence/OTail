@@ -10,7 +10,7 @@ $(OUT_DIR):
 # Build the wasm binary
 build: $(OUT_DIR)
 	GOOS=js GOARCH=wasm go build -o $(OUT_DIR)/ottl.wasm
-	cp "$(shell go env GOROOT)/misc/wasm/wasm_exec.js" $(OUT_DIR)/
+	cp "$(shell go env GOROOT)/lib/wasm/wasm_exec.js" $(OUT_DIR)/
 
 # Clean build artifacts
 clean:

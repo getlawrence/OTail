@@ -3,7 +3,7 @@
 import React from "react"
 import { ChevronDown, MoreVertical } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { AlwaysSamplePolicyEditor, AndPolicyEditor, BooleanTagPolicyEditor, CompositePolicyEditor, LatencyPolicyEditor, NumericTagPolicyEditor, OttlPolicyEditor, ProbabilisticPolicyEditor, RateLimitingPolicyEditor, SpanCountPolicyEditor, StringAttributePolicyEditor, TraceStatePolicyEditor } from "./policy-editors";
+import { AlwaysSamplePolicyEditor, AndPolicyEditor, BooleanTagPolicyEditor, CompositePolicyEditor, DropPolicyEditor, LatencyPolicyEditor, NumericTagPolicyEditor, OttlPolicyEditor, ProbabilisticPolicyEditor, RateLimitingPolicyEditor, SpanCountPolicyEditor, StringAttributePolicyEditor, TraceStatePolicyEditor } from "./policy-editors";
 import { StatusCodePolicyEditor } from "./policy-editors/status-code";
 import { Policy } from "@/types/policy";
 import { Decision } from "@/types/trace";
@@ -49,6 +49,8 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({ policy, onUpdate, onRemo
         return <TraceStatePolicyEditor policy={policy} onUpdate={onUpdate} />;
       case 'and':
         return <AndPolicyEditor policy={policy} onUpdate={onUpdate} />;
+      case 'drop':
+        return <DropPolicyEditor policy={policy} onUpdate={onUpdate} />;
       default:
         return <div>Unknown policy type: {(policy as Policy).type}</div>;
     }

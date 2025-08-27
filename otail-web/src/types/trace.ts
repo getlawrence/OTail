@@ -49,6 +49,7 @@ export enum Decision {
   NotSampled,
   InvertNotSampled,
   InvertSampled,
+  Dropped,
   Error
 }
 

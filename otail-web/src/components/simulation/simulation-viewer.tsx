@@ -12,7 +12,7 @@ import { DecisionBadge } from "@/components/shared/decision-badge"
 import { Button } from "../ui/button"
 import { PlayCircle } from "lucide-react"
 import { useTheme } from "@/hooks/use-theme"
-import { trackSampling } from '@/utils/analytics';
+import { trackSampling } from '@/utils/events';
 
 
 

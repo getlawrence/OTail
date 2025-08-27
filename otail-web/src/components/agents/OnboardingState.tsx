@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { CopyIcon, CheckIcon, UpdateIcon } from "@radix-ui/react-icons"
 import { useAuth } from "@/hooks/use-auth"
-
+import { config } from "@/config"
 interface OnboardingStateProps {
     onRefresh: () => void
     apiToken: string
@@ -12,7 +12,7 @@ interface OnboardingStateProps {
 export function OnboardingState({ onRefresh, apiToken }: OnboardingStateProps) {
     const [copied, setCopied] = useState(false)
     const { organization } = useAuth()
-    const opampEndpoint = import.meta.env.VITE_OPAMP_ENDPOINT || 'ws://localhost:4320/v1/opamp'
+    const opampEndpoint = config.opampEndpoint
 
     const exampleConfig = `server:
   endpoint: ${opampEndpoint}

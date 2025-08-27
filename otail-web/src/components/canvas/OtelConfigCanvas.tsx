@@ -28,17 +28,15 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
   // Track which section is in full-screen mode (if any)
-  const [fullScreenSection, setFullScreenSection] = useState<SectionType | null>(null); // No section is in full-screen by default
+  const [fullScreenSection, setFullScreenSection] = useState<SectionType | null>(null);
   
   // Track which sections are collapsed
-  const [collapsedSections, setCollapsedSections] = useState<SectionType[]>([]); // No sections collapsed by default
-  
+  const [collapsedSections, setCollapsedSections] = useState<SectionType[]>([]);
 
   // Handle section full-screen toggle
   const handleToggleFullScreen = useCallback((type: SectionType, enterFullScreen: boolean) => {
     setFullScreenSection(enterFullScreen ? type : null);
     
-    // If entering full-screen, ensure the section is not collapsed
     if (enterFullScreen) {
       setCollapsedSections(prev => prev.filter(section => section !== type));
     }
@@ -47,23 +45,15 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
   // Handle section collapse/expand toggle
   const handleToggleCollapse = useCallback((type: SectionType, collapsed: boolean) => {
     setCollapsedSections(prev => {
-      let newState;
-      
-      // If we're collapsing and it's not already in the array, add it
       if (collapsed && !prev.includes(type)) {
-        newState = [...prev, type];
-        return newState;
+        return [...prev, type];
       }
-      // If we're expanding and it's in the array, remove it
       if (!collapsed && prev.includes(type)) {
-        newState = prev.filter(section => section !== type);
-        return newState;
+        return prev.filter(section => section !== type);
       }
-      // Otherwise return the current state unchanged
       return prev;
     });
   }, []);
-
 
   const hasParsedYaml = useRef(false);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -93,25 +83,20 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     setEdges,
     nodes
   });
-  
-  // Define node types - cast as any to work around type issues
-  const nodeTypes = useMemo(() => ({
-    receivers: ReceiverNode as any,
-    processors: ProcessorNode as any,
-    exporters: ExporterNode as any,
-    connectors: ConnectorNode as any,
-
-    section: FlowSectionComponent as any, // Add FlowSection as a custom node type
-  }), []);
-  
-  const { generateConfig } = useFlowConfig(nodes, edges, onChange);
-  const { screenToFlowPosition } = useReactFlow();
 
   // Initialize sections on mount
   useEffect(() => {
     const sectionNodes = createSectionNodes();
     setNodes(sectionNodes);
   }, [createSectionNodes, setNodes]);
+
+  // Parse YAML after sections are created
+  useEffect(() => {
+    if (initialYaml && !hasParsedYaml.current && nodes.some(node => node.type === 'section')) {
+      parseInitialYaml(initialYaml);
+      hasParsedYaml.current = true;
+    }
+  }, [initialYaml, parseInitialYaml, nodes]);
 
   // Update sections when relevant state changes
   useEffect(() => {
@@ -169,13 +154,37 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     };
   }, [fullScreenSection, collapsedSections, createSectionNodes, setNodes, nodes]);
 
-  // Parse YAML when it changes
+  // Define node types - cast as any to work around type issues
+  const nodeTypes = useMemo(() => ({
+    receivers: ReceiverNode as any,
+    processors: ProcessorNode as any,
+    exporters: ExporterNode as any,
+    connectors: ConnectorNode as any,
+
+    section: FlowSectionComponent as any, // Add FlowSection as a custom node type
+  }), []);
+  
+  const { generateConfig } = useFlowConfig(nodes, edges, onChange);
+  const { screenToFlowPosition } = useReactFlow();
+
+  // Add effect to generate YAML when nodes or edges change
   useEffect(() => {
-    if (initialYaml && !hasParsedYaml.current) {
-      parseInitialYaml(initialYaml);
-      hasParsedYaml.current = true;
+    generateConfig();
+    
+    // Track configuration generation
+    if (nodes.length > 0 || edges.length > 0) {
+      // Filter out section nodes to only count actual components
+      const componentNodes = nodes.filter(node => node.type !== 'section');
+      trackCanvas.config.generate(componentNodes.length, edges.length);
     }
-  }, [initialYaml, parseInitialYaml]);
+  }, [nodes, edges, generateConfig]);
+
+  // Expose parseYaml method through ref
+  React.useImperativeHandle(ref, () => ({
+    parseYaml: (yaml: string) => {
+      parseInitialYaml(yaml);
+    }
+  }));
 
   const onConnect = useCallback((connection: Connection) => {
     const sourceNode = nodes.find(n => n.id === connection.source);
@@ -273,25 +282,6 @@ const OtelConfigCanvasInner = React.forwardRef<{ parseYaml: (yaml: string) => vo
     // Create the component node using the pipeline manager
     createComponentNode(type, name, section, adjustedPosition);
   }, [determineSection, getPositionInSection, createComponentNode]);
-
-  // Add effect to generate YAML when nodes or edges change
-  useEffect(() => {
-    generateConfig();
-    
-    // Track configuration generation
-    if (nodes.length > 0 || edges.length > 0) {
-      // Filter out section nodes to only count actual components
-      const componentNodes = nodes.filter(node => node.type !== 'section');
-      trackCanvas.config.generate(componentNodes.length, edges.length);
-    }
-  }, [nodes, edges, generateConfig]);
-
-  // Expose parseYaml method through ref
-  React.useImperativeHandle(ref, () => ({
-    parseYaml: (yaml: string) => {
-      parseInitialYaml(yaml);
-    }
-  }));
 
   return (
     <div className="h-full relative">
