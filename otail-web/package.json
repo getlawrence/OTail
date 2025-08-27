@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/build-wasm.js && vite",
+    "dev:no-wasm": "vite",
     "build": "tsc -b && vite build",
     "build:wasm": "node scripts/build-wasm.js",
     "lint": "eslint .",

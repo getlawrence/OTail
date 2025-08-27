@@ -1,4 +1,4 @@
-import { Telescope, LogOut, Users, Wrench, Palette, Share2 } from "lucide-react"
+import { Telescope, LogOut, Users, Wrench, Palette, Share2, Rocket } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { AnalyticsToggle } from "@/components/layout/analytics-toggle"
 import { Checklist } from "@/components/checklist/Checklist"
@@ -48,6 +48,11 @@ export function AppSidebar({ noBackend = false }: AppSidebarProps) {
         title: "Agents",
         url: "/agents",
         icon: Telescope,
+      },
+      {
+        title: "Deployments",
+        url: "/deployments",
+        icon: Rocket,
       },
       {
         title: "Canvas",

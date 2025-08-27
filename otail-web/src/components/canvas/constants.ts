@@ -1,11 +1,32 @@
 import { SectionType } from './types';
 
 export const LAYOUT_CONFIG = {
+  // Responsive breakpoints
+  BREAKPOINTS: {
+    MOBILE: 768,
+    TABLET: 1024,
+    DESKTOP: 1200,
+    WIDE: 1600
+  },
+  
+  // Section dimensions
   SECTION_HEIGHT: 600,
   SECTION_PADDING: 40,
+  SECTION_MIN_WIDTH: 300,
+  SECTION_MIN_HEIGHT: 200,
+  SECTION_GAP: 20,
+  
+  // Node dimensions
   NODE_WIDTH: 180,
   NODE_HEIGHT: 40,
   NODE_SPACING: 150, // Increased spacing between nodes for better connections
+  
+  // Layout spacing
+  SIDEBAR_WIDTH: 80,
+  HEADER_HEIGHT: 80,
+  MARGIN: 20,
+  
+  // Z-index management
   MINIMAP_HEIGHT: 120,
   NODE_Z_INDEX: 20, // Z-index for component nodes (higher than edges)
   SECTION_Z_INDEX: 0, // Z-index for section containers (lower than edges)

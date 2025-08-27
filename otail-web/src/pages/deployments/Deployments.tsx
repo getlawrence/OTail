@@ -37,13 +37,16 @@ export default function Deployments() {
     try {
       setLoading(true);
       const response = await deploymentsApi.list();
-      setDeployments(response);
+      // Ensure we always have a valid array, even if response is null/undefined
+      setDeployments(Array.isArray(response) ? response : []);
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to load deployments',
         variant: 'destructive',
       });
+      // Set empty array on error to prevent null reference issues
+      setDeployments([]);
     } finally {
       setLoading(false);
     }
@@ -52,13 +55,16 @@ export default function Deployments() {
   const loadPipelines = async () => {
     try {
       const response = await pipelinesApi.list();
-      setPipelines(response.pipelines);
+      // Ensure we always have a valid array, even if response is null/undefined
+      setPipelines(Array.isArray(response?.pipelines) ? response.pipelines : []);
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to load pipelines',
         variant: 'destructive',
       });
+      // Set empty array on error to prevent null reference issues
+      setPipelines([]);
     }
   };
 
@@ -234,23 +240,23 @@ export default function Deployments() {
           <CardContent>
             {loading ? (
               <div className="text-center py-4">Loading...</div>
-            ) : deployments.length === 0 ? (
+            ) : !deployments || deployments.length === 0 ? (
               <div className="text-center py-4 text-muted-foreground">
                 No deployments found
               </div>
             ) : (
               <div className="space-y-6">
                 {deployments.map((deployment) => (
-                  <Card key={deployment.id} className="relative">
+                  <Card key={deployment?.id || 'unknown'} className="relative">
                     <CardContent className="pt-6">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
-                          <h3 className="font-medium">{deployment.name}</h3>
-                          <p className="text-sm text-muted-foreground">{deployment.description}</p>
+                          <h3 className="font-medium">{deployment?.name || 'Unnamed Deployment'}</h3>
+                          <p className="text-sm text-muted-foreground">{deployment?.description || 'No description'}</p>
                           <div className="flex gap-2 mt-2">
-                            <Badge variant="secondary">{deployment.environment}</Badge>
+                            <Badge variant="secondary">{deployment?.environment || 'unknown'}</Badge>
                             <Badge variant="outline">
-                              {deployment.agentGroups?.length} Agent Groups
+                              {(deployment?.agentGroups || []).length} Agent Groups
                             </Badge>
                           </div>
                         </div>
@@ -259,7 +265,8 @@ export default function Deployments() {
                             variant="outline"
                             size="sm"
                             className="flex items-center gap-2"
-                            onClick={() => handleEditDeployment(deployment)}
+                            onClick={() => deployment && handleEditDeployment(deployment)}
+                            disabled={!deployment}
                           >
                             <Pencil className="w-4 h-4" /> Edit
                           </Button>
@@ -268,9 +275,12 @@ export default function Deployments() {
                             size="sm"
                             className="flex items-center gap-2"
                             onClick={() => {
-                              setSelectedDeployment(deployment);
-                              setIsAgentGroupFormOpen(true);
+                              if (deployment) {
+                                setSelectedDeployment(deployment);
+                                setIsAgentGroupFormOpen(true);
+                              }
                             }}
+                            disabled={!deployment}
                           >
                             <FolderPlus className="w-4 h-4" /> Add Agent Group
                           </Button>
@@ -278,29 +288,31 @@ export default function Deployments() {
                             variant="destructive"
                             size="sm"
                             className="flex items-center gap-2"
-                            onClick={() => handleDeleteDeployment(deployment.id)}
+                            onClick={() => deployment?.id && handleDeleteDeployment(deployment.id)}
+                            disabled={!deployment?.id}
                           >
                             <Trash2 className="w-4 h-4" /> Delete
                           </Button>
                         </div>
                       </div>
 
-                      {deployment.agentGroups?.length > 0 && (
+                      {(deployment.agentGroups || []).length > 0 && (
                         <div className="space-y-4 mt-4">
                           <h4 className="text-sm font-medium">Agent Groups</h4>
-                          {deployment.agentGroups.map((group) => (
-                            <Card key={group.id} className="relative">
+                          {(deployment?.agentGroups || []).map((group) => (
+                            <Card key={group?.id || 'unknown'} className="relative">
                               <CardContent className="pt-6">
                                 <div className="flex justify-between items-start">
                                   <div className="flex-1">
-                                    <h5 className="font-medium">{group.name}</h5>
+                                    <h5 className="font-medium">{group?.name || 'Unnamed Group'}</h5>
                                   </div>
                                   <div className="flex gap-2">
                                     <Button
                                       variant="outline"
                                       size="sm"
                                       className="flex items-center gap-2"
-                                      onClick={() => handleEditAgentGroup(deployment, group)}
+                                      onClick={() => deployment && group && handleEditAgentGroup(deployment, group)}
+                                      disabled={!deployment || !group}
                                     >
                                       <Pencil className="w-4 h-4" /> Edit
                                     </Button>
@@ -308,7 +320,8 @@ export default function Deployments() {
                                       variant="destructive"
                                       size="sm"
                                       className="flex items-center gap-2"
-                                      onClick={() => handleDeleteAgentGroup(group.id)}
+                                      onClick={() => group?.id && handleDeleteAgentGroup(group.id)}
+                                      disabled={!group?.id}
                                     >
                                       <Trash2 className="w-4 h-4" /> Delete
                                     </Button>

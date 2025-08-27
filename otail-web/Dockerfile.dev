@@ -1,7 +1,13 @@
 FROM node:18-alpine
 
 # Install build dependencies and ensure npm is available
-RUN apk add --no-cache git make g++ python3 go npm
+RUN apk add --no-cache git make g++ python3 npm
+
+# Install Go with WASM support
+RUN wget -q https://go.dev/dl/go1.21.0.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.21.0.linux-amd64.tar.gz && \
+    rm go1.21.0.linux-amd64.tar.gz
+ENV PATH=$PATH:/usr/local/go/bin
 
 # Set working directory
 WORKDIR /app
@@ -12,7 +18,7 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application
+# Copy source code (excluding node_modules via .dockerignore)
 COPY . .
 
 # Add build arguments for environment variables
@@ -33,4 +39,4 @@ ENV VITE_FORCE_POSTHOG=$VITE_FORCE_POSTHOG
 EXPOSE 3000
 
 # Start the development server with host flag to allow external connections
-CMD ["npm", "run", "dev", "--", "--host"] 
+CMD ["npm", "run", "dev:no-wasm", "--", "--host"] 

@@ -33,15 +33,22 @@ function DeploymentsDashboard() {
   const loadDeployments = async () => {
     try {
       const response = await deploymentsApi.list();
-      setDeployments(response);
-      // Load agent groups for each deployment
-      await Promise.all(response.map(deployment => loadAgentGroups(deployment.id)));
+      // Ensure we always have a valid array, even if response is null/undefined
+      const validDeployments = Array.isArray(response) ? response : [];
+      setDeployments(validDeployments);
+      
+      // Load agent groups for each deployment only if we have valid deployments
+      if (validDeployments.length > 0) {
+        await Promise.all(validDeployments.map(deployment => loadAgentGroups(deployment.id)));
+      }
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to load deployments',
         variant: 'destructive',
       });
+      // Set empty array on error to prevent null reference issues
+      setDeployments([]);
     } finally {
       setLoading(false);
     }
@@ -50,32 +57,40 @@ function DeploymentsDashboard() {
   const loadAgentGroups = async (deploymentId: string) => {
     try {
       const response = await agentGroupsApi.list(deploymentId);
+      // Ensure we always have a valid array, even if response is null/undefined
+      const validGroups = Array.isArray(response) ? response : [];
       setAgentGroups(prev => ({
         ...prev,
-        [deploymentId]: response
+        [deploymentId]: validGroups
       }));
-      // Load agents for each group
-      await Promise.all(response.map(group => loadAgents(group.id)));
+      
+      // Load agents for each group only if we have valid groups
+      if (validGroups.length > 0) {
+        await Promise.all(validGroups.map(group => loadAgents(group.id)));
+      }
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to load agent groups',
         variant: 'destructive',
       });
+      // Set empty array on error to prevent null reference issues
+      setAgentGroups(prev => ({
+        ...prev,
+        [deploymentId]: []
+      }));
     }
   };
 
   const loadAgents = async (groupId: string) => {
     try {
       const response = await agentsApi.getByGroup(groupId);
-      if (!response) {
-        console.warn(`No data received for group ${groupId}`);
-        return;
-      }
-
+      // Ensure we always have a valid array, even if response is null/undefined
+      const validAgents = Array.isArray(response) ? response : [];
+      
       setAgents(prev => ({
         ...prev,
-        [groupId]: response
+        [groupId]: validAgents
       }));
     } catch (error) {
       console.error(`Failed to load agents for group ${groupId}:`, error);
@@ -84,6 +99,11 @@ function DeploymentsDashboard() {
         description: 'Failed to load agents',
         variant: 'destructive',
       });
+      // Set empty array on error to prevent null reference issues
+      setAgents(prev => ({
+        ...prev,
+        [groupId]: []
+      }));
     }
   };
 
@@ -112,8 +132,9 @@ function DeploymentsDashboard() {
   };
 
   const getTotalAgents = (deployment: Deployment) => {
+    if (!deployment?.id) return 0;
     const groups = agentGroups[deployment.id] || [];
-    return groups.reduce((total, group) => total + (agents[group.id]?.length || 0), 0);
+    return groups.reduce((total, group) => total + (agents[group?.id || '']?.length || 0), 0);
   };
 
   return (
@@ -139,62 +160,62 @@ function DeploymentsDashboard() {
         <CardContent>
           {loading ? (
             <div className="text-center py-4">Loading...</div>
-          ) : deployments.length === 0 ? (
+          ) : !deployments || deployments.length === 0 ? (
             <div className="text-center py-4 text-muted-foreground">
               No deployments found. Create your first deployment to get started.
             </div>
           ) : (
             <div className="space-y-4">
               {deployments.map((deployment) => (
-                <div key={deployment.id} className="border rounded-lg">
+                <div key={deployment?.id || 'unknown'} className="border rounded-lg">
                   <div
                     className="p-4 hover:bg-accent cursor-pointer flex items-center justify-between"
-                    onClick={() => toggleDeployment(deployment.id)}
+                    onClick={() => deployment?.id && toggleDeployment(deployment.id)}
                   >
                     <div className="flex items-center gap-2">
-                      {expandedDeployments.has(deployment.id) ? (
+                      {expandedDeployments.has(deployment?.id || '') ? (
                         <ChevronDown className="h-4 w-4" />
                       ) : (
                         <ChevronRight className="h-4 w-4" />
                       )}
                       <div>
-                        <h3 className="font-medium">{deployment.name}</h3>
+                        <h3 className="font-medium">{deployment?.name || 'Unnamed Deployment'}</h3>
                         <p className="text-sm text-muted-foreground">
-                          Created {new Date(deployment.created_at).toLocaleDateString()}
+                          Created {deployment?.created_at ? new Date(deployment.created_at).toLocaleDateString() : 'Unknown date'}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">
                         <Users className="h-3 w-3 mr-1" />
-                        {agentGroups[deployment.id]?.length || 0} Groups
+                        {agentGroups[deployment?.id || '']?.length || 0} Groups
                       </Badge>
                       <Badge variant="outline">
                         <Server className="h-3 w-3 mr-1" />
-                        {getTotalAgents(deployment)} Agents
+                        {deployment ? getTotalAgents(deployment) : 0} Agents
                       </Badge>
                     </div>
                   </div>
 
-                  {expandedDeployments.has(deployment.id) && (
+                  {deployment?.id && expandedDeployments.has(deployment.id) && (
                     <div className="border-t bg-accent/50">
                       <div className="p-4 space-y-4">
-                        {agentGroups[deployment.id]?.map((group) => (
-                          <div key={group.id} className="pl-6 border-l-2 border-primary">
+                        {(agentGroups[deployment.id] || []).map((group) => (
+                          <div key={group?.id || 'unknown'} className="pl-6 border-l-2 border-primary">
                             <div
                               className="flex items-center justify-between cursor-pointer"
-                              onClick={() => toggleGroup(group.id)}
+                              onClick={() => group?.id && toggleGroup(group.id)}
                             >
                               <div className="flex items-center gap-2">
-                                {expandedGroups.has(group.id) ? (
+                                {expandedGroups.has(group?.id || '') ? (
                                   <ChevronDown className="h-4 w-4" />
                                 ) : (
                                   <ChevronRight className="h-4 w-4" />
                                 )}
                                 <div>
-                                  <h4 className="font-medium">{group.name}</h4>
+                                  <h4 className="font-medium">{group?.name || 'Unnamed Group'}</h4>
                                   <p className="text-sm text-muted-foreground">
-                                    {(group.agent_ids || []).length} Agents
+                                    {(group?.agent_ids || []).length} Agents
                                   </p>
                                 </div>
                               </div>
@@ -203,29 +224,32 @@ function DeploymentsDashboard() {
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  navigate(`/deployments/${deployment.id}/groups/${group.id}`);
+                                  if (deployment?.id && group?.id) {
+                                    navigate(`/deployments/${deployment.id}/groups/${group.id}`);
+                                  }
                                 }}
+                                disabled={!deployment?.id || !group?.id}
                               >
                                 View Details
                               </Button>
                             </div>
 
-                            {expandedGroups.has(group.id) && (
+                            {group?.id && expandedGroups.has(group.id) && (
                               <div className="mt-4 pl-6 space-y-2">
-                                {agents[group.id]?.map((agent) => (
+                                {(agents[group.id] || []).map((agent) => (
                                   <div
-                                    key={agent.InstanceId}
+                                    key={agent?.InstanceId || 'unknown'}
                                     className="flex items-center justify-between p-2 rounded-md bg-background"
                                   >
                                     <div className="flex items-center gap-2">
                                       <Activity className={cn(
                                         "h-3 w-3",
-                                        agent.status === 'success' ? "text-green-500" :
-                                          agent.status === 'failed' ? "text-red-500" :
+                                        agent?.status === 'success' ? "text-green-500" :
+                                          agent?.status === 'failed' ? "text-red-500" :
                                             "text-yellow-500"
                                       )} />
                                       <div>
-                                        <p className="text-sm font-medium">{agent.InstanceId.slice(0, 8)}</p>
+                                        <p className="text-sm font-medium">{agent?.InstanceId ? agent.InstanceId.slice(0, 8) : 'Unknown'}</p>
                                         <p className="text-xs text-muted-foreground">
                                           Version {agent.status}
                                         </p>
