@@ -91,59 +91,24 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
 
   const sectionConfig = PIPELINE_SECTIONS[data.type] || { label: colorScheme.label };
 
-  // Effect to handle section as a container for nodes
+  // Effect to ensure nodes are properly contained within the section
   useEffect(() => {
     // Skip if we don't have access to the ReactFlow instance
     if (!reactFlowInstance) return;
 
     const allNodes = reactFlowInstance.getNodes();
-    const sectionNodes = allNodes.filter(node =>
+    const sectionNodes = allNodes.filter(node => 
       node.data.pipelineType === data.type &&
       !node.id.startsWith('section-')
     );
 
-    // Ensure all nodes belonging to this section are contained within the section boundaries
+    // Ensure all nodes belonging to this section are properly contained and styled
     if (sectionNodes.length > 0) {
-      const sectionNode = allNodes.find(node => node.id === id);
-      if (!sectionNode) return;
-
-      // Get the section's position and dimensions
-      const sectionX = sectionNode.position.x;
-      const sectionY = sectionNode.position.y;
-      // Always use full width of the canvas
-      const sectionWidth = data.width || window.innerWidth - 20; // Full width with a small margin
-
-      // Calculate section height based on full-screen state
-      // By default, use exactly 1/3 of viewport height (converted from vh to pixels)
-      const viewportHeight = window.innerHeight;
-      const thirdOfViewport = viewportHeight / 3; // Exactly one-third of viewport height
-      const sectionHeight = (data.height || viewportHeight);
-
-      // Calculate content area boundaries (accounting for header height)
-      const contentX = sectionX + 10; // Add some padding
-      const contentY = sectionY + 56; // Header height is 56px
-      const contentWidth = typeof sectionWidth === 'number' ? sectionWidth - 20 : window.innerWidth - 40; // Subtract padding
-      const contentHeight = typeof sectionHeight === 'number' ? sectionHeight - 56 : thirdOfViewport - 56; // Subtract header height
-
       reactFlowInstance.setNodes(nodes => {
         return nodes.map(node => {
           if (sectionNodes.some(n => n.id === node.id)) {
-            // Constrain node position to be within the section boundaries
-            const nodeWidth = node.style?.width || 150;
-            const nodeHeight = node.style?.height || 40;
-
-            // Calculate new position to ensure node is within section boundaries
-            const nodeWidthNum = typeof nodeWidth === 'number' ? nodeWidth : 150;
-            const nodeHeightNum = typeof nodeHeight === 'number' ? nodeHeight : 40;
-            let newX = Math.max(contentX, Math.min(contentX + contentWidth - nodeWidthNum, node.position.x));
-            let newY = Math.max(contentY, Math.min(contentY + contentHeight - nodeHeightNum, node.position.y));
-
             return {
               ...node,
-              position: {
-                x: newX,
-                y: newY
-              },
               style: {
                 ...node.style,
                 opacity: 1, // Always visible
@@ -158,7 +123,7 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
         });
       });
     }
-  }, [data.type, data.width, data.height, data.isFullScreen, id, reactFlowInstance]);
+  }, [data.type, id, reactFlowInstance]);
 
   // Handle full-screen toggle
   const handleToggleFullScreen = (e: React.MouseEvent) => {
@@ -204,7 +169,7 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
     <div
       className={`section-node ${colors.bg} rounded-lg border-2 ${colors.border} shadow-sm transition-all duration-500
         overflow-visible absolute pointer-events-all flex flex-col transform scale-100 origin-top-left
-        mb-[50px] z-10
+        z-10
         ${data.isFullScreen ? 'h-[calc(100vh-80px)] max-h-[calc(100vh-80px)]' : ''}`}
       style={{
         width: `${data.width}px`,
@@ -215,36 +180,38 @@ const FlowSectionComponent = ({ data, id }: NodeProps<FlowSectionData>) => {
     >
       {/* Section header */}
       <div
-        className={`h-10 px-4 flex items-center justify-between border-b ${colors.border}
+        className={`h-8 px-3 flex items-center justify-between border-b ${colors.border}
           bg-white rounded-t-lg`}
       >
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className={`${colors.badge} shadow-sm`}>
+          <Badge variant="outline" className={`${colors.badge} shadow-sm text-xs`}>
             {sectionConfig.label}
           </Badge>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           {/* Collapse/Expand button */}
           <Button
             variant="ghost"
             size="icon"
+            className="h-6 w-6"
             onClick={handleToggleCollapse}
           >
-            {isCollapsed ? <ChevronRight /> : <ChevronDown />}
+            {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
           </Button>
           {/* Full-screen toggle button */}
           <Button
             variant="ghost"
             size="icon"
+            className="h-6 w-6"
             onClick={handleToggleFullScreen}
           >
-            {isExpanded ? <Minimize2 /> : <Maximize2 />}
+            {isExpanded ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
           </Button>
         </div>
       </div>
       {/* Section content */}
       <div
-        className={`flex-1 p-4 ${colors.bg} rounded-b-lg ${isCollapsed ? 'hidden' : 'block'}`}
+        className={`flex-1 p-3 ${colors.bg} rounded-b-lg ${isCollapsed ? 'hidden' : 'block'}`}
       >
         {data.children}
       </div>

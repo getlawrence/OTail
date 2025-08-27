@@ -19,6 +19,14 @@ type Server struct {
 	opampServer server.OpAMPServer
 	agents      *Agents
 	verifyToken func(string) (string, error)
+	// Callback for agent group and deployment verification
+	onAgentConnected func(ctx context.Context, deploymentName, groupName string) (string, string, error)
+	// Map to store connection metadata
+	connectionMetadata map[types.Connection]struct {
+		OrgID        string
+		GroupID      string
+		DeploymentID string
+	}
 }
 
 // zapToOpAmpLogger adapts zap.Logger to opamp's logger interface
@@ -34,11 +42,22 @@ func (z *zapToOpAmpLogger) Errorf(ctx context.Context, format string, args ...in
 	z.Sugar().Errorf(format, args...)
 }
 
-func NewServer(agents *Agents, verifyToken func(string) (string, error), logger *zap.Logger) (*Server, error) {
+func NewServer(
+	agents *Agents,
+	verifyToken func(string) (string, error),
+	onAgentConnected func(ctx context.Context, deploymentName, groupName string) (string, string, error),
+	logger *zap.Logger,
+) (*Server, error) {
 	s := &Server{
-		logger:      logger,
-		agents:      agents,
-		verifyToken: verifyToken,
+		logger:           logger,
+		agents:           agents,
+		verifyToken:      verifyToken,
+		onAgentConnected: onAgentConnected,
+		connectionMetadata: make(map[types.Connection]struct {
+			OrgID        string
+			GroupID      string
+			DeploymentID string
+		}),
 	}
 
 	// Create the OPAmp server
@@ -73,11 +92,38 @@ func (s *Server) Start() error {
 						return types.ConnectionResponse{Accept: false, HTTPStatusCode: http.StatusUnauthorized}
 					}
 
+					// Extract agent group and deployment from headers
+					agentGroup := request.Header.Get("Agent-Group")
+					deployment := request.Header.Get("Deployment")
+
+					// Verify agent group and deployment if provided
+					groupID, deploymentID, err := s.onAgentConnected(request.Context(), agentGroup, deployment)
+					if err != nil {
+						s.logger.Error("Invalid agent group or deployment",
+							zap.Error(err),
+							zap.String("group", agentGroup),
+							zap.String("deployment", deployment))
+						return types.ConnectionResponse{Accept: false, HTTPStatusCode: http.StatusUnauthorized}
+					}
+
 					return types.ConnectionResponse{
 						Accept: true,
 						ConnectionCallbacks: server.ConnectionCallbacksStruct{
 							OnConnectedFunc: func(ctx context.Context, conn types.Connection) {
-								s.agents.SetOrganizationID(conn, organizationID)
+								// Create a new agent for this connection
+								agentId := uuid.New()
+								agent := s.agents.FindOrCreateAgent(agentId, conn)
+								if agent == nil {
+									s.logger.Warn("Failed to create agent",
+										zap.String("agent_id", agentId.String()))
+									return
+								}
+
+								s.logger.Info("Created new agent",
+									zap.String("agent_id", agentId.String()))
+
+								// Set all connection metadata at once
+								s.agents.SetConnection(conn, organizationID, groupID, deploymentID)
 							},
 							OnMessageFunc:         s.onMessage,
 							OnConnectionCloseFunc: s.onDisconnect,
@@ -104,19 +150,48 @@ func (s *Server) Stop(ctx context.Context) error {
 }
 
 func (s *Server) onDisconnect(conn types.Connection) {
+	// Get agent info for this connection
+	agentIds := s.agents.GetAgentIdsByConnection(conn)
+	if len(agentIds) == 0 {
+		s.logger.Warn("No agents found for connection",
+			zap.Any("connection", conn))
+		return
+	}
+
+	// Get the first agent's info
+	agentId := agentIds[0]
+	agentInfo := s.agents.GetAgentInfo(agentId)
+	if agentInfo == nil {
+		s.logger.Warn("No agent info found",
+			zap.String("agent_id", agentId.String()))
+		return
+	}
+
+	// Remove the connection
 	s.agents.RemoveConnection(conn)
 }
 
-func (s *Server) onMessage(ctx context.Context, conn types.Connection, msg *protobufs.AgentToServer) *protobufs.ServerToAgent {
-	response := &protobufs.ServerToAgent{}
-	instanceId := uuid.UUID(msg.InstanceUid)
-
-	// Process the message with the verified user context
-	agent := s.agents.FindOrCreateAgent(instanceId, conn)
-	if agent == nil {
-		return response
+func (s *Server) onMessage(ctx context.Context, conn types.Connection, message *protobufs.AgentToServer) *protobufs.ServerToAgent {
+	// Get agent info for this connection
+	agentIds := s.agents.GetAgentIdsByConnection(conn)
+	if len(agentIds) == 0 {
+		s.logger.Warn("No agents found for connection",
+			zap.Any("connection", conn))
+		return nil
 	}
-	agent.UpdateStatus(msg, response)
+
+	// Get the first agent's info
+	agentId := agentIds[0]
+	agentInfo := s.agents.GetAgentInfo(agentId)
+	if agentInfo == nil {
+		s.logger.Warn("No agent info found",
+			zap.String("agent_id", agentId.String()))
+		return nil
+	}
+
+	// Process the message
+	response := &protobufs.ServerToAgent{}
+	agentInfo.Agent.UpdateStatus(message, response)
 	return response
 }
 
@@ -155,4 +230,12 @@ func (s *Server) ListAgents() map[uuid.UUID]*Agent {
 
 func (s *Server) GetAgentsByOrganization(organizationId string) map[uuid.UUID]*Agent {
 	return s.agents.GetAgentsByOrganization(organizationId)
+}
+
+func (s *Server) GetAgentsByGroup(groupId string) map[uuid.UUID]*Agent {
+	return s.agents.GetAgentsByGroup(groupId)
+}
+
+func (s *Server) GetAgentsByDeployment(deploymentId string) map[uuid.UUID]*Agent {
+	return s.agents.GetAgentsByDeployment(deploymentId)
 }

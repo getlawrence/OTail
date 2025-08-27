@@ -2,7 +2,7 @@ services:
   frontend:
     build:
       context: ./otail-web
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "3000:3000"
     volumes:
@@ -13,6 +13,7 @@ services:
       - VITE_NO_BACKEND=false
     networks:
       - otail-network
+    command: npm run dev:no-wasm -- --host
 
   backend:
     build:
@@ -35,32 +36,22 @@ services:
       - clickhouse
       - mongodb
 
-  opampsupervisor:
+  collector:
     build:
-      context: ./opampsupervisor
+      context: ./otail-col
       dockerfile: Dockerfile
     environment:
       - OPAMP_SERVER_ENDPOINT=ws://host.docker.internal:4320/v1/opamp
-      - API_TOKEN=J3BLTewhup46MHHGKdVBmLV1cQJUD77jwfPB6-eoPuo=
+      - API_TOKEN=qrKZyKiG-RWcPWpuhBy6I7m52X4S8fy1k97SIlkL_-k=
+      - AGENT_GROUP=prd-otail-test-group
+      - DEPLOYMENT=prd-otail-test-deployment
     ports:
       - "14317:4317"  # OTLP gRPC
       - "14318:4318"  # OTLP HTTP
+      - "4327:4327"   # OTLP for backend communication
+      - "8889:8889"   # Prometheus metrics endpoint
     volumes:
-      - ./opampsupervisor/storage:/var/lib/opamp
-    networks:
-      - otail-network
-
-
-  collector:
-    image: otel/opentelemetry-collector-contrib:latest
-    command: ["--config=/etc/otelcol/config.yml"]
-    ports:
-      - "4417:4317"  
-      - "4418:4318"
-      - "4327:4327"
-      - "8889:8889"  # Prometheus metrics endpoint
-    volumes:
-      - ./otail-col/config.yml:/etc/otelcol/config.yml
+      - opamp-storage:/var/lib/opamp
     depends_on:
       clickhouse:
         condition: service_healthy

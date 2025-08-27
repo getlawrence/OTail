@@ -17,12 +17,24 @@ interface ColumnsProps {
     onViewConfig: (agent: Agent) => void
     onViewLogs: (agent: Agent) => void
     onApplyPipeline: (agent: Agent) => void
+    onViewDetails: (agent: Agent) => void
 }
 
-export const columns = ({ onViewConfig, onViewLogs, onApplyPipeline }: ColumnsProps): ColumnDef<Agent>[] => [
+export const columns = ({ onViewConfig, onViewLogs, onApplyPipeline, onViewDetails }: ColumnsProps): ColumnDef<Agent>[] => [
     {
         accessorKey: "InstanceId",
         header: "Instance Id",
+        cell: ({ row }) => {
+            const agent = row.original;
+            return (
+                <button
+                    onClick={() => onViewDetails(agent)}
+                    className="text-left hover:text-primary hover:underline cursor-pointer font-medium"
+                >
+                    {agent.InstanceId}
+                </button>
+            );
+        },
     },
     {
         accessorKey: "StartedAt",
@@ -58,6 +70,9 @@ export const columns = ({ onViewConfig, onViewLogs, onApplyPipeline }: ColumnsPr
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => onViewDetails(agent)}>
+                                View Details
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onViewConfig(agent)}>
                                 View config
                             </DropdownMenuItem>

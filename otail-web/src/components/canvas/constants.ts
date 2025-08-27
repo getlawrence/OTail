@@ -1,11 +1,40 @@
 import { SectionType } from './types';
 
 export const LAYOUT_CONFIG = {
-  SECTION_HEIGHT: 600,
-  SECTION_PADDING: 40,
-  NODE_WIDTH: 180,
-  NODE_HEIGHT: 40,
+  // Layout strategy - vertical stacking for pipeline flow visualization
+  LAYOUT_STRATEGY: 'vertical' as const,
+  
+  // Responsive breakpoints - kept for potential future use but not affecting layout
+  BREAKPOINTS: {
+    MOBILE: 768,
+    TABLET: 1024,
+    DESKTOP: 1600,
+    WIDE: 2000
+  },
+  
+  // Section dimensions - optimized for vertical pipeline flow
+  SECTION_HEIGHT: 500,
+  SECTION_PADDING: 20,
+  SECTION_MIN_WIDTH: 400, // Keep reasonable width for pipeline components
+  SECTION_MIN_HEIGHT: 400, // Keep reasonable height for pipeline components
+  SECTION_GAP: 16, // Reduced gap for tighter vertical layout
+  
+  // Pipeline-specific dimensions - aligned with existing layout system
+  PIPELINE_MIN_WIDTH: 500, // Minimum width needed for a typical pipeline
+  PIPELINE_COMPONENT_WIDTH: 180, // Width of individual pipeline components
+  PIPELINE_COMPONENT_SPACING: 100, // Spacing between pipeline components
+  
+  // Node dimensions - aligned with existing layout system from layoutCalculator.ts
+  NODE_WIDTH: 150, // Match the existing layout system (NODE_WIDTH in layoutCalculator.ts)
+  NODE_HEIGHT: 40, // Match the existing layout system (NODE_HEIGHT in layoutCalculator.ts)
   NODE_SPACING: 150, // Increased spacing between nodes for better connections
+  
+  // Layout spacing - optimized for better space utilization while maintaining vertical flow
+  SIDEBAR_WIDTH: 80,
+  HEADER_HEIGHT: 64, // Reduced header height
+  MARGIN: 16, // Reduced margin for tighter layout
+  
+  // Z-index management
   MINIMAP_HEIGHT: 120,
   NODE_Z_INDEX: 20, // Z-index for component nodes (higher than edges)
   SECTION_Z_INDEX: 0, // Z-index for section containers (lower than edges)

@@ -451,7 +451,6 @@ func (agent *Agent) OfferConnectionSettings(offers *protobufs.ConnectionSettings
 }
 
 func (agent *Agent) addErrorResponse(errMsg string, response *protobufs.ServerToAgent) {
-	logger.Println(errMsg)
 	if response.ErrorResponse == nil {
 		response.ErrorResponse = &protobufs.ServerErrorResponse{
 			Type:         protobufs.ServerErrorResponseType_ServerErrorResponseType_BadRequest,

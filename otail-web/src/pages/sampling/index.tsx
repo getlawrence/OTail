@@ -128,12 +128,12 @@ const ConfigEditor = () => {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 flex-1">
+    <div className="flex flex-col">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Left Panel - Policy Editor */}
-        <div className="flex flex-col h-full min-h-0">
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b bg-muted/5">
+        <div className="flex flex-col flex-1">
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col h-[40rem]">
+            <div className="flex items-center justify-between p-4 border-b bg-muted/5 flex-shrink-0">
               <div>
                 <h2 className="text-lg font-medium">Policy Builder</h2>
                 <p className="text-sm text-muted-foreground">Configure your sampling policies</p>
@@ -143,7 +143,7 @@ const ConfigEditor = () => {
                 onImport={handleConfigImport}
               />
             </div>
-            <div className="p-6 h-full overflow-auto policy-builder">
+            <div className="p-6 overflow-auto flex-1 policy-builder">
               <PolicyBuilder
                 policies={policies}
                 addPolicy={handlePolicyAdd}
@@ -156,9 +156,9 @@ const ConfigEditor = () => {
         </div>
 
         {/* Right Panel - Configuration/Simulation */}
-        <div className="flex flex-col h-full min-h-0">
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b bg-muted/5">
+        <div className="flex flex-col flex-1">
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col h-[40rem]">
+            <div className="flex items-center justify-between p-4 border-b bg-muted/5 flex-shrink-0">
               <div>
                 <h2 className="text-lg font-medium">
                   {mode === 'Edit' ? 'YAML Configuration' : 'Validate Sampling Rules with OTEL Data'}
@@ -174,7 +174,7 @@ const ConfigEditor = () => {
                 <ModeToggle mode={mode} onToggleMode={toggleMode} />
               </div>
             </div>
-            <div className="p-4 h-full overflow-auto config-viewer">
+            <div className="p-4 overflow-auto flex-1 config-viewer">
               {mode === 'Edit' ? (
                 <ConfigViewer
                   policies={policies}

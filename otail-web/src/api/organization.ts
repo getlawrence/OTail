@@ -1,16 +1,19 @@
 import { apiClient } from './client';
-import { CreateInviteResponse, Organization } from './types';
+import type { Organization, CreateInviteResponse } from './types';
 
 export const organizationApi = {
-  getOrganization: async (id: string): Promise<Organization> => {
-    return await apiClient.get<Organization>(`/api/v1/organization/${id}`);
+  get: async (id: string): Promise<Organization> => {
+    const response = await apiClient.get<Organization>(`/api/v1/organization/${id}`);
+    return response.data;
   },
 
   createInvite: async (email: string): Promise<CreateInviteResponse> => {
-    return await apiClient.post<CreateInviteResponse>('/api/v1/organization/invite', { email });
+    const response = await apiClient.post<CreateInviteResponse>('/api/v1/organization/invite', { email });
+    return response.data;
   },
 
-  createToken: async (orgId: string, description: string): Promise<{token: string}> => {
-    return await apiClient.post<{token: string}>(`/api/v1/organization/${orgId}/token`, { description });
+  createToken: async (orgId: string, description: string): Promise<{ token: string }> => {
+    const response = await apiClient.post<{ token: string }>(`/api/v1/organization/${orgId}/token`, { description });
+    return response.data;
   },
 };

@@ -1,0 +1,42 @@
+FROM node:18-alpine
+
+# Install build dependencies and ensure npm is available
+RUN apk add --no-cache git make g++ python3 npm
+
+# Install Go with WASM support
+RUN wget -q https://go.dev/dl/go1.21.0.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.21.0.linux-amd64.tar.gz && \
+    rm go1.21.0.linux-amd64.tar.gz
+ENV PATH=$PATH:/usr/local/go/bin
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source code (excluding node_modules via .dockerignore)
+COPY . .
+
+# Add build arguments for environment variables
+ARG VITE_API_BASE_URL
+ARG VITE_NO_BACKEND
+ARG VITE_POSTHOG_KEY
+ARG VITE_POSTHOG_HOST
+ARG VITE_FORCE_POSTHOG
+
+# Set environment variables
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_NO_BACKEND=$VITE_NO_BACKEND
+ENV VITE_POSTHOG_KEY=$VITE_POSTHOG_KEY
+ENV VITE_POSTHOG_HOST=$VITE_POSTHOG_HOST
+ENV VITE_FORCE_POSTHOG=$VITE_FORCE_POSTHOG
+
+# Expose the development server port
+EXPOSE 3000
+
+# Start the development server with host flag to allow external connections
+CMD ["npm", "run", "dev:no-wasm", "--", "--host"] 

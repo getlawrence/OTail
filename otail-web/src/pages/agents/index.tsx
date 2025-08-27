@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
-import { getAgents, fetchAgentLogs, updateConfig } from "@/api/agent"
-import { Agent, Log } from "@/api/types"
+import { agentsApi } from "@/api/agent"
+import type { Agent, Log } from "@/api/types"
 import { LogsDialog } from "@/components/agents/LogsDialog"
-import { ConfigDialog } from "@/components/agents/ConfigDialog"
 import { ApplyPipelineDialog } from "@/components/agents/ApplyPipelineDialog"
 import { OnboardingState } from "@/components/agents/OnboardingState"
-import { load } from 'js-yaml'
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
 import { Input } from "@/components/ui/input"
@@ -17,7 +16,6 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 const AgentsPage = () => {
     const [agents, setAgents] = useState<Agent[]>([])
     const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
-    const [configOpen, setConfigOpen] = useState(false)
     const [logsOpen, setLogsOpen] = useState(false)
     const [applyPipelineOpen, setApplyPipelineOpen] = useState(false)
     const [logs, setLogs] = useState<Log[]>([])
@@ -26,11 +24,12 @@ const AgentsPage = () => {
     const [isConnectAgentDialogOpen, setIsConnectAgentDialogOpen] = useState(false)
     const { toast } = useToast()
     const { organization } = useAuth()
+    const navigate = useNavigate()
 
     const fetchAgents = async () => {
         try {
-            const data = await getAgents()
-            setAgents(Object.values(data))
+            const data = await agentsApi.list()
+            setAgents(data)
         } catch (error) {
             toast({
                 variant: "destructive",
@@ -46,8 +45,7 @@ const AgentsPage = () => {
     }, [])
 
     const handleViewConfig = (agent: Agent) => {
-        setSelectedAgent(agent)
-        setConfigOpen(true)
+        navigate(`/agents/${agent.InstanceId}/config`)
     }
 
     const handleViewLogs = async (agent: Agent) => {
@@ -55,7 +53,7 @@ const AgentsPage = () => {
         setLoading(true)
         setLogsOpen(true)
         try {
-            const logsData = await fetchAgentLogs(agent.InstanceId)
+            const logsData = await agentsApi.getLogs(agent.InstanceId)
             setLogs(logsData)
         } catch (error) {
             console.error('Failed to fetch logs:', error)
@@ -70,48 +68,31 @@ const AgentsPage = () => {
         setApplyPipelineOpen(true)
     }
 
-    const handleUpdateConfig = async (value: string) => {
-        if (!selectedAgent) return
-
-        try {
-            const parsedConfig = JSON.stringify(load(value))
-            await updateConfig(selectedAgent.InstanceId, parsedConfig)
-            toast({
-                variant: "default",
-                title: "Success",
-                description: "Configuration updated successfully",
-            })
-            setConfigOpen(false)
-        } catch (error) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to update configuration",
-            })
-            console.error('Failed to update config:', error)
-        }
+    const handleViewDetails = (agent: Agent) => {
+        navigate(`/agents/${agent.InstanceId}`)
     }
+
+
 
     const tableColumns = columns({
         onViewConfig: handleViewConfig,
         onViewLogs: handleViewLogs,
-        onApplyPipeline: handleApplyPipeline
+        onApplyPipeline: handleApplyPipeline,
+        onViewDetails: handleViewDetails
     })
 
     // Show onboarding state if no agents are connected and org has never connected an agent
     if (agents.length === 0 && organization && !organization.has_connected_agent) {
         return (
-            <div className="container mx-auto py-10">
-                <OnboardingState
-                    onRefresh={fetchAgents}
-                    apiToken={organization.tokens?.[0]?.token || ''}
-                />
-            </div>
+            <OnboardingState
+                onRefresh={fetchAgents}
+                apiToken={organization.tokens?.[0]?.token || ''}
+            />
         )
     }
 
     return (
-        <div className="container mx-auto py-10">
+        <>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Agents</h1>
                 <Button onClick={() => setIsConnectAgentDialogOpen(true)}>
@@ -138,13 +119,6 @@ const AgentsPage = () => {
 
             {selectedAgent && (
                 <>
-                    <ConfigDialog
-                        open={configOpen}
-                        onOpenChange={setConfigOpen}
-                        config={selectedAgent.EffectiveConfig}
-                        onUpdate={handleUpdateConfig}
-                    />
-
                     <LogsDialog
                         open={logsOpen}
                         onOpenChange={setLogsOpen}
@@ -159,7 +133,7 @@ const AgentsPage = () => {
                     />
                 </>
             )}
-        </div>
+        </>
     )
 }
 

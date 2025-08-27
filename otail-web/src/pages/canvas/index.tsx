@@ -112,7 +112,7 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
   }, [applyEditorChanges]);
 
   return (
-    <div className="flex flex-col h-full gap-4 p-4">
+    <div className="flex flex-col h-[calc(100vh-8rem)] gap-3 p-3">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Canvas</h1>
         <div className="flex space-x-2 items-center">
@@ -144,8 +144,8 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
           )}
         </div>
       </div>
-      <div className={`grid ${viewYaml ? 'grid-cols-2' : 'grid-cols-1'} gap-4 flex-grow`}>
-        <div className="canvas-container">
+      <div className={`grid ${viewYaml ? 'grid-cols-2' : 'grid-cols-1'} gap-3 flex-grow min-h-0`}>
+        <div className="canvas-container min-h-0">
           <OtelConfigCanvas
             ref={canvasRef}
             onChange={handleBuilderChange}
@@ -153,7 +153,7 @@ export const CanvasPage = ({ config, onUpdate }: CanvasPageProps) => {
           />
         </div>
         {viewYaml && (
-          <div className="border rounded-lg overflow-hidden">
+          <div className="border rounded-lg overflow-hidden min-h-0">
             <Editor
               height="100%"
               defaultLanguage="yaml"

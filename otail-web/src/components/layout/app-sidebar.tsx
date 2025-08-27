@@ -1,4 +1,4 @@
-import { Telescope, LogOut, Users, Wrench, Palette, Share2 } from "lucide-react"
+import { Telescope, LogOut, Users, Wrench, Palette, Share2, Rocket } from "lucide-react"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { AnalyticsToggle } from "@/components/layout/analytics-toggle"
 import { Checklist } from "@/components/checklist/Checklist"
@@ -48,6 +48,11 @@ export function AppSidebar({ noBackend = false }: AppSidebarProps) {
         title: "Agents",
         url: "/agents",
         icon: Telescope,
+      },
+      {
+        title: "Deployments",
+        url: "/deployments",
+        icon: Rocket,
       },
       {
         title: "Canvas",
@@ -142,11 +147,6 @@ export function AppSidebar({ noBackend = false }: AppSidebarProps) {
                           <Badge variant="secondary" className="ml-auto text-xs">
                             {item.badge}
                           </Badge>
-                        )}
-                        {state === "collapsed" && item.badge && (
-                          <div className="absolute top-0.5 right-0.5 h-3 w-3 bg-primary text-white rounded-full flex items-center justify-center min-w-[12px] text-[8px] font-medium">
-                            {item.badge}
-                          </div>
                         )}
                       </Link>
                     </SidebarMenuButton>

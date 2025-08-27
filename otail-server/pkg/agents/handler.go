@@ -40,6 +40,7 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 	r.Get("/{agentId}/config", h.GetConfig)
 	r.Put("/{agentId}/config", h.UpdateConfig)
 	r.Get("/{agentId}/logs", h.GetLogs)
+	r.Get("/groups/{groupId}", h.GetAgentsByGroup)
 }
 
 func (h *Handler) ListAgents(w http.ResponseWriter, r *http.Request) {
@@ -120,6 +121,12 @@ func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.writeJSON(w, logs)
+}
+
+func (h *Handler) GetAgentsByGroup(w http.ResponseWriter, r *http.Request) {
+	groupID := chi.URLParam(r, "groupId")
+	agents := h.samplingService.GetAgentsByGroup(groupID)
+	h.writeJSON(w, agents)
 }
 
 // writeJSON writes a JSON response
