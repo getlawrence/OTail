@@ -26,10 +26,30 @@ export default function Layout() {
           <AgentConfigBanner />
           <ActivePipelineBanner />
         </header>
-        <div className="flex flex-1 flex-col w-full h-[calc(100vh-3.5rem)] min-h-0 overflow-hidden">
+        <div className="flex flex-1 flex-col w-full h-[calc(100vh-3.5rem)] min-h-0 overflow-hidden relative">
           <PageLayout>
             <Outlet />
           </PageLayout>
+          
+          {/* Lawrence footer attribution */}
+          <div className="absolute bottom-2 right-4 pointer-events-none">
+            <a
+              href="https://getlawrence.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 transition-opacity hover:opacity-80 pointer-events-auto"
+              title="Brought to you by Lawrence"
+            >
+              <img 
+                src="/lawrence.svg" 
+                alt="Lawrence" 
+                className="w-4 h-4"
+              />
+              <span className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+                Lawrence
+              </span>
+            </a>
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
