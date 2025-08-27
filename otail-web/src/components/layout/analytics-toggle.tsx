@@ -10,7 +10,11 @@ import {
 } from "@/components/ui/tooltip"
 import { isAnalyticsEnabled } from "@/utils/analytics"
 
-export function AnalyticsToggle() {
+interface AnalyticsToggleProps {
+  collapsed?: boolean;
+}
+
+export function AnalyticsToggle({ collapsed = false }: AnalyticsToggleProps) {
   const [enabled, setEnabled] = useState(true)
 
   useEffect(() => {
@@ -31,7 +35,8 @@ export function AnalyticsToggle() {
             variant="ghost"
             size="icon"
             onClick={toggle}
-            className="h-8 w-8"
+            className={collapsed ? "h-7 w-7" : "h-8 w-8"}
+            title={collapsed ? (enabled ? "Analytics enabled" : "Analytics disabled") : undefined}
           >
             <BarChart3 className={`h-4 w-4 transition-colors ${enabled ? "text-primary" : "text-muted-foreground"}`} />
           </Button>

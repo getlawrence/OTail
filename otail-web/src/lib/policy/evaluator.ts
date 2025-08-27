@@ -10,7 +10,8 @@ export const makeDecision = async (trace: Trace, policies: (PolicyEvaluator | As
         [Decision.Sampled]: false,
         [Decision.NotSampled]: false,
         [Decision.InvertSampled]: false,
-        [Decision.InvertNotSampled]: false
+        [Decision.InvertNotSampled]: false,
+        [Decision.Dropped]: false
     };
     const policyDecisions: Record<string, Decision> = {}
 
@@ -20,21 +21,25 @@ export const makeDecision = async (trace: Trace, policies: (PolicyEvaluator | As
             samplingDecision[decision] = true;
             policyDecisions[policy.policyName] = decision;
 
+            // Break early if dropped. This can drastically reduce tick/decision latency.
+            // Dropped decisions take precedence over all others and can't be overridden.
+            if (decision === Decision.Dropped) {
+                break;
+            }
+
         } catch (error) {
             samplingDecision[Decision.Error] = true;
             console.error('Sampling policy error', error);
         }
     }
 
-    if (samplingDecision[Decision.InvertNotSampled]) {
+    if (samplingDecision[Decision.Dropped]) {
+        finalDecision = Decision.Dropped;
+    } else if (samplingDecision[Decision.InvertNotSampled]) {
         finalDecision = Decision.NotSampled;
-    }
-
-    if (samplingDecision[Decision.Sampled]) {
+    } else if (samplingDecision[Decision.Sampled]) {
         finalDecision = Decision.Sampled;
-    }
-
-    if (samplingDecision[Decision.InvertSampled] && !samplingDecision[Decision.NotSampled]) {
+    } else if (samplingDecision[Decision.InvertSampled] && !samplingDecision[Decision.NotSampled]) {
         finalDecision = Decision.Sampled;
     }
     return {

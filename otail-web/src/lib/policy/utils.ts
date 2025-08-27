@@ -97,6 +97,14 @@ export const createNewPolicy = (type: PolicyType): Policy => {
         type: 'and',
         subPolicies: [],
       };
+    case 'drop':
+      return {
+        ...basePolicy,
+        type: 'drop',
+        drop: {
+          drop_sub_policy: [],
+        },
+      };
     default:
       throw new Error(`Unknown policy type: ${type}`);
   }

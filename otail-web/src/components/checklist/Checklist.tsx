@@ -4,6 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Circle, Minimize2, Maximize2, Trophy } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import Confetti from './Confetti';
 
 export interface ChecklistStep {
@@ -16,6 +22,7 @@ export interface ChecklistStep {
 export interface ChecklistProps {
     onStepClick?: (step: ChecklistStep) => void;
     currentPath?: string;
+    mode?: 'full' | 'compact';
 }
 
 const defaultSteps: ChecklistStep[] = [
@@ -41,7 +48,8 @@ const defaultSteps: ChecklistStep[] = [
 
 export const Checklist: React.FC<ChecklistProps> = ({ 
     onStepClick,
-    currentPath = '/'
+    currentPath = '/',
+    mode = 'full'
 }) => {
     const { currentStep, isMinimized, toggleMinimize, completedSteps } = useChecklist();
     const [showConfetti, setShowConfetti] = useState(false);
@@ -71,6 +79,79 @@ export const Checklist: React.FC<ChecklistProps> = ({
         }
     };
 
+    // Compact mode - shows circular progress indicator
+    if (mode === 'compact') {
+        const tooltipContent = (
+            <div className="text-center">
+                <div className="font-medium mb-2">Getting Started</div>
+                <div className="space-y-2">
+                    {defaultSteps.map((step, index) => (
+                        <div 
+                            key={index} 
+                            className="flex items-center gap-2 text-left cursor-pointer hover:bg-muted/50 p-1.5 rounded transition-colors"
+                            onClick={() => handleStepClick(step)}
+                        >
+                            {completedSteps.has(index) ? (
+                                <CheckCircle2 className="h-3 w-3 text-green-500 flex-shrink-0" />
+                            ) : (
+                                <Circle className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                                <div className="text-xs font-medium truncate">{step.title}</div>
+                                <div className="text-xs text-muted-foreground truncate">{step.description}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+            </div>
+        );
+
+        return (
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div className="flex justify-center">
+                            <div className="relative">
+                                <svg className="w-8 h-8 transform -rotate-90" viewBox="0 0 32 32">
+                                    {/* Background circle */}
+                                    <circle
+                                        cx="16"
+                                        cy="16"
+                                        r="14"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        fill="none"
+                                        className="text-muted-foreground/20"
+                                    />
+                                    {/* Progress circle */}
+                                    <circle
+                                        cx="16"
+                                        cy="16"
+                                        r="14"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        fill="none"
+                                        className="text-primary"
+                                        strokeDasharray={`${2 * Math.PI * 14}`}
+                                        strokeDashoffset={`${2 * Math.PI * 14 * (1 - progress / 100)}`}
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <Trophy className="h-3 w-3 text-primary" />
+                                </div>
+                            </div>
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-48">
+                        {tooltipContent}
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        );
+    }
+
     if (isMinimized) {
         return (
             <div className="space-y-2">
@@ -93,7 +174,7 @@ export const Checklist: React.FC<ChecklistProps> = ({
                     <span>
                         {remainingSteps === 0 
                             ? "🎉 All steps completed!" 
-                            : `${remainingSteps} step${remainingSteps === 1 ? '' : 's'} remaining`}
+                            : `${remainingSteps} step${remainingSteps === 1 ? '' : ''} remaining`}
                     </span>
                     <span>{completedSteps.size}/{defaultSteps.length}</span>
                 </div>

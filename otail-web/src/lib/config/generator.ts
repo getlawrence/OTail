@@ -69,6 +69,15 @@ const generatePolicyConfig = (policy: Policy): Record<string, any> => {
           ),
         },
       };
+    case 'drop':
+      return {
+        ...basePolicy,
+        drop: {
+          drop_sub_policy: policy.drop.drop_sub_policy.map((subPolicy: Policy) =>
+            generatePolicyConfig(subPolicy)
+          ),
+        },
+      };
     case 'ottl_condition':
       return {
         ...basePolicy,
