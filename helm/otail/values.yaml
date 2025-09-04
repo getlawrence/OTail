@@ -1,11 +1,11 @@
 global:
   environment: production
-  imageRegistry: "mottibec123/otail"
+  imageRegistry: "getlawrence/otail"
 
 frontend:
   name: otail-web
   image:
-    repository: mottibec123/otail
+    repository: getlawrence/otail
     tag: otail-web
     pullPolicy: Always
     buildArgs:
@@ -45,7 +45,7 @@ frontend:
 backend:
   name: otail-server
   image:
-    repository: mottibec123/otail
+    repository: getlawrence/otail
     tag: otail-server
     pullPolicy: Always
   service:
@@ -232,7 +232,7 @@ jaeger:
 opampSupervisor:
   name: opampsupervisor
   image:
-    repository: mottibec123/otail
+    repository: getlawrence/otail
     tag: opampsupervisor
     pullPolicy: IfNotPresent
   service:

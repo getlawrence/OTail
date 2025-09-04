@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
+	"github.com/getlawrence/otail-server/pkg/auth"
+	"github.com/getlawrence/otail-server/pkg/organization"
 	"github.com/google/uuid"
-	"github.com/mottibec/otail-server/pkg/auth"
-	"github.com/mottibec/otail-server/pkg/organization"
 )
 
 type UserService struct {

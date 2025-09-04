@@ -54,7 +54,7 @@ helm install otail otail/otail --namespace otail
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/mottibec/otail.git
+git clone https://github.com/getlawrence/otail.git
 cd otail
 ```
 

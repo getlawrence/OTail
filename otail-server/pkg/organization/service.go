@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/getlawrence/otail-server/pkg/auth"
+	"github.com/getlawrence/otail-server/pkg/telemetry"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/mottibec/otail-server/pkg/auth"
-	"github.com/mottibec/otail-server/pkg/telemetry"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -17,7 +17,7 @@ import (
 
 var (
 	jwtSecret = []byte("your-secret-key") // TODO: Move to configuration
-	tracer    = otel.Tracer("github.com/mottibec/otail-server/pkg/organization")
+	tracer    = otel.Tracer("github.com/getlawrence/otail-server/pkg/organization")
 )
 
 type orgService struct {

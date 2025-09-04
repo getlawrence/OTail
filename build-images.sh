@@ -4,7 +4,7 @@
 set -e
 
 # Registry configuration
-REGISTRY="mottibec123/otail"  # Docker Hub registry
+REGISTRY="getlawrence/otail"  # Docker Hub registry
 VERSION="latest"
 
 # Check if user is logged in to Docker Hub

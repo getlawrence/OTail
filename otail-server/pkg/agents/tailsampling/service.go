@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/getlawrence/otail-server/pkg/agents/opamp"
 	"github.com/google/uuid"
-	"github.com/mottibec/otail-server/pkg/agents/opamp"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
