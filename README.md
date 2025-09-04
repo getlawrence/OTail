@@ -41,7 +41,7 @@ OTail is a user-friendly web interface for creating and managing OpenTelemetry t
 
 1. Add the Helm repository:
 ```bash
-helm repo add otail https://mottibec.github.io/otail
+helm repo add otail https://getlawrence.github.io/otail
 helm repo update
 ```
 

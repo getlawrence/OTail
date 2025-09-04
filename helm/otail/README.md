@@ -27,7 +27,7 @@ The chart deploys the following components:
 
 1. Add the Helm repository:
 ```bash
-helm repo add otail https://your-helm-repo-url
+helm repo add otail https://getlawrence.github.io/otail
 helm repo update
 ```
 

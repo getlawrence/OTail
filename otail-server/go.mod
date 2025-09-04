@@ -1,4 +1,4 @@
-module github.com/mottibec/otail-server
+module github.com/getlawrence/otail-server
 
 go 1.22.0
 

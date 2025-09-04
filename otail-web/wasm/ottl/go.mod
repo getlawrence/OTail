@@ -1,4 +1,4 @@
-module github.com/mottibec/otail/wasm/ottl
+module github.com/getlawrence/otail/wasm/ottl
 
 go 1.23.4
 
