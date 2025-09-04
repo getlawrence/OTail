@@ -36,6 +36,7 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.22'
+          cache: true
 
       - name: Check for lockfile
         id: check-lockfile
@@ -61,6 +62,11 @@ jobs:
           go mod tidy
           go build -o main .
           go test ./...
+
+      - name: Build WASM module
+        run: |
+          cd otail-web/wasm/ottl
+          make build
 
       - name: Run unit tests
         run: pnpm exec jest --passWithNoTests
