@@ -72,6 +72,10 @@ jobs:
         run: pnpm exec playwright install --with-deps
         working-directory: otail-web/
 
+      - name: Build frontend
+        run: pnpm run build
+        working-directory: otail-web/
+
       - name: Run unit tests
         run: pnpm exec jest --passWithNoTests
         working-directory: otail-web/
