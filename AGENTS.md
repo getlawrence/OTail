@@ -111,7 +111,7 @@ OTail/
 
 1. **Clone and Setup**
    ```bash
-   git clone https://github.com/mottibec/otail.git
+   git clone https://github.com/getlawrence/otail.git
    cd otail
    make setup
    ```
@@ -133,7 +133,7 @@ OTail/
 
 1. **Add Helm Repository**
    ```bash
-   helm repo add otail https://mottibec.github.io/otail
+   helm repo add otail https://getlawrence.github.io/otail
    helm repo update
    ```
 

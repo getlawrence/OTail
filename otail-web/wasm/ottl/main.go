@@ -5,7 +5,7 @@ import (
 	"errors"
 	"syscall/js"
 
-	"github.com/mottibec/otail/wasm/ottl/evaluator"
+	"github.com/getlawrence/otail/wasm/ottl/evaluator"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.uber.org/zap"

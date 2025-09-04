@@ -18,7 +18,7 @@ OTail Server is a backend service for configuring OpenTelemetry tail sampling pr
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/mottibec/otail-server.git
+git clone https://github.com/getlawrence/otail-server.git
 ```
 
 2. Install dependencies:

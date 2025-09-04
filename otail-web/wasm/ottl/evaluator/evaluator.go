@@ -3,7 +3,7 @@ package evaluator
 import (
 	"context"
 
-	"github.com/mottibec/otail/wasm/ottl/filter"
+	"github.com/getlawrence/otail/wasm/ottl/filter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottlspan"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl/contexts/ottlspanevent"

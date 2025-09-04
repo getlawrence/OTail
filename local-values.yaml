@@ -1,9 +1,9 @@
 global:
-  imageRegistry: "mottibec123/otail"
+  imageRegistry: "getlawrence/otail"
 
 frontend:
   image:
-    repository: mottibec123/otail
+    repository: getlawrence/otail
     tag: otail-web
   service:
     type: ClusterIP
@@ -15,7 +15,7 @@ frontend:
 
 backend:
   image:
-    repository: mottibec123/otail
+    repository: getlawrence/otail
     tag: otail-server
   service:
     type: ClusterIP
@@ -77,7 +77,7 @@ grafana:
 
 opampsupervisor:
   image:
-    repository: mottibec123/otail
+    repository: getlawrence/otail
     tag: opampsupervisor
   env:
     - name: API_TOKEN

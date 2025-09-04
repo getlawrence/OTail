@@ -20,7 +20,7 @@ type Metrics struct {
 var globalMetrics *Metrics
 
 func InitMetrics(ctx context.Context) (*Metrics, error) {
-	meter := otel.GetMeterProvider().Meter("github.com/mottibec/otail-server")
+	meter := otel.GetMeterProvider().Meter("github.com/getlawrence/otail-server")
 
 	organizationCreated, err := meter.Int64Counter(
 		"organization.created_total",

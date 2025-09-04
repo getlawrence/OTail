@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/getlawrence/otail-server/pkg/auth"
+	"github.com/getlawrence/otail-server/pkg/organization"
 	"github.com/go-chi/chi/v5"
-	"github.com/mottibec/otail-server/pkg/auth"
-	"github.com/mottibec/otail-server/pkg/organization"
 	"go.uber.org/zap"
 )
 
@@ -40,8 +40,8 @@ type LoginRequest struct {
 }
 
 type AuthResponse struct {
-	User         *User                           `json:"user"`
-	Token        string                          `json:"token"`
+	User         *User                             `json:"user"`
+	Token        string                            `json:"token"`
 	Organization *organization.OrganizationDetails `json:"organization"`
 }
 

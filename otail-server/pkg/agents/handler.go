@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/getlawrence/otail-server/pkg/agents/clickhouse"
+	"github.com/getlawrence/otail-server/pkg/agents/tailsampling"
+	"github.com/getlawrence/otail-server/pkg/auth"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"github.com/mottibec/otail-server/pkg/agents/clickhouse"
-	"github.com/mottibec/otail-server/pkg/agents/tailsampling"
-	"github.com/mottibec/otail-server/pkg/auth"
 	"go.uber.org/zap"
 )
 

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/getlawrence/otail-server/pkg/auth"
 	"github.com/go-chi/chi/v5"
-	"github.com/mottibec/otail-server/pkg/auth"
 	"go.uber.org/zap"
 )
 

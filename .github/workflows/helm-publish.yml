@@ -1,0 +1,43 @@
+name: Publish Helm Chart
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'helm/**'
+  release:
+    types: [ published ]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+
+      - name: Package Helm Chart
+        run: |
+          helm package helm/otail --destination ./packages
+
+      - name: Create Helm Repository Index
+        run: |
+          helm repo index ./packages --url https://getlawrence.github.io/otail
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./packages
+          destination_dir: .
