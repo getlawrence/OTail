@@ -68,6 +68,10 @@ jobs:
           cd otail-web/wasm/ottl
           make build
 
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+        working-directory: otail-web/
+
       - name: Run unit tests
         run: pnpm exec jest --passWithNoTests
         working-directory: otail-web/
