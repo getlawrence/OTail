@@ -63,7 +63,7 @@ jobs:
           go test ./...
 
       - name: Run unit tests
-        run: pnpm test --passWithNoTests
+        run: pnpm exec jest --passWithNoTests
         working-directory: otail-web/
 
       - name: Run E2E tests
