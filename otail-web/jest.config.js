@@ -4,7 +4,7 @@ export default {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  // setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
       tsconfig: {
